@@ -1,6 +1,3 @@
-{-# OPTIONS -fallow-undecidable-instances #-}
--- Search for -fallow-undecidable-instances to see why this is needed
-
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Cont
@@ -16,10 +13,14 @@
 -----------------------------------------------------------------------------
 
 module Control.Monad.Cont (
-    module Control.Monad.Cont.Class,
-    Cont(..),
+    -- * MonadCont class
+    MonadCont(..),
+    -- * The Cont monad
+    Cont,
+    runCont,
     mapCont,
     withCont,
+    -- * The ContT monad transformer
     ContT(..),
     mapContT,
     withContT,
@@ -28,71 +29,52 @@ module Control.Monad.Cont (
   ) where
 
 import Control.Monad
-import Control.Monad.Cont.Class
-import Control.Monad.Reader.Class
-import Control.Monad.State.Class
+import Control.Monad.Trans.Cont hiding (callCC)
+import qualified Control.Monad.Trans.Cont as ContT
+import Control.Monad.Trans.Error as Error
+import Control.Monad.Trans.List as List
+import Control.Monad.Trans.Reader as Reader
+import Control.Monad.Trans.RWS.Lazy as LazyRWS
+import Control.Monad.Trans.RWS.Strict as StrictRWS
+import Control.Monad.Trans.State.Lazy as LazyState
+import Control.Monad.Trans.State.Strict as StrictState
+import Control.Monad.Trans.Writer.Lazy as LazyWriter
+import Control.Monad.Trans.Writer.Strict as StrictWriter
 import Control.Monad.Trans
+import Data.Monoid
 
--- ---------------------------------------------------------------------------
--- Our parameterizable continuation monad
-
-newtype Cont r a = Cont { runCont :: (a -> r) -> r }
-
-mapCont :: (r -> r) -> Cont r a -> Cont r a
-mapCont f m = Cont $ f . runCont m
-
-withCont :: ((b -> r) -> (a -> r)) -> Cont r a -> Cont r b
-withCont f m = Cont $ runCont m . f
-
-instance Functor (Cont r) where
-    fmap f m = Cont $ \c -> runCont m (c . f)
-
-instance Monad (Cont r) where
-    return a = Cont ($ a)
-    m >>= k  = Cont $ \c -> runCont m $ \a -> runCont (k a) c
-
-instance MonadCont (Cont r) where
-    callCC f = Cont $ \c -> runCont (f (\a -> Cont $ \_ -> c a)) c
-
--- ---------------------------------------------------------------------------
--- Our parameterizable continuation monad, with an inner monad
-
-newtype ContT r m a = ContT { runContT :: (a -> m r) -> m r }
-
-mapContT :: (m r -> m r) -> ContT r m a -> ContT r m a
-mapContT f m = ContT $ f . runContT m
-
-withContT :: ((b -> m r) -> (a -> m r)) -> ContT r m a -> ContT r m b
-withContT f m = ContT $ runContT m . f
-
-instance (Monad m) => Functor (ContT r m) where
-    fmap f m = ContT $ \c -> runContT m (c . f)
-
-instance (Monad m) => Monad (ContT r m) where
-    return a = ContT ($ a)
-    m >>= k  = ContT $ \c -> runContT m (\a -> runContT (k a) c)
+class (Monad m) => MonadCont m where
+    callCC :: ((a -> m b) -> m a) -> m a
 
 instance (Monad m) => MonadCont (ContT r m) where
-    callCC f = ContT $ \c -> runContT (f (\a -> ContT $ \_ -> c a)) c
+    callCC = ContT.callCC
 
 -- ---------------------------------------------------------------------------
 -- Instances for other mtl transformers
 
-instance MonadTrans (ContT r) where
-    lift m = ContT (m >>=)
+instance (Error e, MonadCont m) => MonadCont (ErrorT e m) where
+    callCC = Error.liftCallCC callCC
 
-instance (MonadIO m) => MonadIO (ContT r m) where
-    liftIO = lift . liftIO
+instance (MonadCont m) => MonadCont (ListT m) where
+    callCC = List.liftCallCC callCC
 
--- Needs -fallow-undecidable-instances
-instance (MonadReader r' m) => MonadReader r' (ContT r m) where
-    ask       = lift ask
-    local f m = ContT $ \c -> do
-        r <- ask
-        local f (runContT m (local (const r) . c))
+instance (MonadCont m) => MonadCont (ReaderT r m) where
+    callCC = Reader.liftCallCC callCC
 
--- Needs -fallow-undecidable-instances
-instance (MonadState s m) => MonadState s (ContT r m) where
-    get = lift get
-    put = lift . put
+instance (Monoid w, MonadCont m) => MonadCont (LazyRWS.RWST r w s m) where
+    callCC = LazyRWS.liftCallCC callCC
 
+instance (Monoid w, MonadCont m) => MonadCont (StrictRWS.RWST r w s m) where
+    callCC = StrictRWS.liftCallCC callCC
+
+instance (MonadCont m) => MonadCont (LazyState.StateT s m) where
+    callCC = LazyState.liftCallCC callCC
+
+instance (MonadCont m) => MonadCont (StrictState.StateT s m) where
+    callCC = StrictState.liftCallCC callCC
+
+instance (Monoid w, MonadCont m) => MonadCont (LazyWriter.WriterT w m) where
+    callCC = LazyWriter.liftCallCC callCC
+
+instance (Monoid w, MonadCont m) => MonadCont (StrictWriter.WriterT w m) where
+    callCC = StrictWriter.liftCallCC callCC

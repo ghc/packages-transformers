@@ -5,15 +5,13 @@ SUBDIRS =
 
 ALL_DIRS =                  \
 	Control/Monad           \
-	Control/Monad/Cont      \
-	Control/Monad/Error     \
-	Control/Monad/RWS       \
-	Control/Monad/Reader    \
-	Control/Monad/State     \
-	Control/Monad/Writer
+	Control/Monad/Trans     \
+	Control/Monad/Trans/RWS \
+	Control/Monad/Trans/State \
+	Control/Monad/Trans/Writer
 
 PACKAGE = mtl
-VERSION = 1.0
+VERSION = 1.99
 PACKAGE_DEPS = base
 
 EXCLUDED_SRCS += Setup.hs

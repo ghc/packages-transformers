@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Control.Monad.List
+-- Module      :  Control.Monad.Trans.Writer
 -- Copyright   :  (c) Andy Gill 2001,
 --                (c) Oregon Graduate Institute of Science and Technology, 2001
 -- License     :  BSD-style (see the file libraries/base/LICENSE)
@@ -9,17 +9,18 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- The List monad.
+-- The WriterT monad transformer.
 --
+--      Inspired by the paper
+--      /Functional Programming with Overloading and
+--          Higher-Order Polymorphism/,
+--        Mark P Jones (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>)
+--          Advanced School of Functional Programming, 1995.
 -----------------------------------------------------------------------------
 
-module Control.Monad.List (
-    ListT(..),
-    mapListT,
-    module Control.Monad,
-    module Control.Monad.Trans,
+module Control.Monad.Trans.Writer (
+    module Control.Monad.Trans.Writer.Lazy
   ) where
 
-import Control.Monad
-import Control.Monad.Trans
-import Control.Monad.Trans.List
+import Control.Monad.Trans.Writer.Lazy
+

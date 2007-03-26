@@ -1,5 +1,6 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 -- Search for -fallow-undecidable-instances to see why this is needed
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Reader
@@ -21,10 +22,15 @@
 -----------------------------------------------------------------------------
 
 module Control.Monad.Reader (
-    module Control.Monad.Reader.Class,
-    Reader(..),
+    -- * MonadReader class
+    MonadReader(..),
+    asks,
+    -- * The Reader monad
+    Reader,
+    runReader,
     mapReader,
     withReader,
+    -- * The ReaderT monad transformer
     ReaderT(..),
     mapReaderT,
     withReaderT,
@@ -34,14 +40,35 @@ module Control.Monad.Reader (
     ) where
 
 import Control.Monad
-import Control.Monad.Cont.Class
-import Control.Monad.Error.Class
 import Control.Monad.Fix
-import Control.Monad.Instances ()
-import Control.Monad.Reader.Class
-import Control.Monad.State.Class
+import Control.Monad.Trans.Cont as Cont
+import Control.Monad.Trans.Error
+import Control.Monad.Trans.List
+import Control.Monad.Trans.Reader hiding (ask, local, asks)
+import qualified Control.Monad.Trans.Reader as ReaderT (ask, local)
+import qualified Control.Monad.Trans.RWS.Lazy as LazyRWS (RWST, ask, local)
+import qualified Control.Monad.Trans.RWS.Strict as StrictRWS (RWST, ask, local)
+import Control.Monad.Trans.State.Lazy as Lazy
+import Control.Monad.Trans.State.Strict as Strict
+import Control.Monad.Trans.Writer.Lazy as Lazy
+import Control.Monad.Trans.Writer.Strict as Strict
 import Control.Monad.Trans
-import Control.Monad.Writer.Class
+import Data.Monoid
+
+-- ----------------------------------------------------------------------------
+-- class MonadReader
+--  asks for the internal (non-mutable) state.
+
+class (Monad m) => MonadReader r m | m -> r where
+    ask   :: m r
+    local :: (r -> r) -> m a -> m a
+
+-- This allows you to provide a projection function.
+
+asks :: (MonadReader r m) => (r -> a) -> m a
+asks f = do
+    r <- ask
+    return (f r)
 
 -- ----------------------------------------------------------------------------
 -- The partially applied function type is a simple reader monad
@@ -50,95 +77,54 @@ instance MonadReader r ((->) r) where
     ask       = id
     local f m = m . f
 
--- ---------------------------------------------------------------------------
--- Our parameterizable reader monad
-
-newtype Reader r a = Reader { runReader :: r -> a }
-
-mapReader :: (a -> b) -> Reader r a -> Reader r b
-mapReader f m = Reader $ f . runReader m
-
--- This is a more general version of local.
-
-withReader :: (r' -> r) -> Reader r a -> Reader r' a
-withReader f m = Reader $ runReader m . f
-
-instance Functor (Reader r) where
-    fmap f m = Reader $ \r -> f (runReader m r)
-
-instance Monad (Reader r) where
-    return a = Reader $ \_ -> a
-    m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
-
-instance MonadFix (Reader r) where
-    mfix f = Reader $ \r -> let a = runReader (f a) r in a
-
-instance MonadReader r (Reader r) where
-    ask       = Reader id
-    local f m = Reader $ runReader m . f
-
--- ---------------------------------------------------------------------------
--- Our parameterizable reader monad, with an inner monad
-
-newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a }
-
-mapReaderT :: (m a -> n b) -> ReaderT w m a -> ReaderT w n b
-mapReaderT f m = ReaderT $ f . runReaderT m
-
-withReaderT :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
-withReaderT f m = ReaderT $ runReaderT m . f
-
-instance (Monad m) => Functor (ReaderT r m) where
-    fmap f m = ReaderT $ \r -> do
-        a <- runReaderT m r
-        return (f a)
-
-instance (Monad m) => Monad (ReaderT r m) where
-    return a = ReaderT $ \_ -> return a
-    m >>= k  = ReaderT $ \r -> do
-        a <- runReaderT m r
-        runReaderT (k a) r
-    fail msg = ReaderT $ \_ -> fail msg
-
-instance (MonadPlus m) => MonadPlus (ReaderT r m) where
-    mzero       = ReaderT $ \_ -> mzero
-    m `mplus` n = ReaderT $ \r -> runReaderT m r `mplus` runReaderT n r
-
-instance (MonadFix m) => MonadFix (ReaderT r m) where
-    mfix f = ReaderT $ \r -> mfix $ \a -> runReaderT (f a) r
-
 instance (Monad m) => MonadReader r (ReaderT r m) where
-    ask       = ReaderT return
-    local f m = ReaderT $ \r -> runReaderT m (f r)
+    ask = ReaderT.ask
+    local = ReaderT.local
+
+instance (Monad m, Monoid w) => MonadReader r (LazyRWS.RWST r w s m) where
+    ask = LazyRWS.ask
+    local = LazyRWS.local
+
+instance (Monad m, Monoid w) => MonadReader r (StrictRWS.RWST r w s m) where
+    ask = StrictRWS.ask
+    local = StrictRWS.local
 
 -- ---------------------------------------------------------------------------
 -- Instances for other mtl transformers
 
-instance MonadTrans (ReaderT r) where
-    lift m = ReaderT $ \_ -> m
-
-instance (MonadIO m) => MonadIO (ReaderT r m) where
-    liftIO = lift . liftIO
-
-instance (MonadCont m) => MonadCont (ReaderT r m) where
-    callCC f = ReaderT $ \r ->
-        callCC $ \c ->
-        runReaderT (f (\a -> ReaderT $ \_ -> c a)) r
-
-instance (MonadError e m) => MonadError e (ReaderT r m) where
-    throwError       = lift . throwError
-    m `catchError` h = ReaderT $ \r -> runReaderT m r
-        `catchError` \e -> runReaderT (h e) r
+-- Needs -fallow-undecidable-instances
+instance (MonadReader r' m) => MonadReader r' (ContT r m) where
+    ask   = lift ask
+    local = Cont.liftLocal ask local
 
 -- Needs -fallow-undecidable-instances
-instance (MonadState s m) => MonadState s (ReaderT r m) where
-    get = lift get
-    put = lift . put
+instance (Error e, MonadReader r m) => MonadReader r (ErrorT e m) where
+    ask   = lift ask
+    local = mapErrorT . local
+
+-- Needs -fallow-undecidable-instances
+instance (MonadReader s m) => MonadReader s (ListT m) where
+    ask   = lift ask
+    local = mapListT . local
+
+-- Needs -fallow-undecidable-instances
+instance (MonadReader r m) => MonadReader r (Lazy.StateT s m) where
+    ask   = lift ask
+    local = Lazy.mapStateT . local
+
+-- Needs -fallow-undecidable-instances
+instance (MonadReader r m) => MonadReader r (Strict.StateT s m) where
+    ask   = lift ask
+    local = Strict.mapStateT . local
 
 -- This instance needs -fallow-undecidable-instances, because
 -- it does not satisfy the coverage condition
-instance (MonadWriter w m) => MonadWriter w (ReaderT r m) where
-    tell     = lift . tell
-    listen m = ReaderT $ \w -> listen (runReaderT m w)
-    pass   m = ReaderT $ \w -> pass   (runReaderT m w)
+instance (Monoid w, MonadReader r m) => MonadReader r (Lazy.WriterT w m) where
+    ask   = lift ask
+    local = Lazy.mapWriterT . local
 
+-- This instance needs -fallow-undecidable-instances, because
+-- it does not satisfy the coverage condition
+instance (Monoid w, MonadReader r m) => MonadReader r (Strict.WriterT w m) where
+    ask   = lift ask
+    local = Strict.mapWriterT . local

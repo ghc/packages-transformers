@@ -1,5 +1,4 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
--- Needed for the same reasons as in Reader, State etc
 
 {- |
 Module      :  Control.Monad.Error
@@ -35,7 +34,10 @@ The Error monad (also called the Exception monad).
     Andy Gill (<http://www.cse.ogi.edu/~andy/>)
 -}
 module Control.Monad.Error (
-    module Control.Monad.Error.Class,
+    -- * Monads with error handling
+    MonadError(..),
+    Error(..),
+    -- * The ErrorT monad transformer
     ErrorT(..),
     mapErrorT,
     module Control.Monad,
@@ -49,21 +51,53 @@ module Control.Monad.Error (
   ) where
 
 import Control.Monad
-import Control.Monad.Cont.Class
-import Control.Monad.Error.Class
 import Control.Monad.Fix
-import Control.Monad.RWS.Class
-import Control.Monad.Reader.Class
-import Control.Monad.State.Class
+import Control.Monad.Trans.Error hiding (throwError, catchError)
+import qualified Control.Monad.Trans.Error as ErrorT (throwError, catchError)
+import Control.Monad.Trans.List as List
+import Control.Monad.Trans.Reader as Reader
+import Control.Monad.Trans.RWS.Lazy as LazyRWS
+import Control.Monad.Trans.RWS.Strict as StrictRWS
+import Control.Monad.Trans.State.Lazy as LazyState
+import Control.Monad.Trans.State.Strict as StrictState
+import Control.Monad.Trans.Writer.Lazy as LazyWriter
+import Control.Monad.Trans.Writer.Strict as StrictWriter
 import Control.Monad.Trans
-import Control.Monad.Writer.Class
+import Data.Monoid
 
 import Control.Monad.Instances ()
 import System.IO
 
-instance MonadPlus IO where
-    mzero       = ioError (userError "mzero")
-    m `mplus` n = m `catch` \_ -> n
+{- |
+The strategy of combining computations that can throw exceptions
+by bypassing bound functions
+from the point an exception is thrown to the point that it is handled.
+
+Is parameterized over the type of error information and
+the monad type constructor.
+It is common to use @'Data.Either' String@ as the monad type constructor
+for an error monad in which error descriptions take the form of strings.
+In that case and many other common cases the resulting monad is already defined
+as an instance of the 'MonadError' class.
+You can also define your own error type and\/or use a monad type constructor
+other than @'Data.Either' String@ or @'Data.Either' IOError@.
+In these cases you will have to explicitly define instances of the 'Error'
+and\/or 'MonadError' classes.
+-}
+class (Monad m) => MonadError e m | m -> e where
+    -- | Is used within a monadic computation to begin exception processing.
+    throwError :: e -> m a
+
+    {- |
+    A handler function to handle previous errors and return to normal execution.
+    A common idiom is:
+
+    > do { action1; action2; action3 } `catchError` handler
+
+    where the @action@ functions can call 'throwError'.
+    Note that @handler@ and the do-block must have the same return type.
+    -}
+    catchError :: m a -> (e -> m a) -> m a
 
 instance MonadError IOError IO where
     throwError = ioError
@@ -72,133 +106,49 @@ instance MonadError IOError IO where
 -- ---------------------------------------------------------------------------
 -- Our parameterizable error monad
 
-instance (Error e) => Monad (Either e) where
-    return        = Right
-    Left  l >>= _ = Left l
-    Right r >>= k = k r
-    fail msg      = Left (strMsg msg)
-
-instance (Error e) => MonadPlus (Either e) where
-    mzero            = Left noMsg
-    Left _ `mplus` n = n
-    m      `mplus` _ = m
-
-instance (Error e) => MonadFix (Either e) where
-    mfix f = let
-        a = f $ case a of
-            Right r -> r
-            _       -> error "empty mfix argument"
-        in a
-
 instance (Error e) => MonadError e (Either e) where
     throwError             = Left
     Left  l `catchError` h = h l
     Right r `catchError` _ = Right r
 
-{- |
-The error monad transformer. It can be used to add error handling to other
-monads.
-
-The @ErrorT@ Monad structure is parameterized over two things:
-
- * e - The error type.
-
- * m - The inner monad.
-
-Here are some examples of use:
-
-> -- wraps IO action that can throw an error e
-> type ErrorWithIO e a = ErrorT e IO a
-> ==> ErrorT (IO (Either e a))
->
-> -- IO monad wrapped in StateT inside of ErrorT
-> type ErrorAndStateWithIO e s a = ErrorT e (StateT s IO) a
-> ==> ErrorT (StateT s IO (Either e a))
-> ==> ErrorT (StateT (s -> IO (Either e a,s)))
--}
-
-newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
-
-mapErrorT :: (m (Either e a) -> n (Either e' b))
-          -> ErrorT e m a
-          -> ErrorT e' n b
-mapErrorT f m = ErrorT $ f (runErrorT m)
-
-instance (Monad m) => Functor (ErrorT e m) where
-    fmap f m = ErrorT $ do
-        a <- runErrorT m
-        case a of
-            Left  l -> return (Left  l)
-            Right r -> return (Right (f r))
-
-instance (Monad m, Error e) => Monad (ErrorT e m) where
-    return a = ErrorT $ return (Right a)
-    m >>= k  = ErrorT $ do
-        a <- runErrorT m
-        case a of
-            Left  l -> return (Left l)
-            Right r -> runErrorT (k r)
-    fail msg = ErrorT $ return (Left (strMsg msg))
-
-instance (Monad m, Error e) => MonadPlus (ErrorT e m) where
-    mzero       = ErrorT $ return (Left noMsg)
-    m `mplus` n = ErrorT $ do
-        a <- runErrorT m
-        case a of
-            Left  _ -> runErrorT n
-            Right r -> return (Right r)
-
-instance (MonadFix m, Error e) => MonadFix (ErrorT e m) where
-    mfix f = ErrorT $ mfix $ \a -> runErrorT $ f $ case a of
-        Right r -> r
-        _       -> error "empty mfix argument"
-
 instance (Monad m, Error e) => MonadError e (ErrorT e m) where
-    throwError l     = ErrorT $ return (Left l)
-    m `catchError` h = ErrorT $ do
-        a <- runErrorT m
-        case a of
-            Left  l -> runErrorT (h l)
-            Right r -> return (Right r)
+    throwError = ErrorT.throwError
+    catchError = ErrorT.catchError
 
 -- ---------------------------------------------------------------------------
 -- Instances for other mtl transformers
 
-instance (Error e) => MonadTrans (ErrorT e) where
-    lift m = ErrorT $ do
-        a <- m
-        return (Right a)
+instance (MonadError e m) => MonadError e (ListT m) where
+    throwError = lift . throwError
+    catchError = List.liftCatch catchError
 
-instance (Error e, MonadIO m) => MonadIO (ErrorT e m) where
-    liftIO = lift . liftIO
+instance (MonadError e m) => MonadError e (ReaderT r m) where
+    throwError = lift . throwError
+    catchError = Reader.liftCatch catchError
 
-instance (Error e, MonadCont m) => MonadCont (ErrorT e m) where
-    callCC f = ErrorT $
-        callCC $ \c ->
-        runErrorT (f (\a -> ErrorT $ c (Right a)))
+instance (Monoid w, MonadError e m) => MonadError e (LazyRWS.RWST r w s m) where
+    throwError = lift . throwError
+    catchError = LazyRWS.liftCatch catchError
 
-instance (Error e, MonadRWS r w s m) => MonadRWS r w s (ErrorT e m)
+instance (Monoid w, MonadError e m) => MonadError e (StrictRWS.RWST r w s m) where
+    throwError = lift . throwError
+    catchError = StrictRWS.liftCatch catchError
 
-instance (Error e, MonadReader r m) => MonadReader r (ErrorT e m) where
-    ask       = lift ask
-    local f m = ErrorT $ local f (runErrorT m)
+instance (MonadError e m) => MonadError e (LazyState.StateT s m) where
+    throwError = lift . throwError
+    catchError = LazyState.liftCatch catchError
 
-instance (Error e, MonadState s m) => MonadState s (ErrorT e m) where
-    get = lift get
-    put = lift . put
+instance (MonadError e m) => MonadError e (StrictState.StateT s m) where
+    throwError = lift . throwError
+    catchError = StrictState.liftCatch catchError
 
-instance (Error e, MonadWriter w m) => MonadWriter w (ErrorT e m) where
-    tell     = lift . tell
-    listen m = ErrorT $ do
-        (a, w) <- listen (runErrorT m)
-        case a of
-            Left  l -> return $ Left  l
-            Right r -> return $ Right (r, w)
-    pass   m = ErrorT $ pass $ do
-        a <- runErrorT m
-        case a of
-            Left  l      -> return (Left  l, id)
-            Right (r, f) -> return (Right r, f)
+instance (Monoid w, MonadError e m) => MonadError e (LazyWriter.WriterT w m) where
+    throwError = lift . throwError
+    catchError = LazyWriter.liftCatch catchError
+
+instance (Monoid w, MonadError e m) => MonadError e (StrictWriter.WriterT w m) where
+    throwError = lift . throwError
+    catchError = StrictWriter.liftCatch catchError
 
 {- $customErrorExample
 Here is an example that demonstrates the use of a custom 'Error' data type with
@@ -287,4 +237,3 @@ Here is an example how to combine it with an @IO@ monad:
 >reportResult (Right len) = putStrLn ("The length of the string is " ++ (show len))
 >reportResult (Left e) = putStrLn ("Length calculation failed with error: " ++ (show e))
 -}
-

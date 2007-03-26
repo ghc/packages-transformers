@@ -1,3 +1,6 @@
+{-# OPTIONS -fallow-undecidable-instances #-}
+-- Search for -fallow-undecidable-instances to see why this is needed
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.RWS
@@ -19,8 +22,44 @@
 -----------------------------------------------------------------------------
 
 module Control.Monad.RWS (
-    module Control.Monad.RWS.Lazy
+    -- * Reader-writer-state monads
+    MonadRWS,
+    -- * The RWS monad
+    RWS,
+    runRWS,
+    evalRWS,
+    execRWS,
+    mapRWS,
+    withRWS,
+    -- * The RWST monad transformer
+    RWST(..),
+    evalRWST,
+    execRWST,
+    mapRWST,
+    withRWST,
+    MonadReader(..),
+    MonadState(..),
+    MonadWriter(..),
   ) where
 
-import Control.Monad.RWS.Lazy
+import Control.Monad.Reader     (MonadReader(..))
+import Control.Monad.State      (MonadState(..))
+import Control.Monad.Trans.Error(Error, ErrorT)
+import Control.Monad.Trans.RWS.Lazy as Lazy
+import qualified Control.Monad.Trans.RWS.Strict as Strict
+import Control.Monad.Writer     (MonadWriter(..))
+import Data.Monoid
 
+class (Monoid w, MonadReader r m, MonadWriter w m, MonadState s m)
+   => MonadRWS r w s m | m -> r, m -> w, m -> s
+
+instance (Monoid w, Monad m) => MonadRWS r w s (Lazy.RWST r w s m)
+
+instance (Monoid w, Monad m) => MonadRWS r w s (Strict.RWST r w s m)
+
+-- ---------------------------------------------------------------------------
+-- Instances for other mtl transformers
+
+-- This instance needs -fallow-undecidable-instances, because
+-- it does not satisfy the coverage condition
+instance (Error e, MonadRWS r w s m) => MonadRWS r w s (ErrorT e m)
