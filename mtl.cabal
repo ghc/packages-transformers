@@ -37,4 +37,7 @@ exposed-modules:
     Control.Monad.Trans.Writer.Strict
     Control.Monad.Writer
 build-depends: base
-extensions: MultiParamTypeClasses, FunctionalDependencies
+extensions: MultiParamTypeClasses,
+            FunctionalDependencies,
+            FlexibleInstances,
+            TypeSynonymInstances
