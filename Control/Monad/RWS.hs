@@ -37,17 +37,24 @@ module Control.Monad.RWS (
     execRWST,
     mapRWST,
     withRWST,
-    MonadReader(..),
-    MonadState(..),
-    MonadWriter(..),
+    MonadReader(..), asks,
+    MonadState(..), modify, gets,
+    MonadWriter(..), listens, censor,
+    module Control.Monad,
+    module Control.Monad.Fix,
+    module Control.Monad.Trans,
+    module Data.Monoid,
   ) where
 
-import Control.Monad.Reader     (MonadReader(..))
-import Control.Monad.State      (MonadState(..))
+import Control.Monad
+import Control.Monad.Fix
+import Control.Monad.Trans
+import Control.Monad.Reader     (MonadReader(..), asks)
+import Control.Monad.State      (MonadState(..), modify, gets)
 import Control.Monad.Trans.Error(Error, ErrorT)
-import Control.Monad.Trans.RWS.Lazy as Lazy
+import Control.Monad.Trans.RWS.Lazy as Lazy hiding (asks, modify, gets, listens, censor)
 import qualified Control.Monad.Trans.RWS.Strict as Strict
-import Control.Monad.Writer     (MonadWriter(..))
+import Control.Monad.Writer     (MonadWriter(..), listens, censor)
 import Data.Monoid
 
 class (Monoid w, MonadReader r m, MonadWriter w m, MonadState s m)
