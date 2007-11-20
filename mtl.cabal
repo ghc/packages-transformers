@@ -15,11 +15,13 @@ build-type: Simple
 ghc-options: -Wall
 exposed-modules:
     Control.Monad.Cont
+    Control.Monad.Cont.Class
     Control.Monad.Error
     Control.Monad.Identity
     Control.Monad.List
-    Control.Monad.Reader
     Control.Monad.RWS
+    Control.Monad.Reader
+    Control.Monad.Reader.Class
     Control.Monad.State
     Control.Monad.Trans
     Control.Monad.Trans.Cont

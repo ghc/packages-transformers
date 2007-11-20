@@ -37,31 +37,38 @@ module Control.Monad.Trans.Reader (
     liftCatch,
     ) where
 
-import Control.Monad
-import Control.Monad.Fix
 import Control.Monad.Identity
-import Control.Monad.Instances ()
 import Control.Monad.Trans
 
--- ---------------------------------------------------------------------------
--- Our parameterizable reader monad
+import Control.Monad
+import Control.Monad.Fix
+import Control.Monad.Instances ()
 
+-- | The parameterizable reader monad.
+--
+-- The 'return' function creates a @Reader@ that ignores the environment,
+-- and produces the given value.
+--
+-- The binding operator @>>=@ produces a @Reader@ that uses the
+-- environment to extract the value its left-hand side, and then applies
+-- the bound function to that value in the same environment.
 type Reader r = ReaderT r Identity
 
-runReader :: Reader r a -> r -> a
+-- | Runs @Reader@ and extracts the final value from it.
+runReader :: Reader r a		-- ^ A @Reader@ to run.
+    -> r			-- ^ An initial environment.
+    -> a
 runReader m = runIdentity . runReaderT m
 
 mapReader :: (a -> b) -> Reader r a -> Reader r b
 mapReader f = mapReaderT (Identity . f . runIdentity)
 
--- This is a more general version of local.
-
+-- | A more general version of 'local'.
 withReader :: (r' -> r) -> Reader r a -> Reader r' a
 withReader = withReaderT
 
--- ---------------------------------------------------------------------------
--- Our parameterizable reader monad, with an inner monad
-
+-- | The reader monad transformer.
+-- Can be used to add environment reading functionality to other monads.
 newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a }
 
 mapReaderT :: (m a -> n b) -> ReaderT w m a -> ReaderT w n b
