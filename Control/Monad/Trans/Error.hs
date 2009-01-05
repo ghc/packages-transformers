@@ -134,8 +134,8 @@ mapErrorT :: (m (Either e a) -> n (Either e' b))
           -> ErrorT e' n b
 mapErrorT f m = ErrorT $ f (runErrorT m)
 
-instance (Monad m) => Functor (ErrorT e m) where
-    fmap f = ErrorT . liftM (fmap f) . runErrorT
+instance (Functor m) => Functor (ErrorT e m) where
+    fmap f = ErrorT . fmap (fmap f) . runErrorT
 
 instance (Monad m, Error e) => Monad (ErrorT e m) where
     return a = ErrorT $ return (Right a)

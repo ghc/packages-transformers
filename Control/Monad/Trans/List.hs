@@ -33,8 +33,8 @@ newtype ListT m a = ListT { runListT :: m [a] }
 mapListT :: (m [a] -> n [b]) -> ListT m a -> ListT n b
 mapListT f m = ListT $ f (runListT m)
 
-instance (Monad m) => Functor (ListT m) where
-    fmap f = mapListT $ liftM $ map f
+instance (Functor m) => Functor (ListT m) where
+    fmap f = mapListT $ fmap $ map f
 
 instance (Monad m) => Monad (ListT m) where
     return a = ListT $ return [a]

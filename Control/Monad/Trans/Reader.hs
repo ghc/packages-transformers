@@ -81,8 +81,8 @@ mapReaderT f m = ReaderT $ f . runReaderT m
 withReaderT :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
 withReaderT f m = ReaderT $ runReaderT m . f
 
-instance (Monad m) => Functor (ReaderT r m) where
-    fmap f m = ReaderT (liftM f . runReaderT m)
+instance (Functor m) => Functor (ReaderT r m) where
+    fmap f m = ReaderT (fmap f . runReaderT m)
 
 instance (Monad m) => Monad (ReaderT r m) where
     return a = ReaderT $ \_ -> return a

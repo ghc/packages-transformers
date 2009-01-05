@@ -104,10 +104,9 @@ mapRWST f m = RWST $ \r s -> f (runRWST m r s)
 withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 withRWST f m = RWST $ \r s -> uncurry (runRWST m) (f r s)
 
-instance (Monad m) => Functor (RWST r w s m) where
-    fmap f m = RWST $ \r s -> do
-        (a, s', w) <- runRWST m r s
-        return (f a, s', w)
+instance (Functor m) => Functor (RWST r w s m) where
+    fmap f m = RWST $ \r s ->
+        fmap (\(a, s', w) -> (f a, s', w)) $ runRWST m r s
 
 instance (Monoid w, Monad m) => Monad (RWST r w s m) where
     return a = RWST $ \_ s -> return (a, s, mempty)

@@ -153,8 +153,8 @@ mapStateT f m = StateT $ f . runStateT m
 withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f m = StateT $ runStateT m . f
 
-instance (Monad m) => Functor (StateT s m) where
-    fmap f = mapStateT $ liftM $ \ ~(x, s') -> (f x, s')
+instance (Functor m) => Functor (StateT s m) where
+    fmap f = mapStateT $ fmap $ \ ~(x, s') -> (f x, s')
 
 instance (Monad m) => Monad (StateT s m) where
     return a = StateT $ \s -> return (a, s)

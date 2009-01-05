@@ -76,8 +76,8 @@ execWriterT m = do
 mapWriterT :: (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
 mapWriterT f m = WriterT $ f (runWriterT m)
 
-instance (Monad m) => Functor (WriterT w m) where
-    fmap f = mapWriterT $ liftM $ \ ~(a, w) -> (f a, w)
+instance (Functor m) => Functor (WriterT w m) where
+    fmap f = mapWriterT $ fmap $ \ ~(a, w) -> (f a, w)
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
     return a = WriterT $ return (a, mempty)
