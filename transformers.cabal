@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.0
+version:      0.0.0.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill
@@ -11,8 +11,10 @@ description:
     /Functional Programming with Overloading and Higher-Order Polymorphism/,
     by Mark P Jones, in /Advanced School of Functional Programming/, 1995
     (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>).
+    .
+    This part contains the monad transformer class, the concrete monad
+    transformers, operations and liftings.
 build-type: Simple
-ghc-options: -Wall
 exposed-modules:
     Control.Monad.Identity
     Control.Monad.Trans
