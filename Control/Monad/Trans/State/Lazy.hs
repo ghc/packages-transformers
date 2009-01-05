@@ -24,6 +24,7 @@
 module Control.Monad.Trans.State.Lazy (
     -- * The State monad
     State,
+    state,
     runState,
     evalState,
     execState,
@@ -60,6 +61,9 @@ type State s = StateT s Identity
 
 runState :: State s a -> s -> (a, s)
 runState m = runIdentity . runStateT m
+
+state :: (s -> (a, s)) -> State s a
+state f = StateT (Identity . f)
 
 -- |Evaluate this state monad with the given initial state,throwing
 -- away the final state.  Very much like @fst@ composed with

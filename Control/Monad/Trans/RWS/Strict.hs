@@ -21,6 +21,7 @@
 module Control.Monad.Trans.RWS.Strict (
     -- * The RWS monad
     RWS,
+    rws,
     runRWS,
     evalRWS,
     execRWS,
@@ -59,6 +60,9 @@ import Control.Monad.Trans
 import Data.Monoid
 
 type RWS r w s = RWST r w s Identity
+
+rws :: (r -> s -> (a, s, w)) -> RWS r w s a
+rws f = RWST (\ r s -> Identity (f r s))
 
 runRWS :: RWS r w s a -> r -> s -> (a, s, w)
 runRWS m r s = runIdentity (runRWST m r s)

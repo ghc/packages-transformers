@@ -24,6 +24,7 @@
 module Control.Monad.Trans.State.Strict (
     -- * The State monad
     State,
+    state,
     runState,
     evalState,
     execState,
@@ -57,6 +58,9 @@ import Control.Monad.Trans
 -- to carry and /a/ is the type of the /return value/.
 
 type State s = StateT s Identity
+
+state :: (s -> (a, s)) -> State s a
+state f = StateT (Identity . f)
 
 runState :: State s a -> s -> (a, s)
 runState m = runIdentity . runStateT m

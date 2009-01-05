@@ -21,6 +21,7 @@
 module Control.Monad.Trans.Writer.Lazy (
     -- * The Writer monad
     Writer,
+    writer,
     runWriter,
     execWriter,
     mapWriter,
@@ -49,6 +50,9 @@ import Data.Monoid
 -- Our parameterizable writer monad
 
 type Writer w = WriterT w Identity
+
+writer :: (a, w) -> Writer w a
+writer = WriterT . Identity
 
 runWriter :: Writer w a -> (a, w)
 runWriter = runIdentity . runWriterT

@@ -21,6 +21,7 @@
 module Control.Monad.Trans.Reader (
     -- * The Reader monad
     Reader,
+    reader,
     runReader,
     mapReader,
     withReader,
@@ -53,6 +54,9 @@ import Control.Monad.Instances ()
 -- environment to extract the value its left-hand side, and then applies
 -- the bound function to that value in the same environment.
 type Reader r = ReaderT r Identity
+
+reader :: (r -> a) -> Reader r a
+reader f = ReaderT (Identity . f)
 
 -- | Runs @Reader@ and extracts the final value from it.
 runReader :: Reader r a		-- ^ A @Reader@ to run.

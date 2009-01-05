@@ -15,6 +15,7 @@
 module Control.Monad.Trans.Cont (
     -- * The Cont monad
     Cont,
+    cont,
     runCont,
     mapCont,
     withCont,
@@ -42,6 +43,9 @@ The @return@ function simply creates a continuation which passes the value on.
 The @>>=@ operator adds the bound function into the continuation chain.
 -}
 type Cont r = ContT r Identity
+
+cont :: ((a -> r) -> r) -> Cont r a
+cont f = ContT (\ k -> Identity (f (runIdentity . k)))
 
 -- | Runs a CPS computation, returns its result after applying the final
 -- continuation to it.
