@@ -29,7 +29,7 @@ The Error monad (also called the Exception monad).
 {-
   Rendered by Michael Weber <mailto:michael.weber@post.rwth-aachen.de>,
   inspired by the Haskell Monad Template Library from
-    Andy Gill (<http://www.cse.ogi.edu/~andy/>)
+    Andy Gill (<http://web.cecs.pdx.edu/~andy/>)
 -}
 module Control.Monad.Trans.Error (
     -- * The ErrorT monad transformer
