@@ -40,6 +40,7 @@ module Control.Monad.Trans.Writer.Strict (
     liftCatch,
   ) where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Identity
@@ -78,6 +79,11 @@ mapWriterT f m = WriterT $ f (runWriterT m)
 
 instance (Functor m) => Functor (WriterT w m) where
     fmap f = mapWriterT $ fmap $ \ (a, w) -> (f a, w)
+
+instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
+    pure a = WriterT $ pure (a, mempty)
+    WriterT f <*> WriterT v = WriterT $ liftA2 k f v
+      where k (a, w) (b, w') = (a b, w `mappend` w')
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
     return a = WriterT $ return (a, mempty)

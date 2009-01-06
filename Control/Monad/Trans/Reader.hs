@@ -41,6 +41,7 @@ module Control.Monad.Trans.Reader (
 import Control.Monad.Identity
 import Control.Monad.Trans
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Instances ()
@@ -83,6 +84,10 @@ withReaderT f m = ReaderT $ runReaderT m . f
 
 instance (Functor m) => Functor (ReaderT r m) where
     fmap f m = ReaderT (fmap f . runReaderT m)
+
+instance (Applicative m) => Applicative (ReaderT r m) where
+    pure a = ReaderT $ \ _ -> pure a
+    ReaderT f <*> ReaderT v = ReaderT $ \ r -> f r <*> v r
 
 instance (Monad m) => Monad (ReaderT r m) where
     return a = ReaderT $ \_ -> return a

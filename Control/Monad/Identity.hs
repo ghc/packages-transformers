@@ -42,6 +42,7 @@ module Control.Monad.Identity (
     Identity(..),
    ) where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 
@@ -83,6 +84,10 @@ newtype Identity a = Identity { runIdentity :: a }
 
 instance Functor Identity where
     fmap f m = Identity (f (runIdentity m))
+
+instance Applicative Identity where
+    pure a = Identity a
+    Identity f <*> Identity x = Identity (f x)
 
 instance Monad Identity where
     return a = Identity a

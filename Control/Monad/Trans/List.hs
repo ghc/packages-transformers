@@ -22,6 +22,7 @@ module Control.Monad.Trans.List (
     liftCatch,
   ) where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
 
@@ -35,6 +36,10 @@ mapListT f m = ListT $ f (runListT m)
 
 instance (Functor m) => Functor (ListT m) where
     fmap f = mapListT $ fmap $ map f
+
+instance (Applicative m) => Applicative (ListT m) where
+    pure a = ListT $ pure [a]
+    ListT f <*> ListT v = ListT $ liftA2 (<*>) f v
 
 instance (Monad m) => Monad (ListT m) where
     return a = ListT $ return [a]

@@ -48,6 +48,7 @@ module Control.Monad.Trans.State.Lazy (
     liftPass,
   ) where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Identity
@@ -153,8 +154,12 @@ mapStateT f m = StateT $ f . runStateT m
 withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f m = StateT $ runStateT m . f
 
-instance (Functor m) => Functor (StateT s m) where
-    fmap f = mapStateT $ fmap $ \ ~(x, s') -> (f x, s')
+instance (Monad m) => Functor (StateT s m) where
+    fmap = liftM
+
+instance (Monad m) => Applicative (StateT s m) where
+    pure = return
+    (<*>) = ap
 
 instance (Monad m) => Monad (StateT s m) where
     return a = StateT $ \s -> return (a, s)

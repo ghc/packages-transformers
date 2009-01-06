@@ -31,6 +31,7 @@ module Control.Monad.Trans.Cont (
 import Control.Monad.Identity
 import Control.Monad.Trans
 
+import Control.Applicative
 import Control.Monad
 
 {- |
@@ -75,6 +76,10 @@ withContT f m = ContT $ runContT m . f
 
 instance Functor (ContT r m) where
     fmap f m = ContT $ \c -> runContT m (c . f)
+
+instance Applicative (ContT r m) where
+    pure a = ContT ($ a)
+    ContT f <*> ContT v = ContT $ \ k -> f $ \ g -> v (k . g)
 
 instance (Monad m) => Monad (ContT r m) where
     return a = ContT ($ a)

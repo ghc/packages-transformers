@@ -53,6 +53,7 @@ module Control.Monad.Trans.RWS.Strict (
     liftCatch,
   ) where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Identity
@@ -104,9 +105,14 @@ mapRWST f m = RWST $ \r s -> f (runRWST m r s)
 withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 withRWST f m = RWST $ \r s -> uncurry (runRWST m) (f r s)
 
-instance (Functor m) => Functor (RWST r w s m) where
-    fmap f m = RWST $ \r s ->
-        fmap (\(a, s', w) -> (f a, s', w)) $ runRWST m r s
+instance (Monad m) => Functor (RWST r w s m) where
+    fmap f m = RWST $ \r s -> do
+        (a, s', w) <- runRWST m r s
+        return (f a, s', w)
+
+instance (Monoid w, Monad m) => Applicative (RWST r w s m) where
+    pure = return
+    (<*>) = ap
 
 instance (Monoid w, Monad m) => Monad (RWST r w s m) where
     return a = RWST $ \_ s -> return (a, s, mempty)
