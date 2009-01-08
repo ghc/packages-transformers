@@ -150,6 +150,10 @@ instance (Monad m) => Applicative (ErrorT e m) where
                     Left  e -> return (Left e)
                     Right x -> return (Right (k x))
 
+instance (Monad m, Error e) => Alternative (ErrorT e m) where
+    empty = mzero
+    (<|>) = mplus
+
 instance (Monad m, Error e) => Monad (ErrorT e m) where
     return a = ErrorT $ return (Right a)
     m >>= k  = ErrorT $ do

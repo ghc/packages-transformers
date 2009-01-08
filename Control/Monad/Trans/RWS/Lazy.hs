@@ -114,6 +114,10 @@ instance (Monoid w, Monad m) => Applicative (RWST r w s m) where
     pure = return
     (<*>) = ap
 
+instance (Monoid w, MonadPlus m) => Alternative (RWST r w s m) where
+    empty = mzero
+    (<|>) = mplus
+
 instance (Monoid w, Monad m) => Monad (RWST r w s m) where
     return a = RWST $ \_ s -> return (a, s, mempty)
     m >>= k  = RWST $ \r s -> do

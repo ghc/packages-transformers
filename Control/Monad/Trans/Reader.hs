@@ -89,6 +89,10 @@ instance (Applicative m) => Applicative (ReaderT r m) where
     pure a = ReaderT $ \ _ -> pure a
     ReaderT f <*> ReaderT v = ReaderT $ \ r -> f r <*> v r
 
+instance (Alternative m) => Alternative (ReaderT r m) where
+    empty   = ReaderT $ \_ -> empty
+    m <|> n = ReaderT $ \r -> runReaderT m r <|> runReaderT n r
+
 instance (Monad m) => Monad (ReaderT r m) where
     return a = ReaderT $ \_ -> return a
     m >>= k  = ReaderT $ \r -> do

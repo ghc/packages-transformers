@@ -85,6 +85,10 @@ instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
     WriterT f <*> WriterT v = WriterT $ liftA2 k f v
       where k ~(a, w) ~(b, w') = (a b, w `mappend` w')
 
+instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
+    empty   = WriterT empty
+    m <|> n = WriterT $ runWriterT m <|> runWriterT n
+
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
     return a = WriterT $ return (a, mempty)
     m >>= k  = WriterT $ do

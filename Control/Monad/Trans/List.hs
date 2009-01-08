@@ -41,6 +41,10 @@ instance (Applicative m) => Applicative (ListT m) where
     pure a = ListT $ pure [a]
     ListT f <*> ListT v = ListT $ liftA2 (<*>) f v
 
+instance (Applicative m) => Alternative (ListT m) where
+    empty   = ListT $ pure []
+    m <|> n = ListT $ (++) <$> runListT m <*> runListT n
+
 instance (Monad m) => Monad (ListT m) where
     return a = ListT $ return [a]
     m >>= k  = ListT $ do

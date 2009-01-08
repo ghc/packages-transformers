@@ -161,6 +161,10 @@ instance (Monad m) => Applicative (StateT s m) where
     pure = return
     (<*>) = ap
 
+instance (MonadPlus m) => Alternative (StateT s m) where
+    empty = mzero
+    (<|>) = mplus
+
 instance (Monad m) => Monad (StateT s m) where
     return a = StateT $ \s -> return (a, s)
     m >>= k  = StateT $ \s -> do
