@@ -81,8 +81,8 @@ instance (Functor m) => Functor (WriterT w m) where
     fmap f = mapWriterT $ fmap $ \ ~(a, w) -> (f a, w)
 
 instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
-    pure a = WriterT $ pure (a, mempty)
-    WriterT f <*> WriterT v = WriterT $ liftA2 k f v
+    pure a  = WriterT $ pure (a, mempty)
+    f <*> v = WriterT $ liftA2 k (runWriterT f) (runWriterT v)
       where k ~(a, w) ~(b, w') = (a b, w `mappend` w')
 
 instance (Monoid w, Alternative m) => Alternative (WriterT w m) where

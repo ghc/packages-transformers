@@ -86,8 +86,8 @@ instance (Functor m) => Functor (ReaderT r m) where
     fmap f m = ReaderT (fmap f . runReaderT m)
 
 instance (Applicative m) => Applicative (ReaderT r m) where
-    pure a = ReaderT $ \ _ -> pure a
-    ReaderT f <*> ReaderT v = ReaderT $ \ r -> f r <*> v r
+    pure a  = ReaderT $ \ _ -> pure a
+    f <*> v = ReaderT $ \ r -> runReaderT f r <*> runReaderT v r
 
 instance (Alternative m) => Alternative (ReaderT r m) where
     empty   = ReaderT $ \_ -> empty

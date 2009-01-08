@@ -78,8 +78,8 @@ instance Functor (ContT r m) where
     fmap f m = ContT $ \c -> runContT m (c . f)
 
 instance Applicative (ContT r m) where
-    pure a = ContT ($ a)
-    ContT f <*> ContT v = ContT $ \ k -> f $ \ g -> v (k . g)
+    pure a  = ContT ($ a)
+    f <*> v = ContT $ \ k -> runContT f $ \ g -> runContT v (k . g)
 
 instance (Monad m) => Monad (ContT r m) where
     return a = ContT ($ a)

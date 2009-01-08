@@ -38,8 +38,8 @@ instance (Functor m) => Functor (ListT m) where
     fmap f = mapListT $ fmap $ map f
 
 instance (Applicative m) => Applicative (ListT m) where
-    pure a = ListT $ pure [a]
-    ListT f <*> ListT v = ListT $ liftA2 (<*>) f v
+    pure a  = ListT $ pure [a]
+    f <*> v = ListT $ (<*>) <$> runListT f <*> runListT v
 
 instance (Applicative m) => Alternative (ListT m) where
     empty   = ListT $ pure []

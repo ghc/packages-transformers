@@ -139,13 +139,13 @@ instance (Monad m) => Functor (ErrorT e m) where
     fmap f = ErrorT . liftM (fmap f) . runErrorT
 
 instance (Monad m) => Applicative (ErrorT e m) where
-    pure a = ErrorT $ return (Right a)
-    ErrorT f <*> ErrorT v = ErrorT $ do
-        mf <- f
+    pure a  = ErrorT $ return (Right a)
+    f <*> v = ErrorT $ do
+        mf <- runErrorT f
         case mf of
             Left  e -> return (Left e)
             Right k -> do
-                mv <- v
+                mv <- runErrorT v
                 case mv of
                     Left  e -> return (Left e)
                     Right x -> return (Right (k x))
