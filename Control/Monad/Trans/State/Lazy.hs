@@ -219,7 +219,7 @@ liftCallCC :: ((((a,s) -> m (b,s)) -> m (a,s)) -> m (a,s)) ->
     ((a -> StateT s m b) -> StateT s m a) -> StateT s m a
 liftCallCC callCC f = StateT $ \s ->
     callCC $ \c ->
-    runStateT (f (\a -> StateT $ \s' -> c (a, s))) s
+    runStateT (f (\a -> StateT $ \ _ -> c (a, s))) s
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.

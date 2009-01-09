@@ -217,7 +217,7 @@ liftCallCC :: (Monoid w) =>
     ((a -> RWST r w s m b) -> RWST r w s m a) -> RWST r w s m a
 liftCallCC callCC f = RWST $ \r s ->
     callCC $ \c ->
-    runRWST (f (\a -> RWST $ \_ s' -> c (a, s, mempty))) r s
+    runRWST (f (\a -> RWST $ \_ _ -> c (a, s, mempty))) r s
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
