@@ -50,6 +50,7 @@ module Control.Monad.Trans.RWS.Strict (
     gets,
     -- * Lifting other operations
     liftCallCC,
+    liftCallCC',
     liftCatch,
   ) where
 
@@ -208,11 +209,22 @@ gets f = do
     s <- get
     return (f s)
 
--- | Lift a @callCC@ operation to the new monad.
+-- | Uniform lifting of a @callCC@ operation to the new monad.
+-- This version rolls back to the original state on entering the
+-- continuation.
 liftCallCC :: (Monoid w) =>
     ((((a,s,w) -> m (b,s,w)) -> m (a,s,w)) -> m (a,s,w)) ->
     ((a -> RWST r w s m b) -> RWST r w s m a) -> RWST r w s m a
 liftCallCC callCC f = RWST $ \r s ->
+    callCC $ \c ->
+    runRWST (f (\a -> RWST $ \_ s' -> c (a, s, mempty))) r s
+
+-- | In-situ lifting of a @callCC@ operation to the new monad.
+-- This version uses the current state on entering the continuation.
+liftCallCC' :: (Monoid w) =>
+    ((((a,s,w) -> m (b,s,w)) -> m (a,s,w)) -> m (a,s,w)) ->
+    ((a -> RWST r w s m b) -> RWST r w s m a) -> RWST r w s m a
+liftCallCC' callCC f = RWST $ \r s ->
     callCC $ \c ->
     runRWST (f (\a -> RWST $ \_ s' -> c (a, s', mempty))) r s
 

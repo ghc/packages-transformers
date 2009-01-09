@@ -43,6 +43,7 @@ module Control.Monad.Trans.State.Lazy (
     gets,
     -- * Lifting other operations
     liftCallCC,
+    liftCallCC',
     liftCatch,
     liftListen,
     liftPass,
@@ -211,10 +212,20 @@ gets f = do
     s <- get
     return (f s)
 
--- | Lift a @callCC@ operation to the new monad.
+-- | Uniform lifting of a @callCC@ operation to the new monad.
+-- This version rolls back to the original state on entering the
+-- continuation.
 liftCallCC :: ((((a,s) -> m (b,s)) -> m (a,s)) -> m (a,s)) ->
     ((a -> StateT s m b) -> StateT s m a) -> StateT s m a
 liftCallCC callCC f = StateT $ \s ->
+    callCC $ \c ->
+    runStateT (f (\a -> StateT $ \s' -> c (a, s))) s
+
+-- | In-situ lifting of a @callCC@ operation to the new monad.
+-- This version uses the current state on entering the continuation.
+liftCallCC' :: ((((a,s) -> m (b,s)) -> m (a,s)) -> m (a,s)) ->
+    ((a -> StateT s m b) -> StateT s m a) -> StateT s m a
+liftCallCC' callCC f = StateT $ \s ->
     callCC $ \c ->
     runStateT (f (\a -> StateT $ \s' -> c (a, s'))) s
 
