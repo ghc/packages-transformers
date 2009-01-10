@@ -3,7 +3,7 @@ version:      0.1.0.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill
-maintainer:   libraries@haskell.org
+maintainer:   Ross Paterson <ross@soi.city.ac.uk>
 category:     Control
 synopsis:     Concrete monad transformers
 description:
