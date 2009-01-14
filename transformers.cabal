@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.1.0.0
+version:      0.1.0.1
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill
@@ -13,9 +13,22 @@ description:
     (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>).
     .
     This part contains the monad transformer class, the concrete monad
-    transformers, operations and liftings.
+    transformers, operations and liftings.  It can be used on its own
+    in Haskell 98 code, or with the monad classes in the packages
+    @monads-fd@ or @monads-tf@.
 build-type: Simple
-exposed-modules:
+cabal-version: >= 1.2
+
+flag ApplicativeInBase
+  description: Choose the newer base package, including Applicative and other
+    Functor classes.
+
+library
+  if flag(ApplicativeInBase)
+    build-depends: base >= 2
+  else
+    build-depends: base >= 1.0 && < 2, special-functors >=1.0 && <1.1
+  exposed-modules:
     Control.Monad.Identity
     Control.Monad.Trans
     Control.Monad.Trans.Cont
@@ -31,4 +44,3 @@ exposed-modules:
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
-build-depends: base
