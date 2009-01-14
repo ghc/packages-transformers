@@ -155,14 +155,15 @@ mapStateT f m = StateT $ f . runStateT m
 withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f m = StateT $ runStateT m . f
 
-instance (Monad m) => Functor (StateT s m) where
-    fmap = liftM
+instance (Functor m) => Functor (StateT s m) where
+    fmap f m = StateT $ \ s ->
+        fmap (\ (a, s') -> (f a, s')) $ runStateT m s
 
-instance (Monad m) => Applicative (StateT s m) where
+instance (Functor m, Monad m) => Applicative (StateT s m) where
     pure = return
     (<*>) = ap
 
-instance (MonadPlus m) => Alternative (StateT s m) where
+instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
     empty = mzero
     (<|>) = mplus
 

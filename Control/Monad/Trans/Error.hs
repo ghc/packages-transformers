@@ -135,10 +135,10 @@ mapErrorT :: (m (Either e a) -> n (Either e' b))
           -> ErrorT e' n b
 mapErrorT f m = ErrorT $ f (runErrorT m)
 
-instance (Monad m) => Functor (ErrorT e m) where
-    fmap f = ErrorT . liftM (fmap f) . runErrorT
+instance (Functor m) => Functor (ErrorT e m) where
+    fmap f = ErrorT . fmap (fmap f) . runErrorT
 
-instance (Monad m) => Applicative (ErrorT e m) where
+instance (Functor m, Monad m) => Applicative (ErrorT e m) where
     pure a  = ErrorT $ return (Right a)
     f <*> v = ErrorT $ do
         mf <- runErrorT f
@@ -150,7 +150,7 @@ instance (Monad m) => Applicative (ErrorT e m) where
                     Left  e -> return (Left e)
                     Right x -> return (Right (k x))
 
-instance (Monad m, Error e) => Alternative (ErrorT e m) where
+instance (Functor m, Monad m, Error e) => Alternative (ErrorT e m) where
     empty = mzero
     (<|>) = mplus
 
