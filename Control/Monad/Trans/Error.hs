@@ -88,6 +88,16 @@ instance ErrorList Char where
 -- ---------------------------------------------------------------------------
 -- Our parameterizable error monad
 
+instance Applicative (Either e) where
+    pure          = Right
+    Left  e <*> _ = Left e
+    Right f <*> r = fmap f r
+
+instance (Error e) => Alternative (Either e) where
+    empty        = Left noMsg
+    Left _ <|> n = n
+    m      <|> _ = m
+
 instance (Error e) => Monad (Either e) where
     return        = Right
     Left  l >>= _ = Left l
