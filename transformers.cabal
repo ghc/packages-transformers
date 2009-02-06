@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.1.1.0
+version:      0.1.3.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill
@@ -34,6 +34,7 @@ library
     Control.Monad.Trans.Cont
     Control.Monad.Trans.Error
     Control.Monad.Trans.List
+    Control.Monad.Trans.Maybe
     Control.Monad.Trans.Reader
     Control.Monad.Trans.RWS
     Control.Monad.Trans.RWS.Lazy
@@ -44,3 +45,4 @@ library
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
+  extensions: CPP
