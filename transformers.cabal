@@ -33,6 +33,7 @@ library
     Control.Monad.Trans
     Control.Monad.Trans.Cont
     Control.Monad.Trans.Error
+    Control.Monad.Trans.Identity
     Control.Monad.Trans.List
     Control.Monad.Trans.Maybe
     Control.Monad.Trans.Reader
