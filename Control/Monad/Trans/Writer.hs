@@ -10,12 +10,8 @@
 -- Portability :  portable
 --
 -- The WriterT monad transformer.
---
---      Inspired by the paper
---      /Functional Programming with Overloading and
---          Higher-Order Polymorphism/,
---        Mark P Jones (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>)
---          Advanced School of Functional Programming, 1995.
+-- This version is lazy; for a strict version, see
+-- "Control.Monad.Trans.Writer.Strict", which has the same interface.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer (
@@ -23,4 +19,3 @@ module Control.Monad.Trans.Writer (
   ) where
 
 import Control.Monad.Trans.Writer.Lazy
-

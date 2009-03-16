@@ -9,13 +9,9 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Combination Reader, Writer and State monad transformer.
---
---      Inspired by the paper
---      /Functional Programming with Overloading and
---          Higher-Order Polymorphism/,
---        Mark P Jones (<http://web.cecs.pdx.edu/~mpj/>)
---          Advanced School of Functional Programming, 1995.
+-- A monad transformer that combines 'ReaderT', 'WriterT' and 'State'.
+-- This version is lazy; for a strict version, see
+-- "Control.Monad.Trans.RWS.Strict", which has the same interface.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.RWS (
@@ -23,4 +19,3 @@ module Control.Monad.Trans.RWS (
   ) where
 
 import Control.Monad.Trans.RWS.Lazy
-

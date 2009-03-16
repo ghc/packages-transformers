@@ -30,12 +30,6 @@ The purpose of the @Identity@ monad is its fundamental role in the theory
 of monad transformers.
 Any monad transformer applied to the @Identity@ monad yields a non-transformer
 version of that monad.
-
-  Inspired by the paper
-  /Functional Programming with Overloading and
-      Higher-Order Polymorphism/,
-    Mark P Jones (<http://web.cecs.pdx.edu/~mpj/>)
-      Advanced School of Functional Programming, 1995.
 -}
 
 module Control.Monad.Identity (
