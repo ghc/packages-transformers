@@ -10,13 +10,8 @@
 -- Portability :  portable
 --
 -- State monads.
---
---      This module is inspired by the paper
---      /Functional Programming with Overloading and
---          Higher-Order Polymorphism/,
---        Mark P Jones (<http://web.cecs.pdx.edu/~mpj/>)
---          Advanced School of Functional Programming, 1995.
-
+-- This version is lazy; for a strict version, see
+-- "Control.Monad.Trans.State.Strict", which has the same interface.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.State (

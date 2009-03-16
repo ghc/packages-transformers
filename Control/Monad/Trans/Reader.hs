@@ -3,19 +3,14 @@
 -- Module      :  Control.Monad.Trans.Reader
 -- Copyright   :  (c) Andy Gill 2001,
 --                (c) Oregon Graduate Institute of Science and Technology, 2001
--- License     :  BSD-style (see the file libraries/base/LICENSE)
+-- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  libraries@haskell.org
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Declaration of the MonadReader class
---
---      Inspired by the paper
---      /Functional Programming with Overloading and
---          Higher-Order Polymorphism/,
---        Mark P Jones (<http://web.cecs.pdx.edu/~mpj/>)
---          Advanced School of Functional Programming, 1995.
+-- Declaration of the 'ReaderT' monad transformer, which adds a static
+-- environment to a given monad.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Reader (
@@ -48,90 +43,121 @@ import Control.Monad.Instances ()
 
 -- | The parameterizable reader monad.
 --
--- The 'return' function creates a @Reader@ that ignores the environment,
--- and produces the given value.
+-- Computations are functions of a shared environment.
 --
--- The binding operator @>>=@ produces a @Reader@ that uses the
--- environment to extract the value its left-hand side, and then applies
--- the bound function to that value in the same environment.
+-- The 'return' function ignores the environment, while @>>=@ passes
+-- the inherited environment to both subcomputations.
 type Reader r = ReaderT r Identity
 
+-- | Constructor for computations in the reader monad.
 reader :: (r -> a) -> Reader r a
 reader f = ReaderT (Identity . f)
 
--- | Runs @Reader@ and extracts the final value from it.
+-- | Runs a @Reader@ and extracts the final value from it.
 runReader :: Reader r a		-- ^ A @Reader@ to run.
     -> r			-- ^ An initial environment.
     -> a
 runReader m = runIdentity . runReaderT m
 
+-- | Transform the value returned by a @Reader@.
 mapReader :: (a -> b) -> Reader r a -> Reader r b
 mapReader f = mapReaderT (Identity . f . runIdentity)
 
--- | A more general version of 'local'.
-withReader :: (r' -> r) -> Reader r a -> Reader r' a
+-- | Execute a computation in a modified environment
+-- (a specialization of 'withReaderT').
+withReader
+    :: (r' -> r)        -- ^ The function to modify the environment.
+    -> Reader r a       -- ^ Computation to run in the modified environment.
+    -> Reader r' a
 withReader = withReaderT
 
--- | The reader monad transformer.
--- Can be used to add environment reading functionality to other monads.
-newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a }
+-- | The reader monad transformer,
+-- which adds a read-only environment to the given monad.
+--
+-- The 'return' function ignores the environment, while @>>=@ passes
+-- the inherited environment to both subcomputations.
+newtype ReaderT r m a = ReaderT {
+        -- | The underlying computation, as a function of the environment.
+        runReaderT :: r -> m a
+    }
 
-mapReaderT :: (m a -> n b) -> ReaderT w m a -> ReaderT w n b
+-- | Transform the computation inside a @ReaderT@.
+mapReaderT :: (m a -> n b) -> ReaderT r m a -> ReaderT r n b
 mapReaderT f m = ReaderT $ f . runReaderT m
 
-withReaderT :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
+-- | Execute a computation in a modified environment
+-- (a  more general version of 'local').
+withReaderT
+    :: (r' -> r)        -- ^ The function to modify the environment.
+    -> ReaderT r m a    -- ^ Computation to run in the modified environment.
+    -> ReaderT r' m a
 withReaderT f m = ReaderT $ runReaderT m . f
 
 instance (Functor m) => Functor (ReaderT r m) where
-    fmap f m = ReaderT (fmap f . runReaderT m)
+    fmap f  = mapReaderT (fmap f)
 
 instance (Applicative m) => Applicative (ReaderT r m) where
-    pure a  = ReaderT $ \ _ -> pure a
+    pure    = liftReaderT . pure
     f <*> v = ReaderT $ \ r -> runReaderT f r <*> runReaderT v r
 
 instance (Alternative m) => Alternative (ReaderT r m) where
-    empty   = ReaderT $ \_ -> empty
-    m <|> n = ReaderT $ \r -> runReaderT m r <|> runReaderT n r
+    empty   = liftReaderT empty
+    m <|> n = ReaderT $ \ r -> runReaderT m r <|> runReaderT n r
 
 instance (Monad m) => Monad (ReaderT r m) where
-    return a = ReaderT $ \_ -> return a
-    m >>= k  = ReaderT $ \r -> do
+    return   = lift . return
+    m >>= k  = ReaderT $ \ r -> do
         a <- runReaderT m r
         runReaderT (k a) r
-    fail msg = ReaderT $ \_ -> fail msg
+    fail msg = lift (fail msg)
 
 instance (MonadPlus m) => MonadPlus (ReaderT r m) where
-    mzero       = ReaderT $ \_ -> mzero
-    m `mplus` n = ReaderT $ \r -> runReaderT m r `mplus` runReaderT n r
+    mzero       = lift mzero
+    m `mplus` n = ReaderT $ \ r -> runReaderT m r `mplus` runReaderT n r
 
 instance (MonadFix m) => MonadFix (ReaderT r m) where
-    mfix f = ReaderT $ \r -> mfix $ \a -> runReaderT (f a) r
+    mfix f = ReaderT $ \ r -> mfix $ \ a -> runReaderT (f a) r
 
 instance MonadTrans (ReaderT r) where
-    lift m = ReaderT $ \_ -> m
+    lift   = liftReaderT
 
 instance (MonadIO m) => MonadIO (ReaderT r m) where
     liftIO = lift . liftIO
 
+liftReaderT :: m a -> ReaderT r m a
+liftReaderT m = ReaderT (const m)
+
+-- | Fetch the value of the environment.
 ask :: (Monad m) => ReaderT r m r
 ask = ReaderT return
 
-local :: (Monad m) => (r -> r) -> ReaderT r m a -> ReaderT r m a
-local f m = ReaderT $ \r -> runReaderT m (f r)
+-- | Execute a computation in a modified environment
+-- (a specialization of 'withReaderT').
+local :: (Monad m)
+    => (r -> r)         -- ^ The function to modify the environment.
+    -> ReaderT r m a    -- ^ Computation to run in the modified environment.
+    -> ReaderT r m a
+local = withReaderT
 
-asks :: (Monad m) => (r -> a) -> ReaderT r m a
-asks f = do
-    r <- ask
-    return (f r)
+-- | Retrieve a function of the current environment.
+asks :: (Monad m)
+    => (r -> a)         -- ^ The selector function to apply to the environment.
+    -> ReaderT r m a
+asks f = liftM f ask
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (((a -> m b) -> m a) -> m a) ->
-    ((a -> ReaderT r m b) -> ReaderT r m a) -> ReaderT r m a
-liftCallCC callCC f = ReaderT $ \r ->
-    callCC $ \c ->
-    runReaderT (f (\a -> ReaderT $ \_ -> c a)) r
+liftCallCC ::
+    (((a -> m b) -> m a) -> m a)        -- ^ @callCC@ on the argument monad.
+    -> ((a -> ReaderT r m b) -> ReaderT r m a) -> ReaderT r m a
+liftCallCC callCC f = ReaderT $ \ r ->
+    callCC $ \ c ->
+    runReaderT (f (ReaderT . const . c)) r
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m a -> (e -> m a) -> m a) ->
-    ReaderT r m a -> (e -> ReaderT r m a) -> ReaderT r m a
-liftCatch f m h = ReaderT $ \r -> f (runReaderT m r) (\e -> runReaderT (h e) r)
+liftCatch ::
+    (m a -> (e -> m a) -> m a)          -- ^ @catch@ on the argument monad.
+    -> ReaderT r m a                    -- ^ Computation to attempt.
+    -> (e -> ReaderT r m a)             -- ^ Exception handler.
+    -> ReaderT r m a
+liftCatch f m h =
+    ReaderT $ \ r -> f (runReaderT m r) (\ e -> runReaderT (h e) r)

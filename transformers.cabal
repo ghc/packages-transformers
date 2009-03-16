@@ -8,14 +8,15 @@ category:     Control
 synopsis:     Concrete monad transformers
 description:
     Haskell 98 part of a monad transformer library, inspired by the paper
-    /Functional Programming with Overloading and Higher-Order Polymorphism/,
+    \"Functional Programming with Overloading and Higher-Order Polymorphism\",
     by Mark P Jones, in /Advanced School of Functional Programming/, 1995
     (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>).
     .
     This part contains the monad transformer class, the concrete monad
     transformers, operations and liftings.  It can be used on its own
-    in Haskell 98 code, or with the monad classes in the packages
-    @monads-fd@ or @monads-tf@.
+    in Haskell 98 code, or with the monad classes in the @monads-fd@ or
+    @monads-tf@ packages, which automatically lift operations introduced
+    by monad transformers through other transformers.
 build-type: Simple
 cabal-version: >= 1.2
 
