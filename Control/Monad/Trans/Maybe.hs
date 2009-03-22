@@ -14,8 +14,10 @@
 module Control.Monad.Trans.Maybe (
     -- * The MaybeT monad transformer
     MaybeT(..),
+    mapMaybeT,
     -- * Lifting other operations
     liftCallCC,
+    liftCatch,
     liftListen,
     liftPass,
   ) where
@@ -68,6 +70,11 @@ liftCallCC :: (((Maybe a -> m (Maybe b)) -> m (Maybe a)) ->
     m (Maybe a)) -> ((a -> MaybeT m b) -> MaybeT m a) -> MaybeT m a
 liftCallCC callCC f =
     MaybeT $ callCC $ \ c -> runMaybeT (f (MaybeT . c . Just))
+
+-- | Lift a @catchError@ operation to the new monad.
+liftCatch :: (m (Maybe a) -> (e -> m (Maybe a)) -> m (Maybe a)) ->
+    MaybeT m a -> (e -> MaybeT m a) -> MaybeT m a
+liftCatch f m h = MaybeT $ f (runMaybeT m) (runMaybeT . h)
 
 -- | Lift a @listen@ operation to the new monad.
 liftListen :: Monad m =>

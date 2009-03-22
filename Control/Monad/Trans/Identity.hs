@@ -14,30 +14,28 @@
 module Control.Monad.Trans.Identity (
     -- * The identity monad transformer
     IdentityT(..),
+    mapIdentityT,
     -- * Lifting other operations
-    liftCallCC,
     liftCatch,
-    liftListen,
-    liftLocal,
-    liftPass,
+    liftCallCC,
   ) where
 
 import Control.Applicative
-import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
+import Control.Monad (MonadPlus(mzero, mplus))
 import Control.Monad.Trans (MonadIO(liftIO), MonadTrans(lift))
 
 newtype IdentityT m a = IdentityT { runIdentityT :: m a }
 
 instance (Functor m) => Functor (IdentityT m) where
-    fmap f = IdentityT . fmap f . runIdentityT
+    fmap f = mapIdentityT (fmap f)
 
 instance (Applicative m) => Applicative (IdentityT m) where
     pure x = IdentityT (pure x)
-    f <*> v = IdentityT (runIdentityT f <*> runIdentityT v)
+    (<*>) = lift2IdentityT (<*>)
  
 instance (Alternative m) => Alternative (IdentityT m) where
     empty = IdentityT empty
-    f <|> v = IdentityT (runIdentityT f <|> runIdentityT v)
+    (<|>) = lift2IdentityT (<|>)
 
 instance (Monad m) => Monad (IdentityT m) where
     return = IdentityT . return
@@ -46,13 +44,22 @@ instance (Monad m) => Monad (IdentityT m) where
  
 instance (MonadPlus m) => MonadPlus (IdentityT m) where
     mzero = IdentityT mzero
-    f `mplus` v = IdentityT (runIdentityT f `mplus` runIdentityT v)
+    mplus = lift2IdentityT mplus
 
 instance (MonadIO m) => MonadIO (IdentityT m) where
     liftIO = IdentityT . liftIO
 
 instance MonadTrans IdentityT where
     lift = IdentityT
+
+-- | Lift a unary operation to the new monad.
+mapIdentityT :: (m a -> n b) -> IdentityT m a -> IdentityT n b
+mapIdentityT f = IdentityT . f . runIdentityT
+
+-- | Lift a binary operation to the new monad.
+lift2IdentityT ::
+    (m a -> n b -> p c) -> IdentityT m a -> IdentityT n b -> IdentityT p c
+lift2IdentityT f a b = IdentityT (f (runIdentityT a) (runIdentityT b))
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: (((a -> m b) -> m a) ->
@@ -64,18 +71,3 @@ liftCallCC callCC f =
 liftCatch :: (m a -> (e -> m a) -> m a) ->
     IdentityT m a -> (e -> IdentityT m a) -> IdentityT m a
 liftCatch f m h = IdentityT $ f (runIdentityT m) (runIdentityT . h)
-
--- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m =>
-    (m a -> m (a,w)) -> IdentityT m a -> IdentityT m (a,w)
-liftListen listen = IdentityT . listen . runIdentityT
-
--- | Lift a @local@ operation to the new monad.
-liftLocal :: Monad m => ((r -> r) -> m a -> m a) ->
-    (r -> r) -> IdentityT m a -> IdentityT m a
-liftLocal local f = IdentityT . local f . runIdentityT
-
--- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => (m (a,w -> w) -> m a) ->
-    IdentityT m (a,w -> w) -> IdentityT m a
-liftPass pass = IdentityT . pass . runIdentityT
