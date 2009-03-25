@@ -81,7 +81,7 @@ instance Applicative (ContT r m) where
     pure a  = ContT ($ a)
     f <*> v = ContT $ \ k -> runContT f $ \ g -> runContT v (k . g)
 
-instance (Monad m) => Monad (ContT r m) where
+instance Monad (ContT r m) where
     return a = ContT ($ a)
     m >>= k  = ContT $ \c -> runContT m (\a -> runContT (k a) c)
 
