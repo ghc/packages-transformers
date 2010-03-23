@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Control.Monad.Trans
+-- Module      :  Control.Monad.Trans.Class
 -- Copyright   :  (c) Andy Gill 2001,
 --                (c) Oregon Graduate Institute of Science and Technology, 2001
 -- License     :  BSD-style (see the file libraries/base/LICENSE)
@@ -25,10 +25,9 @@
 -- unwrap the transformer, exposing a computation of the inner monad.
 -----------------------------------------------------------------------------
 
-module Control.Monad.Trans (
-    -- * Transformer classes
-    MonadTrans(..),
-    MonadIO(..),
+module Control.Monad.Trans.Class (
+    -- * Transformer class
+    MonadTrans(..)
 
     -- * Examples
     -- ** Parsing
@@ -38,9 +37,8 @@ module Control.Monad.Trans (
     -- $example2
   ) where
 
-import System.IO
-
--- | The class of monad transformers.  Instances should satisfy the laws
+-- | The class of monad transformers.  Instances should satisfy the
+-- following laws, which state that 'lift' is a transformer of monads:
 --
 -- * @'lift' . 'return' = 'return'@
 --
@@ -50,21 +48,10 @@ class MonadTrans t where
     -- | Lift a computation from the argument monad to the constructed monad.
     lift :: Monad m => m a -> t m a
 
--- | Monads in which 'IO' computations may be embedded.
--- Any monad built by applying a sequence of monad transformers to the
--- 'IO' monad will be an instance of this class.
-class (Monad m) => MonadIO m where
-    -- | Lift a computation from the 'IO' monad.
-    liftIO :: IO a -> m a
-
-instance MonadIO IO where
-    liftIO = id
-
 {- $example1
 
-One might define a parsing monad by adding a state, consisting of the
-'String' remaining to be parsed, to the @[]@ monad, which provides
-non-determinism:
+One might define a parsing monad by adding a state (the 'String' remaining
+to be parsed) to the @[]@ monad, which provides non-determinism:
 
 > import Control.Monad.Trans.State
 >
@@ -98,7 +85,7 @@ generalized over all suitable monads.
 
 We can define a parser that also counts by adding a @WriterT@ transformer:
 
-> import Control.Monad.Trans
+> import Control.Monad.Trans.Class
 > import Control.Monad.Trans.State
 > import Control.Monad.Trans.Writer
 > import Data.Monoid
