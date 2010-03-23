@@ -8,7 +8,9 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Declaration of the identity monad transformer.
+-- The identity monad transformer.
+--
+-- This is useful for functions parameterized by a monad transformer.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Identity (
@@ -22,8 +24,10 @@ module Control.Monad.Trans.Identity (
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
-import Control.Monad.Trans (MonadIO(liftIO), MonadTrans(lift))
+import Control.Monad.IO.Class (MonadIO(liftIO))
+import Control.Monad.Trans.Class (MonadTrans(lift))
 
+-- | The trivial monad transformer, which maps a monad to an equivalent monad.
 newtype IdentityT m a = IdentityT { runIdentityT :: m a }
 
 instance (Functor m) => Functor (IdentityT m) where

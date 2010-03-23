@@ -9,7 +9,7 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- A monad transformer that combines 'ReaderT', 'WriterT' and 'State'.
+-- A monad transformer that combines 'ReaderT', 'WriterT' and 'StateT'.
 -- This version is lazy; for a strict version, see
 -- "Control.Monad.Trans.RWS.Strict", which has the same interface.
 -----------------------------------------------------------------------------
