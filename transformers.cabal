@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.1.5.0
+version:      0.2.0.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill
@@ -30,8 +30,8 @@ library
   else
     build-depends: base >= 1.0 && < 2, special-functors >=1.0 && <1.1
   exposed-modules:
-    Control.Monad.Identity
-    Control.Monad.Trans
+    Control.Monad.IO.Class
+    Control.Monad.Trans.Class
     Control.Monad.Trans.Cont
     Control.Monad.Trans.Error
     Control.Monad.Trans.Identity
@@ -47,4 +47,5 @@ library
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
+    Data.Functor.Identity
   extensions: CPP
