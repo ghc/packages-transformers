@@ -22,9 +22,11 @@ module Control.Monad.Trans.List (
     liftCatch,
   ) where
 
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+
 import Control.Applicative
 import Control.Monad
-import Control.Monad.Trans
 
 -- | Parameterizable list monad, with an inner monad.
 --

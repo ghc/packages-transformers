@@ -22,9 +22,11 @@ module Control.Monad.Trans.Maybe (
     liftPass,
   ) where
 
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
-import Control.Monad.Trans (MonadIO(liftIO), MonadTrans(lift))
 
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 

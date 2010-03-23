@@ -11,6 +11,9 @@
 --
 -- Declaration of the 'ReaderT' monad transformer, which adds a static
 -- environment to a given monad.
+--
+-- If the computation is to modify the stored information, use
+-- "Control.Monad.Trans.State" instead.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Reader (
@@ -33,8 +36,9 @@ module Control.Monad.Trans.Reader (
     liftCatch,
     ) where
 
-import Control.Monad.Identity
-import Control.Monad.Trans
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad

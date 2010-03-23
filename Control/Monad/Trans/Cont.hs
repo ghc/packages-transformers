@@ -28,8 +28,9 @@ module Control.Monad.Trans.Cont (
     liftLocal,
   ) where
 
-import Control.Monad.Identity
-import Control.Monad.Trans
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad

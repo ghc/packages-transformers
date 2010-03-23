@@ -34,11 +34,13 @@ module Control.Monad.Trans.Writer.Lazy (
     liftCatch,
   ) where
 
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Functor.Identity
+
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
-import Control.Monad.Identity
-import Control.Monad.Trans
 import Data.Monoid
 
 -- ---------------------------------------------------------------------------

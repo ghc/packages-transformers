@@ -9,21 +9,12 @@ Maintainer  :  libraries@haskell.org
 Stability   :  experimental
 Portability :  portable
 
-[Computation type:] Computations which may fail or throw exceptions.
+This monad transformer adds the ability to fail or throw exceptions
+to a monad.
 
-[Binding strategy:] Failure records information about the cause\/location
-of the failure. Failure values bypass the bound function,
-other values are used as inputs to the bound function.
-
-[Useful for:] Building computations from sequences of functions that may fail
-or using exception handling to structure error handling.
-
-[Zero and plus:] Zero is represented by an empty error and the plus operation
-executes its second argument if the first fails.
-
-[Example type:] @'Data.Either' String a@
-
-The Error monad (also called the Exception monad).
+A sequence of actions succeeds, producing a value, only if all the actions
+in the sequence are successful.  If one fails with an error, the rest
+of the sequence is skipped and the composite action fails with that error.
 -}
 
 module Control.Monad.Trans.Error (
@@ -40,12 +31,13 @@ module Control.Monad.Trans.Error (
     liftPass,
   ) where
 
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+
 import Control.Applicative
 import Control.Exception (IOException)
 import Control.Monad
 import Control.Monad.Fix
-import Control.Monad.Trans
-
 import Control.Monad.Instances ()
 import System.IO
 
@@ -54,24 +46,25 @@ instance MonadPlus IO where
     m `mplus` n = m `catch` \_ -> n
 
 -- | An exception to be thrown.
--- An instance must redefine at least one of 'noMsg', 'strMsg'.
+--
+-- Minimal complete definition: 'noMsg' or 'strMsg'.
 class Error a where
     -- | Creates an exception without a message.
-    -- Default implementation is @'strMsg' \"\"@.
+    -- The default implementation is @'strMsg' \"\"@.
     noMsg  :: a
     -- | Creates an exception with a message.
-    -- Default implementation is 'noMsg'.
+    -- The default implementation of @'strMsg' s@ is 'noMsg'.
     strMsg :: String -> a
 
     noMsg    = strMsg ""
     strMsg _ = noMsg
 
+instance Error IOException where
+    strMsg = userError
+
 -- | A string can be thrown as an error.
 instance ErrorList a => Error [a] where
     strMsg = listMsg
-
-instance Error IOException where
-    strMsg = userError
 
 -- | Workaround so that we can have a Haskell 98 instance @'Error' 'String'@.
 class ErrorList a where
