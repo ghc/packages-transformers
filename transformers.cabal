@@ -5,7 +5,7 @@ license-file: LICENSE
 author:       Andy Gill
 maintainer:   Ross Paterson <ross@soi.city.ac.uk>
 category:     Control
-synopsis:     Concrete monad transformers
+synopsis:     Concrete functor and monad transformers
 description:
     Haskell 98 part of a monad transformer library, inspired by the paper
     \"Functional Programming with Overloading and Higher-Order Polymorphism\",
@@ -47,5 +47,7 @@ library
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
+    Data.Functor.Compose
+    Data.Functor.Constant
     Data.Functor.Identity
   extensions: CPP
