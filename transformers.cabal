@@ -2,7 +2,7 @@ name:         transformers
 version:      0.2.0.0
 license:      BSD3
 license-file: LICENSE
-author:       Andy Gill
+author:       Andy Gill, Ross Paterson
 maintainer:   Ross Paterson <ross@soi.city.ac.uk>
 category:     Control
 synopsis:     Concrete functor and monad transformers
@@ -50,4 +50,3 @@ library
     Data.Functor.Compose
     Data.Functor.Constant
     Data.Functor.Identity
-  extensions: CPP
