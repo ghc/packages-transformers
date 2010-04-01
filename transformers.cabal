@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.2.0.0
+version:      0.2.1.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill, Ross Paterson
@@ -50,3 +50,4 @@ library
     Data.Functor.Compose
     Data.Functor.Constant
     Data.Functor.Identity
+    Data.Functor.Product
