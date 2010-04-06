@@ -33,3 +33,7 @@ instance (Traversable f, Traversable g) => Traversable (Product f g) where
 instance (Applicative f, Applicative g) => Applicative (Product f g) where
     pure x = Pair (pure x) (pure x)
     Pair f g <*> Pair x y = Pair (f <*> x) (g <*> y)
+
+instance (Alternative f, Alternative g) => Alternative (Product f g) where
+    empty = Pair empty empty
+    Pair x1 y1 <|> Pair x2 y2 = Pair (x1 <|> x2) (y1 <|> y2)
