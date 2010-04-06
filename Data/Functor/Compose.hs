@@ -32,3 +32,7 @@ instance (Traversable f, Traversable g) => Traversable (Compose f g) where
 instance (Applicative f, Applicative g) => Applicative (Compose f g) where
     pure x = Compose (pure (pure x))
     Compose f <*> Compose x = Compose ((<*>) <$> f <*> x)
+
+instance (Alternative f, Applicative g) => Alternative (Compose f g) where
+    empty = Compose empty
+    Compose x <|> Compose y = Compose (x <|> y)
