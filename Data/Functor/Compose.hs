@@ -18,6 +18,8 @@ import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
 -- | Right-to-left composition of functors.
+-- The composition of applicative functors is always applicative,
+-- but the composition of monads is not always a monad.
 newtype Compose f g a = Compose { getCompose :: f (g a) }
 
 instance (Functor f, Functor g) => Functor (Compose f g) where
