@@ -10,15 +10,18 @@
 -- Portability :  portable
 --
 -- Lazy state monads, passing an updateable state through a computation.
+-- See below for examples.
 --
--- Some computations may not require the full power if state transformers:
+-- In this version, sequencing of computations is lazy in the state.
+-- For a strict version, see "Control.Monad.Trans.Writer.Strict", which
+-- has the same interface.
+--
+-- Some computations may not require the full power of state transformers:
 --
 -- * For a read-only state, see "Control.Monad.Trans.Reader".
 --
 -- * To accumulate a value without using it on the way, see
 --   "Control.Monad.Trans.Writer".
---
--- See below for examples.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.State.Lazy (
@@ -48,7 +51,14 @@ module Control.Monad.Trans.State.Lazy (
     liftListen,
     liftPass,
     -- * Examples
+    -- ** State monads
     -- $examples
+
+    -- ** Counting
+    -- $counting
+
+    -- ** Labelling trees
+    -- $labelling
   ) where
 
 import Control.Monad.IO.Class
@@ -60,9 +70,11 @@ import Control.Monad
 import Control.Monad.Fix
 
 -- ---------------------------------------------------------------------------
--- | A parameterizable state monad where @s@ is the type of the state
--- to carry.
-
+-- | A state monad parameterized by the type @s@ of the state to carry.
+--
+-- The 'return' function leaves the state unchanged, while @>>=@ uses
+-- the final state of the first computation as the initial state of
+-- the second.
 type State s = StateT s Identity
 
 -- | Construct a state monad computation from a function.
@@ -81,7 +93,7 @@ runState m = runIdentity . runStateT m
 -- | Evaluate a state computation with the given initial state
 -- and return the final value, discarding the final state.
 --
--- @'evalState' m s = 'fst' ('runState' m s)@
+-- * @'evalState' m s = 'fst' ('runState' m s)@
 evalState :: State s a  -- ^state-passing computation to execute
           -> s          -- ^initial value
           -> a          -- ^return value of the state computation
@@ -90,66 +102,42 @@ evalState m s = fst (runState m s)
 -- | Evaluate a state computation with the given initial state
 -- and return the final state, discarding the final value.
 --
--- @'execState' m s = 'snd' ('runState' m s)@
+-- * @'execState' m s = 'snd' ('runState' m s)@
 execState :: State s a  -- ^state-passing computation to execute
           -> s          -- ^initial value
           -> s          -- ^final state
 execState m s = snd (runState m s)
 
--- |Map a stateful computation from one (return value, state) pair to
--- another.  For instance, to convert numberTree from a function that
--- returns a tree to a function that returns the sum of the numbered
--- tree (see the Examples section for numberTree and sumTree) you may
--- write:
+-- | Map both the return value and final state of a computation using
+-- the given function.
 --
--- > sumNumberedTree :: (Eq a) => Tree a -> State (Table a) Int
--- > sumNumberedTree = mapState (\ (t, tab) -> (sumTree t, tab))  . numberTree
-
+-- * @'runState' ('mapState' f m) = f . 'runState' m@
 mapState :: ((a, s) -> (b, s)) -> State s a -> State s b
 mapState f = mapStateT (Identity . f . runIdentity)
 
--- |Apply this function to this state and return the resulting state.
+-- | @'withState' f m@ executes action @m@ on a state modified by
+-- applying @f@.
+--
+-- * @'withState' f m = 'modify' f >> m@
 withState :: (s -> s) -> State s a -> State s a
 withState = withStateT
 
 -- ---------------------------------------------------------------------------
--- | A parameterizable state monad for encapsulating an inner
--- monad.
+-- | A state transformer monad parameterized by:
 --
--- The StateT Monad structure is parameterized over two things:
+--   * @s@ - The state.
 --
---   * s - The state.
+--   * @m@ - The inner monad.
 --
---   * m - The inner monad.
---
--- Here are some examples of use:
---
--- (Parser from ParseLib with Hugs)
---
--- >  type Parser a = StateT String [] a
--- >     ==> StateT (String -> [(a,String)])
---
--- For example, item can be written as:
---
--- >   item = do (x:xs) <- get
--- >          put xs
--- >          return x
--- >
--- >   type BoringState s a = StateT s Identity a
--- >        ==> StateT (s -> Identity (a,s))
--- >
--- >   type StateWithIO s a = StateT s IO a
--- >        ==> StateT (s -> IO (a,s))
--- >
--- >   type StateWithErr s a = StateT s Maybe a
--- >        ==> StateT (s -> Maybe (a,s))
-
+-- The 'return' function leaves the state unchanged, while @>>=@ uses
+-- the final state of the first computation as the initial state of
+-- the second.
 newtype StateT s m a = StateT { runStateT :: s -> m (a,s) }
 
 -- | Evaluate a state computation with the given initial state
 -- and return the final value, discarding the final state.
 --
--- @'evalStateT' m s = 'liftM' 'fst' ('runStateT' m s)@
+-- * @'evalStateT' m s = 'liftM' 'fst' ('runStateT' m s)@
 evalStateT :: (Monad m) => StateT s m a -> s -> m a
 evalStateT m s = do
     ~(a, _) <- runStateT m s
@@ -158,25 +146,23 @@ evalStateT m s = do
 -- | Evaluate a state computation with the given initial state
 -- and return the final state, discarding the final value.
 --
--- @'execStateT' m s = 'liftM' 'snd' ('runStateT' m s)@
+-- * @'execStateT' m s = 'liftM' 'snd' ('runStateT' m s)@
 execStateT :: (Monad m) => StateT s m a -> s -> m s
 execStateT m s = do
     ~(_, s') <- runStateT m s
     return s'
 
--- | Map a stateful computation from one (return value, state) pair to
--- another.  For instance, to convert numberTree from a function that
--- returns a tree to a function that returns the sum of the numbered
--- tree (see the Examples section for numberTree and sumTree) you may
--- write:
+-- | Map both the return value and final state of a computation using
+-- the given function.
 --
--- > sumNumberedTree :: (Eq a) => Tree a -> State (Table a) Int
--- > sumNumberedTree = mapState (\ (t, tab) -> (sumTree t, tab))  . numberTree
-
+-- * @'runStateT' ('mapStateT' f m) = f . 'runStateT' m@
 mapStateT :: (m (a, s) -> n (b, s)) -> StateT s m a -> StateT s n b
 mapStateT f m = StateT $ f . runStateT m
 
--- | Apply this function to this state and return the resulting state.
+-- | @'withStateT' f m@ executes action @m@ on a state modified by
+-- applying @f@.
+--
+-- * @'withStateT' f m = 'modify' f >> m@
 withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f m = StateT $ runStateT m . f
 
@@ -222,11 +208,8 @@ get = StateT $ \s -> return (s, s)
 put :: (Monad m) => s -> StateT s m ()
 put s = StateT $ \_ -> return ((), s)
 
--- | Monadic state transformer.
---
---      Maps an old state to a new state inside a state monad.
---      The old state is thrown away.
-
+-- | @'modify' f@ is an action that updates the state to the result of
+-- applying @f@ to the current state.
 modify :: (Monad m) => (s -> s) -> StateT s m ()
 modify f = do
     s <- get
@@ -234,7 +217,8 @@ modify f = do
 
 -- | Get a specific component of the state, using a projection function
 -- supplied.
-
+--
+-- * @'gets' f = 'liftM' f 'get'@
 gets :: (Monad m) => (s -> a) -> StateT s m a
 gets f = do
     s <- get
@@ -280,6 +264,30 @@ liftPass pass m = StateT $ \s -> pass $ do
 
 {- $examples
 
+Parser from ParseLib with Hugs:
+
+> type Parser a = StateT String [] a
+>    ==> StateT (String -> [(a,String)])
+
+For example, item can be written as:
+
+> item = do (x:xs) <- get
+>        put xs
+>        return x
+>
+> type BoringState s a = StateT s Identity a
+>      ==> StateT (s -> Identity (a,s))
+>
+> type StateWithIO s a = StateT s IO a
+>      ==> StateT (s -> IO (a,s))
+>
+> type StateWithErr s a = StateT s Maybe a
+>      ==> StateT (s -> Maybe (a,s))
+
+-}
+
+{- $counting
+
 A function to increment a counter.  Taken from the paper
 /Generalising Monads to Arrows/, John
 Hughes (<http://www.math.chalmers.se/~rjmh/>), November 1998:
@@ -298,6 +306,10 @@ A contrived addition example. Works only with positive numbers:
 
 > plus :: Int -> Int -> Int
 > plus n x = execState (sequence $ replicate n tick) x
+
+-}
+
+{- $labelling
 
 An example from /The Craft of Functional Programming/, Simon
 Thompson (<http://www.cs.kent.ac.uk/people/staff/sjt/>),
@@ -351,4 +363,5 @@ sumTree is a little helper function that does not use the State monad:
 > sumTree :: (Num a) => Tree a -> a
 > sumTree Nil = 0
 > sumTree (Node e t1 t2) = e + (sumTree t1) + (sumTree t2)
+
 -}

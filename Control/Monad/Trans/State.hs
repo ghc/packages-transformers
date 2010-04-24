@@ -9,7 +9,15 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- State monads.
+-- State monads, passing an updateable state through a computation.
+--
+-- Some computations may not require the full power of state transformers:
+--
+-- * For a read-only state, see "Control.Monad.Trans.Reader".
+--
+-- * To accumulate a value without using it on the way, see
+--   "Control.Monad.Trans.Writer".
+--
 -- This version is lazy; for a strict version, see
 -- "Control.Monad.Trans.State.Strict", which has the same interface.
 -----------------------------------------------------------------------------

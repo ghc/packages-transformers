@@ -8,7 +8,14 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Declaration of the 'MaybeT' monad transformer.
+-- The 'MaybeT' monad transformer adds the ability to fail to a monad.
+--
+-- A sequence of actions succeeds, producing a value, only if all the
+-- actions in the sequence are successful.  If one fails, the rest of
+-- the sequence is skipped and the composite action fails.
+--
+-- For a variant allowing a range of error values, see
+-- "Control.Monad.Trans.Error".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Maybe (
@@ -28,8 +35,16 @@ import Control.Monad.Trans.Class
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
 
+-- | The parameterizable maybe monad, obtained by composing an arbitrary
+-- monad with the 'Maybe' monad.
+--
+-- Computations are actions that may produce a value or fail.
+--
+-- The 'return' function yields a successful computation, while @>>=@
+-- sequences two subcomputations, failing on the first error.
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 
+-- | Transform the computation inside a @MaybeT@.
 mapMaybeT :: (m (Maybe a) -> n (Maybe b)) -> MaybeT m a -> MaybeT n b
 mapMaybeT f = MaybeT . f . runMaybeT
 

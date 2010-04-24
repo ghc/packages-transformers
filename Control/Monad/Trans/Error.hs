@@ -15,6 +15,9 @@ to a monad.
 A sequence of actions succeeds, producing a value, only if all the actions
 in the sequence are successful.  If one fails with an error, the rest
 of the sequence is skipped and the composite action fails with that error.
+
+If the value of the error is not required, the variant in
+"Control.Monad.Trans.Maybe" may be used instead.
 -}
 
 module Control.Monad.Trans.Error (
@@ -23,12 +26,15 @@ module Control.Monad.Trans.Error (
     ErrorList(..),
     ErrorT(..),
     mapErrorT,
+    -- * Error operations
     throwError,
     catchError,
     -- * Lifting other operations
     liftCallCC,
     liftListen,
     liftPass,
+    -- * Examples
+    -- $examples
   ) where
 
 import Control.Monad.IO.Class
@@ -104,30 +110,22 @@ instance (Error e) => MonadFix (Either e) where
             _       -> error "empty mfix argument"
         in a
 
-{- |
-The error monad transformer. It can be used to add error handling to other
-monads.
-
-The @ErrorT@ Monad structure is parameterized over two things:
-
- * e - The error type.
-
- * m - The inner monad.
-
-Here are some examples of use:
-
-> -- wraps IO action that can throw an error e
-> type ErrorWithIO e a = ErrorT e IO a
-> ==> ErrorT (IO (Either e a))
->
-> -- IO monad wrapped in StateT inside of ErrorT
-> type ErrorAndStateWithIO e s a = ErrorT e (StateT s IO) a
-> ==> ErrorT (StateT s IO (Either e a))
-> ==> ErrorT (StateT (s -> IO (Either e a,s)))
--}
-
+-- | The error monad transformer. It can be used to add error handling
+-- to other monads.
+--
+-- The @ErrorT@ Monad structure is parameterized over two things:
+--
+-- * e - The error type.
+--
+-- * m - The inner monad.
+--
+-- The 'return' function yields a successful computation, while @>>=@
+-- sequences two subcomputations, failing on the first error.
 newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
 
+-- | Map the unwrapped computation using the given function.
+--
+-- * @'runErrorT' ('mapErrorT' f m) = f ('runErrorT' m@)
 mapErrorT :: (m (Either e a) -> n (Either e' b))
           -> ErrorT e m a
           -> ErrorT e' n b
@@ -182,13 +180,18 @@ instance (Error e) => MonadTrans (ErrorT e) where
 instance (Error e, MonadIO m) => MonadIO (ErrorT e m) where
     liftIO = lift . liftIO
 
--- | Signal an error
+-- | Signal an error value @e@.
+--
+-- * @'runErrorT' ('throwErrorT' e) = 'return' ('Left' e)@
 throwError :: (Monad m, Error e) => e -> ErrorT e m a
 throwError l = ErrorT $ return (Left l)
 
--- | Handle an error
+-- | Handle an error.
 catchError :: (Monad m, Error e) =>
-    ErrorT e m a -> (e -> ErrorT e m a) -> ErrorT e m a
+    ErrorT e m a                -- ^ the inner computation
+    -> (e -> ErrorT e m a)      -- ^ a handler for errors in the inner
+                                -- computation
+    -> ErrorT e m a
 m `catchError` h = ErrorT $ do
     a <- runErrorT m
     case a of
@@ -217,3 +220,15 @@ liftPass pass = mapErrorT $ \ m -> pass $ do
     return $! case a of
         Left  l      -> (Left  l, id)
         Right (r, f) -> (Right r, f)
+
+{- $examples
+
+> -- wraps IO action that can throw an error e
+> type ErrorWithIO e a = ErrorT e IO a
+> ==> ErrorT (IO (Either e a))
+>
+> -- IO monad wrapped in StateT inside of ErrorT
+> type ErrorAndStateWithIO e s a = ErrorT e (StateT s IO) a
+> ==> ErrorT (StateT s IO (Either e a))
+> ==> ErrorT (StateT (s -> IO (Either e a,s)))
+-}

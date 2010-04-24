@@ -46,11 +46,14 @@ The @>>=@ operator adds the bound function into the continuation chain.
 -}
 type Cont r = ContT r Identity
 
+-- | Construct a continuation-passing computation from a function.
+-- (The inverse of 'runCont'.)
 cont :: ((a -> r) -> r) -> Cont r a
 cont f = ContT (\ k -> Identity (f (runIdentity . k)))
 
 -- | Runs a CPS computation, returns its result after applying the final
 -- continuation to it.
+-- (The inverse of 'cont'.)
 runCont :: Cont r a	-- ^ continuation computation (@Cont@).
     -> (a -> r)		-- ^ the final continuation, which produces
 			-- the final result (often 'id').

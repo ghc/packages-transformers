@@ -9,8 +9,8 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- The List monad.
---
+-- The ListT monad transformer, adding backtracking to a given monad,
+-- which must be commutative.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.List (
@@ -33,6 +33,9 @@ import Control.Monad
 -- /Note:/ this does not yield a monad unless the argument monad is commutative.
 newtype ListT m a = ListT { runListT :: m [a] }
 
+-- | Map between 'ListT' computations.
+--
+-- * @'runListT' ('mapListT' f m) = f ('runListT' m@)
 mapListT :: (m [a] -> n [b]) -> ListT m a -> ListT n b
 mapListT f m = ListT $ f (runListT m)
 
