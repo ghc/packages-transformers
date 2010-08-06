@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {- |
 Module      :  Control.Monad.Trans.Error
 Copyright   :  (c) Michael Weber <michael.weber@post.rwth-aachen.de> 2001,
@@ -82,33 +83,38 @@ instance ErrorList Char where
 -- ---------------------------------------------------------------------------
 -- Our parameterizable error monad
 
+#if !(MIN_VERSION_base(4,2,1))
+
+-- These instances are in base-4.3
+
 instance Applicative (Either e) where
     pure          = Right
     Left  e <*> _ = Left e
     Right f <*> r = fmap f r
+
+instance Monad (Either e) where
+    return        = Right
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
+
+instance MonadFix (Either e) where
+    mfix f = let
+        a = f $ case a of
+            Right r -> r
+            _       -> error "empty mfix argument"
+        in a
+
+#endif /* base to 4.2.0.x */
 
 instance (Error e) => Alternative (Either e) where
     empty        = Left noMsg
     Left _ <|> n = n
     m      <|> _ = m
 
-instance (Error e) => Monad (Either e) where
-    return        = Right
-    Left  l >>= _ = Left l
-    Right r >>= k = k r
-    fail msg      = Left (strMsg msg)
-
 instance (Error e) => MonadPlus (Either e) where
     mzero            = Left noMsg
     Left _ `mplus` n = n
     m      `mplus` _ = m
-
-instance (Error e) => MonadFix (Either e) where
-    mfix f = let
-        a = f $ case a of
-            Right r -> r
-            _       -> error "empty mfix argument"
-        in a
 
 -- | The error monad transformer. It can be used to add error handling
 -- to other monads.
@@ -172,6 +178,7 @@ instance (MonadFix m, Error e) => MonadFix (ErrorT e m) where
         Right r -> r
         _       -> error "empty mfix argument"
 
+-- | MonadTrans ErrorT instance comment
 instance (Error e) => MonadTrans (ErrorT e) where
     lift m = ErrorT $ do
         a <- m

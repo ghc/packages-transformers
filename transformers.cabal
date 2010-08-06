@@ -1,5 +1,5 @@
 name:         transformers
-version:      0.2.1.0
+version:      0.2.1.1
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill, Ross Paterson
@@ -18,7 +18,7 @@ description:
     @monads-tf@ packages, which automatically lift operations introduced
     by monad transformers through other transformers.
 build-type: Simple
-cabal-version: >= 1.2
+cabal-version: >= 1.5.5
 
 flag ApplicativeInBase
   description: Choose the newer base package, including Applicative and other
