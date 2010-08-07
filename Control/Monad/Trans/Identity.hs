@@ -4,7 +4,7 @@
 -- Copyright   :  (c) 2007 Magnus Therning
 -- License     :  BSD-style (see the file LICENSE)
 --
--- Maintainer  :  libraries@haskell.org
+-- Maintainer  :  ross@soi.city.ac.uk
 -- Stability   :  experimental
 -- Portability :  portable
 --

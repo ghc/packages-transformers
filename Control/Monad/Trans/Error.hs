@@ -6,7 +6,7 @@ Copyright   :  (c) Michael Weber <michael.weber@post.rwth-aachen.de> 2001,
                (c) Andriy Palamarchuk 2006
 License     :  BSD-style (see the file libraries/base/LICENSE)
 
-Maintainer  :  libraries@haskell.org
+Maintainer  :  ross@soi.city.ac.uk
 Stability   :  experimental
 Portability :  portable
 
