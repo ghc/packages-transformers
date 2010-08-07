@@ -2,7 +2,7 @@
 -- Module      :  Data.Functor.Identity
 -- Copyright   :  (c) Andy Gill 2001,
 --                (c) Oregon Graduate Institute of Science and Technology 2001
--- License     :  BSD-style (see the file libraries/base/LICENSE)
+-- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  ross@soi.city.ac.uk
 -- Stability   :  experimental

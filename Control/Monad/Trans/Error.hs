@@ -5,7 +5,7 @@
 -- Copyright   :  (c) Michael Weber <michael.weber@post.rwth-aachen.de> 2001,
 --                (c) Jeff Newbern 2003-2006,
 --                (c) Andriy Palamarchuk 2006
--- License     :  BSD-style (see the file libraries/base/LICENSE)
+-- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  ross@soi.city.ac.uk
 -- Stability   :  experimental
