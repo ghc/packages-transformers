@@ -180,7 +180,6 @@ instance (MonadFix m, Error e) => MonadFix (ErrorT e m) where
         Right r -> r
         _       -> error "empty mfix argument"
 
--- | MonadTrans ErrorT instance comment
 instance (Error e) => MonadTrans (ErrorT e) where
     lift m = ErrorT $ do
         a <- m
