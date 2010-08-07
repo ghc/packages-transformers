@@ -4,7 +4,7 @@
 -- Copyright   :  (c) The University of Glasgow 2001
 -- License     :  BSD-style (see the file libraries/base/LICENSE)
 --
--- Maintainer  :  libraries@haskell.org
+-- Maintainer  :  ross@soi.city.ac.uk
 -- Stability   :  experimental
 -- Portability :  portable
 --

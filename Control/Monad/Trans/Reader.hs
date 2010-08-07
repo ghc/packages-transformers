@@ -5,7 +5,7 @@
 --                (c) Oregon Graduate Institute of Science and Technology, 2001
 -- License     :  BSD-style (see the file LICENSE)
 --
--- Maintainer  :  libraries@haskell.org
+-- Maintainer  :  ross@soi.city.ac.uk
 -- Stability   :  experimental
 -- Portability :  portable
 --
