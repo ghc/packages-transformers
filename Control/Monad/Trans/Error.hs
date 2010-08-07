@@ -1,25 +1,27 @@
 {-# LANGUAGE CPP #-}
-{- |
-Module      :  Control.Monad.Trans.Error
-Copyright   :  (c) Michael Weber <michael.weber@post.rwth-aachen.de> 2001,
-               (c) Jeff Newbern 2003-2006,
-               (c) Andriy Palamarchuk 2006
-License     :  BSD-style (see the file libraries/base/LICENSE)
-
-Maintainer  :  ross@soi.city.ac.uk
-Stability   :  experimental
-Portability :  portable
-
-This monad transformer adds the ability to fail or throw exceptions
-to a monad.
-
-A sequence of actions succeeds, producing a value, only if all the actions
-in the sequence are successful.  If one fails with an error, the rest
-of the sequence is skipped and the composite action fails with that error.
-
-If the value of the error is not required, the variant in
-"Control.Monad.Trans.Maybe" may be used instead.
--}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Control.Monad.Trans.Error
+-- Copyright   :  (c) Michael Weber <michael.weber@post.rwth-aachen.de> 2001,
+--                (c) Jeff Newbern 2003-2006,
+--                (c) Andriy Palamarchuk 2006
+-- License     :  BSD-style (see the file libraries/base/LICENSE)
+--
+-- Maintainer  :  ross@soi.city.ac.uk
+-- Stability   :  experimental
+-- Portability :  portable
+--
+-- This monad transformer adds the ability to fail or throw exceptions
+-- to a monad.
+--
+-- A sequence of actions succeeds, producing a value, only if all the
+-- actions in the sequence are successful.  If one fails with an error,
+-- the rest of the sequence is skipped and the composite action fails
+-- with that error.
+--
+-- If the value of the error is not required, the variant in
+-- "Control.Monad.Trans.Maybe" may be used instead.
+-----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Error (
     -- * The ErrorT monad transformer
@@ -230,12 +232,15 @@ liftPass pass = mapErrorT $ \ m -> pass $ do
 
 {- $examples
 
-> -- wraps IO action that can throw an error e
+Wrapping an IO action that can throw an error @e@:
+
 > type ErrorWithIO e a = ErrorT e IO a
 > ==> ErrorT (IO (Either e a))
->
-> -- IO monad wrapped in StateT inside of ErrorT
+
+An IO monad wrapped in @StateT@ inside of @ErrorT@:
+
 > type ErrorAndStateWithIO e s a = ErrorT e (StateT s IO) a
 > ==> ErrorT (StateT s IO (Either e a))
 > ==> ErrorT (StateT (s -> IO (Either e a,s)))
+
 -}
