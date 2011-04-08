@@ -14,6 +14,8 @@ module Data.Functor.Product (
    ) where
 
 import Control.Applicative
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fix (MonadFix(..))
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
@@ -37,3 +39,20 @@ instance (Applicative f, Applicative g) => Applicative (Product f g) where
 instance (Alternative f, Alternative g) => Alternative (Product f g) where
     empty = Pair empty empty
     Pair x1 y1 <|> Pair x2 y2 = Pair (x1 <|> x2) (y1 <|> y2)
+
+instance (Monad f, Monad g) => Monad (Product f g) where
+    return x = Pair (return x) (return x)
+    Pair m n >>= f = Pair (m >>= fstP . f) (n >>= sndP . f)
+      where
+        fstP (Pair a _) = a
+        sndP (Pair _ b) = b
+
+instance (MonadPlus f, MonadPlus g) => MonadPlus (Product f g) where
+    mzero = Pair mzero mzero
+    Pair x1 y1 `mplus` Pair x2 y2 = Pair (x1 `mplus` x2) (y1 `mplus` y2)
+
+instance (MonadFix f, MonadFix g) => MonadFix (Product f g) where
+    mfix f = Pair (mfix (fstP . f)) (mfix (sndP . f))
+      where
+        fstP (Pair a _) = a
+        sndP (Pair _ b) = b
