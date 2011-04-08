@@ -34,7 +34,9 @@ import Control.Monad.Trans.Class
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
+import Control.Monad.Fix (MonadFix(mfix))
 import Data.Foldable (Foldable(foldMap))
+import Data.Maybe (fromMaybe)
 import Data.Traversable (Traversable(traverse))
 
 -- | The parameterizable maybe monad, obtained by composing an arbitrary
@@ -83,6 +85,10 @@ instance (Monad m) => MonadPlus (MaybeT m) where
         case v of
             Nothing -> runMaybeT y
             Just _  -> return v
+
+instance (MonadFix m) => MonadFix (MaybeT m) where
+    mfix f = MaybeT (mfix (runMaybeT . f . unJust))
+      where unJust = fromMaybe (error "mfix MaybeT: Nothing")
 
 instance MonadTrans MaybeT where
     lift = MaybeT . liftM Just
