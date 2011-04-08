@@ -34,6 +34,8 @@ import Control.Monad.Trans.Class
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
+import Data.Foldable (Foldable(foldMap))
+import Data.Traversable (Traversable(traverse))
 
 -- | The parameterizable maybe monad, obtained by composing an arbitrary
 -- monad with the 'Maybe' monad.
@@ -50,6 +52,12 @@ mapMaybeT f = MaybeT . f . runMaybeT
 
 instance (Functor m) => Functor (MaybeT m) where
     fmap f = mapMaybeT (fmap (fmap f))
+
+instance (Foldable f) => Foldable (MaybeT f) where
+    foldMap f (MaybeT a) = foldMap (foldMap f) a
+
+instance (Traversable f) => Traversable (MaybeT f) where
+    traverse f (MaybeT a) = MaybeT <$> traverse (traverse f) a
 
 instance (Functor m, Monad m) => Applicative (MaybeT m) where
     pure = return

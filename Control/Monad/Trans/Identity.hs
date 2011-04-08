@@ -26,12 +26,20 @@ import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Trans.Class (MonadTrans(lift))
+import Data.Foldable (Foldable(foldMap))
+import Data.Traversable (Traversable(traverse))
 
 -- | The trivial monad transformer, which maps a monad to an equivalent monad.
 newtype IdentityT m a = IdentityT { runIdentityT :: m a }
 
 instance (Functor m) => Functor (IdentityT m) where
     fmap f = mapIdentityT (fmap f)
+
+instance (Foldable f) => Foldable (IdentityT f) where
+    foldMap f (IdentityT a) = foldMap f a
+
+instance (Traversable f) => Traversable (IdentityT f) where
+    traverse f (IdentityT a) = IdentityT <$> traverse f a
 
 instance (Applicative m) => Applicative (IdentityT m) where
     pure x = IdentityT (pure x)

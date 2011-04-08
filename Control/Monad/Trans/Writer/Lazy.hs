@@ -49,7 +49,9 @@ import Data.Functor.Identity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
+import Data.Foldable (Foldable(foldMap))
 import Data.Monoid
+import Data.Traversable (Traversable(traverse))
 
 -- ---------------------------------------------------------------------------
 -- | A writer monad parameterized by the type @w@ of output to accumulate.
@@ -141,6 +143,13 @@ instance (Monoid w) => MonadTrans (WriterT w) where
 
 instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
     liftIO = lift . liftIO
+
+instance Foldable f => Foldable (WriterT w f) where
+    foldMap f (WriterT a) = foldMap (f . fst) a
+
+instance Traversable f => Traversable (WriterT w f) where
+    traverse f (WriterT a) = WriterT <$> traverse f' a where
+       f' (a, b) = fmap (\c -> (c, b)) (f a)
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> WriterT w m ()

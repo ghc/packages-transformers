@@ -27,6 +27,8 @@ import Control.Monad.Trans.Class
 
 import Control.Applicative
 import Control.Monad
+import Data.Foldable (Foldable(foldMap))
+import Data.Traversable (Traversable(traverse))
 
 -- | Parameterizable list monad, with an inner monad.
 --
@@ -41,6 +43,12 @@ mapListT f m = ListT $ f (runListT m)
 
 instance (Functor m) => Functor (ListT m) where
     fmap f = mapListT $ fmap $ map f
+
+instance Foldable f => Foldable (ListT f) where
+    foldMap f (ListT a) = foldMap (foldMap f) a
+
+instance Traversable f => Traversable (ListT f) where
+    traverse f (ListT a) = ListT <$> traverse (traverse f) a
 
 instance (Applicative m) => Applicative (ListT m) where
     pure a  = ListT $ pure [a]
