@@ -48,6 +48,9 @@ import Control.Exception (IOException)
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Instances ()
+import Data.Foldable (Foldable(foldMap))
+import Data.Monoid (mempty)
+import Data.Traversable (Traversable(traverse))
 import System.IO
 
 instance MonadPlus IO where
@@ -141,6 +144,13 @@ mapErrorT f m = ErrorT $ f (runErrorT m)
 
 instance (Functor m) => Functor (ErrorT e m) where
     fmap f = ErrorT . fmap (fmap f) . runErrorT
+
+instance (Foldable f) => Foldable (ErrorT e f) where
+    foldMap f (ErrorT a) = foldMap (either (const mempty) f) a
+
+instance (Traversable f) => Traversable (ErrorT e f) where
+    traverse f (ErrorT a) =
+        ErrorT <$> traverse (either (pure . Left) (fmap Right . f)) a
 
 instance (Functor m, Monad m) => Applicative (ErrorT e m) where
     pure a  = ErrorT $ return (Right a)
