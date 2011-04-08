@@ -24,6 +24,7 @@ module Control.Monad.Trans.Identity (
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
+import Control.Monad.Fix (MonadFix(mfix))
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Trans.Class (MonadTrans(lift))
 import Data.Foldable (Foldable(foldMap))
@@ -57,6 +58,9 @@ instance (Monad m) => Monad (IdentityT m) where
 instance (MonadPlus m) => MonadPlus (IdentityT m) where
     mzero = IdentityT mzero
     mplus = lift2IdentityT mplus
+
+instance (MonadFix m) => MonadFix (IdentityT m) where
+    mfix f = IdentityT (mfix (runIdentityT . f))
 
 instance (MonadIO m) => MonadIO (IdentityT m) where
     liftIO = IdentityT . liftIO
