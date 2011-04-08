@@ -44,7 +44,7 @@ instance (Traversable f) => Traversable (IdentityT f) where
 instance (Applicative m) => Applicative (IdentityT m) where
     pure x = IdentityT (pure x)
     (<*>) = lift2IdentityT (<*>)
- 
+
 instance (Alternative m) => Alternative (IdentityT m) where
     empty = IdentityT empty
     (<|>) = lift2IdentityT (<|>)
@@ -53,7 +53,7 @@ instance (Monad m) => Monad (IdentityT m) where
     return = IdentityT . return
     m >>= k = IdentityT $ runIdentityT . k =<< runIdentityT m
     fail msg = IdentityT $ fail msg
- 
+
 instance (MonadPlus m) => MonadPlus (IdentityT m) where
     mzero = IdentityT mzero
     mplus = lift2IdentityT mplus
