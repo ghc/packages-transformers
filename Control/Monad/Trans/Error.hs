@@ -51,11 +51,17 @@ import Control.Monad.Instances ()
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
-import System.IO
+import System.IO.Error
 
 instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
-    m `mplus` n = m `catch` \_ -> n
+    m `mplus` n = m `catchIOError` \_ -> n
+
+#if !(MIN_VERSION_base(4,3,1))
+-- exported by System.IO.Error in later versions
+catchIOError :: IO a -> (IOError -> IO a) -> IO a
+catchIOError = catch
+#endif
 
 -- | An exception to be thrown.
 --
