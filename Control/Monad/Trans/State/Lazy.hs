@@ -13,7 +13,7 @@
 -- See below for examples.
 --
 -- In this version, sequencing of computations is lazy in the state.
--- For a strict version, see "Control.Monad.Trans.Writer.Strict", which
+-- For a strict version, see "Control.Monad.Trans.State.Strict", which
 -- has the same interface.
 --
 -- Some computations may not require the full power of state transformers:
