@@ -30,6 +30,7 @@ library
   else
     build-depends: base >= 1.0 && < 2, special-functors >=1.0 && <1.1
   exposed-modules:
+    Control.Applicative.Backwards
     Control.Monad.IO.Class
     Control.Monad.Trans.Class
     Control.Monad.Trans.Cont
@@ -51,3 +52,4 @@ library
     Data.Functor.Constant
     Data.Functor.Identity
     Data.Functor.Product
+    Data.Functor.Reverse
