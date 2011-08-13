@@ -11,7 +11,7 @@
 --
 -- Classes for monad transformers.
 --
--- A monad transformer makes new monad out of an existing monad, such
+-- A monad transformer makes a new monad out of an existing monad, such
 -- that computations of the old monad may be embedded in the new one.
 -- To construct a monad with a desired set of features, one typically
 -- starts with a base monad, such as @Identity@, @[]@ or 'IO', and
