@@ -53,7 +53,7 @@ import Control.Monad.Instances ()
 -- the inherited environment to both subcomputations.
 type Reader r = ReaderT r Identity
 
--- | Constructor for computations in the reader monad.
+-- | Constructor for computations in the reader monad (equivalent to 'asks').
 reader :: Monad m => (r -> a) -> ReaderT r m a
 reader f = ReaderT (return . f)
 
@@ -147,7 +147,7 @@ local = withReaderT
 asks :: (Monad m)
     => (r -> a)         -- ^ The selector function to apply to the environment.
     -> ReaderT r m a
-asks f = liftM f ask
+asks f = ReaderT (return . f)
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC ::
