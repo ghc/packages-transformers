@@ -62,8 +62,8 @@ type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair.
 -- (The inverse of 'runWriter'.)
-writer :: (a, w) -> Writer w a
-writer = WriterT . Identity
+writer :: Monad m => (a, w) -> WriterT w m a
+writer = WriterT . return
 
 -- | Unwrap a writer computation as a (result, output) pair.
 -- (The inverse of 'writer'.)

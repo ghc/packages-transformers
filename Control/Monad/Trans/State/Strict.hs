@@ -79,9 +79,10 @@ type State s = StateT s Identity
 
 -- | Construct a state monad computation from a function.
 -- (The inverse of 'runState'.)
-state :: (s -> (a, s))  -- ^pure state transformer
-      -> State s a      -- ^equivalent state-passing computation
-state f = StateT (Identity . f)
+state :: Monad m
+      => (s -> (a, s))  -- ^pure state transformer
+      -> StateT s m a   -- ^equivalent state-passing computation
+state f = StateT (return . f)
 
 -- | Unwrap a state monad computation as a function.
 -- (The inverse of 'state'.)

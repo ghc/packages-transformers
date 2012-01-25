@@ -30,16 +30,19 @@ module Control.Monad.Trans.RWS.Strict (
     mapRWST,
     withRWST,
     -- * Reader operations
+    reader,
     ask,
     local,
     asks,
     -- * Writer operations
+    writer,
     tell,
     listen,
     listens,
     pass,
     censor,
     -- * State operations
+    state,
     get,
     put,
     modify,
@@ -149,6 +152,10 @@ instance (Monoid w, MonadIO m) => MonadIO (RWST r w s m) where
 -- ---------------------------------------------------------------------------
 -- Reader operations
 
+-- | Constructor for computations in the reader monad.
+reader :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
+reader f = RWST $ \r s -> return (f r, s, mempty)
+
 -- | Fetch the value of the environment.
 ask :: (Monoid w, Monad m) => RWST r w s m r
 ask = RWST $ \r s -> return (r, s, mempty)
@@ -165,6 +172,10 @@ asks f = do
 
 -- ---------------------------------------------------------------------------
 -- Writer operations
+
+-- | Construct a writer computation from a (result, output) pair.
+writer :: Monad m => (a, w) -> RWST r w s m a
+writer (a, w) = RWST $ \_ s -> return (a, s, w)
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> RWST r w s m ()
@@ -206,6 +217,10 @@ censor f m = pass $ do
 
 -- ---------------------------------------------------------------------------
 -- State operations
+
+-- | Construct a state monad computation from a state transformer function.
+state :: (Monoid w, Monad m) => (s -> (a,s)) -> RWST r w s m a
+state f = RWST $ \_ s -> case f s of (a,s') -> return (a, s', mempty)
 
 -- | Fetch the current value of the state within the monad.
 get :: (Monoid w, Monad m) => RWST r w s m s

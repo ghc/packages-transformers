@@ -54,8 +54,8 @@ import Control.Monad.Instances ()
 type Reader r = ReaderT r Identity
 
 -- | Constructor for computations in the reader monad.
-reader :: (r -> a) -> Reader r a
-reader f = ReaderT (Identity . f)
+reader :: Monad m => (r -> a) -> ReaderT r m a
+reader f = ReaderT (return . f)
 
 -- | Runs a @Reader@ and extracts the final value from it.
 runReader :: Reader r a		-- ^ A @Reader@ to run.
