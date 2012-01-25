@@ -57,8 +57,8 @@ instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
     m `mplus` n = m `catchIOError` \_ -> n
 
-#if !(MIN_VERSION_base(4,3,1))
--- exported by System.IO.Error in later versions
+#if !(MIN_VERSION_base(4,4,0))
+-- exported by System.IO.Error from base-4.4
 catchIOError :: IO a -> (IOError -> IO a) -> IO a
 catchIOError = catch
 #endif
@@ -94,7 +94,7 @@ instance ErrorList Char where
 -- ---------------------------------------------------------------------------
 -- Our parameterizable error monad
 
-#if !(MIN_VERSION_base(4,2,1))
+#if !(MIN_VERSION_base(4,3,0))
 
 -- These instances are in base-4.3
 
