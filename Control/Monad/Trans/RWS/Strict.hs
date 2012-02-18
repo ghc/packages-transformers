@@ -152,9 +152,9 @@ instance (Monoid w, MonadIO m) => MonadIO (RWST r w s m) where
 -- ---------------------------------------------------------------------------
 -- Reader operations
 
--- | Constructor for computations in the reader monad.
+-- | Constructor for computations in the reader monad (equivalent to 'asks').
 reader :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
-reader f = RWST $ \r s -> return (f r, s, mempty)
+reader = asks
 
 -- | Fetch the value of the environment.
 ask :: (Monoid w, Monad m) => RWST r w s m r
@@ -166,9 +166,7 @@ local f m = RWST $ \r s -> runRWST m (f r) s
 
 -- | Retrieve a function of the current environment.
 asks :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
-asks f = do
-    r <- ask
-    return (f r)
+asks f = RWST $ \r s -> return (f r, s, mempty)
 
 -- ---------------------------------------------------------------------------
 -- Writer operations
