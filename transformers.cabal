@@ -20,6 +20,10 @@ description:
 build-type: Simple
 cabal-version: >= 1.5.5
 
+source-repository head
+  type: darcs
+  location: http://code.haskell.org/~ross/transformers
+
 flag ApplicativeInBase
   description: Choose the newer base package, including Applicative and other
     Functor classes.
