@@ -60,9 +60,17 @@ runCont :: Cont r a	-- ^ continuation computation (@Cont@).
     -> r
 runCont m k = runIdentity (runContT m (Identity . k))
 
+-- | Apply a function to transform the result of a continuation-passing
+-- computation.
+--
+-- * @'runCont' ('mapCont' f m) = f . 'runCont' m@
 mapCont :: (r -> r) -> Cont r a -> Cont r a
 mapCont f = mapContT (Identity . f . runIdentity)
 
+-- | Apply a function to transform the continuation passed to a CPS
+-- computation.
+--
+-- * @'runCont' ('withCont' f m) = 'runCont' m . f@
 withCont :: ((b -> r) -> (a -> r)) -> Cont r a -> Cont r b
 withCont f = withContT ((Identity .) . f . (runIdentity .))
 
@@ -72,9 +80,17 @@ Can be used to add continuation handling to other monads.
 -}
 newtype ContT r m a = ContT { runContT :: (a -> m r) -> m r }
 
+-- | Apply a function to transform the result of a continuation-passing
+-- computation.
+--
+-- * @'runContT' ('mapContT' f m) = f . 'runContT' m@
 mapContT :: (m r -> m r) -> ContT r m a -> ContT r m a
 mapContT f m = ContT $ f . runContT m
 
+-- | Apply a function to transform the continuation passed to a CPS
+-- computation.
+--
+-- * @'runContT' ('withContT' f m) = 'runContT' m . f@
 withContT :: ((b -> m r) -> (a -> m r)) -> ContT r m a -> ContT r m b
 withContT f m = ContT $ runContT m . f
 

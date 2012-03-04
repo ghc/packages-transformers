@@ -79,7 +79,7 @@ execWriter m = snd (runWriter m)
 -- | Map both the return value and output of a computation using
 -- the given function.
 --
--- * @'runWriter' ('mapWriter' f m) = f ('runWriter' m@)
+-- * @'runWriter' ('mapWriter' f m) = f ('runWriter' m)@
 mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 mapWriter f = mapWriterT (Identity . f . runIdentity)
 
@@ -105,7 +105,7 @@ execWriterT m = do
 -- | Map both the return value and output of a computation using
 -- the given function.
 --
--- * @'runWriterT' ('mapWriterT' f m) = f ('runWriterT' m@)
+-- * @'runWriterT' ('mapWriterT' f m) = f ('runWriterT' m)@
 mapWriterT :: (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
 mapWriterT f m = WriterT $ f (runWriterT m)
 

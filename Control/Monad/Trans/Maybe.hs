@@ -49,6 +49,8 @@ import Data.Traversable (Traversable(traverse))
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 
 -- | Transform the computation inside a @MaybeT@.
+--
+-- * @'runMaybeT' ('mapMaybeT' f m) = f ('runMaybeT' m)@
 mapMaybeT :: (m (Maybe a) -> n (Maybe b)) -> MaybeT m a -> MaybeT n b
 mapMaybeT f = MaybeT . f . runMaybeT
 

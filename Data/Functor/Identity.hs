@@ -12,7 +12,7 @@
 --
 -- This trivial type constructor serves two purposes:
 --
--- * It can be used with functions parameterized by a 'Functor' or 'Monad'.
+-- * It can be used with functions parameterized by functor or monad classes.
 --
 -- * It can be used as a base monad to which a series of monad
 --   transformers may be applied to construct a composite monad.

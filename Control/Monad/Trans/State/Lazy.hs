@@ -9,10 +9,10 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Lazy state monads, passing an updateable state through a computation.
+-- Lazy state monads, passing an updatable state through a computation.
 -- See below for examples.
 --
--- In this version, sequencing of computations is lazy in the state.
+-- In this version, sequencing of computations is lazy.
 -- For a strict version, see "Control.Monad.Trans.State.Strict", which
 -- has the same interface.
 --
@@ -289,9 +289,9 @@ For example, item can be written as:
 
 {- $counting
 
-A function to increment a counter.  Taken from the paper
-/Generalising Monads to Arrows/, John
-Hughes (<http://www.math.chalmers.se/~rjmh/>), November 1998:
+A function to increment a counter.
+Taken from the paper \"Generalising Monads to Arrows\",
+John Hughes (<http://www.cse.chalmers.se/~rjmh/>), November 1998:
 
 > tick :: State Int Int
 > tick = do n <- get

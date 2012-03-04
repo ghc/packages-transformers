@@ -37,7 +37,7 @@ newtype ListT m a = ListT { runListT :: m [a] }
 
 -- | Map between 'ListT' computations.
 --
--- * @'runListT' ('mapListT' f m) = f ('runListT' m@)
+-- * @'runListT' ('mapListT' f m) = f ('runListT' m)@
 mapListT :: (m [a] -> n [b]) -> ListT m a -> ListT n b
 mapListT f m = ListT $ f (runListT m)
 

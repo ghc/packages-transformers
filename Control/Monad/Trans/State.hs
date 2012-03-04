@@ -9,7 +9,7 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- State monads, passing an updateable state through a computation.
+-- State monads, passing an updatable state through a computation.
 --
 -- Some computations may not require the full power of state transformers:
 --

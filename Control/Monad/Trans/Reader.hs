@@ -58,17 +58,22 @@ reader :: Monad m => (r -> a) -> ReaderT r m a
 reader f = ReaderT (return . f)
 
 -- | Runs a @Reader@ and extracts the final value from it.
+-- (The inverse of 'reader'.)
 runReader :: Reader r a		-- ^ A @Reader@ to run.
     -> r			-- ^ An initial environment.
     -> a
 runReader m = runIdentity . runReaderT m
 
 -- | Transform the value returned by a @Reader@.
+--
+-- * @'runReader' ('mapReader' f m) = f . 'runReader' m@
 mapReader :: (a -> b) -> Reader r a -> Reader r b
 mapReader f = mapReaderT (Identity . f . runIdentity)
 
 -- | Execute a computation in a modified environment
 -- (a specialization of 'withReaderT').
+--
+-- * @'runReader' ('withReader' f m) = 'runReader' m . f@
 withReader
     :: (r' -> r)        -- ^ The function to modify the environment.
     -> Reader r a       -- ^ Computation to run in the modified environment.
@@ -86,11 +91,15 @@ newtype ReaderT r m a = ReaderT {
     }
 
 -- | Transform the computation inside a @ReaderT@.
+--
+-- * @'runReaderT' ('mapReaderT' f m) = f . 'runReaderT' m@
 mapReaderT :: (m a -> n b) -> ReaderT r m a -> ReaderT r n b
 mapReaderT f m = ReaderT $ f . runReaderT m
 
 -- | Execute a computation in a modified environment
--- (a  more general version of 'local').
+-- (a more general version of 'local').
+--
+-- * @'runReaderT' ('withReaderT' f m) = 'runReaderT' m . f@
 withReaderT
     :: (r' -> r)        -- ^ The function to modify the environment.
     -> ReaderT r m a    -- ^ Computation to run in the modified environment.
@@ -137,6 +146,8 @@ ask = ReaderT return
 
 -- | Execute a computation in a modified environment
 -- (a specialization of 'withReaderT').
+--
+-- * @'runReaderT' ('local' f m) = 'runReaderT' m . f@
 local :: (Monad m)
     => (r -> r)         -- ^ The function to modify the environment.
     -> ReaderT r m a    -- ^ Computation to run in the modified environment.
@@ -144,6 +155,8 @@ local :: (Monad m)
 local = withReaderT
 
 -- | Retrieve a function of the current environment.
+--
+-- * @'asks' f = 'liftM' f 'ask'@
 asks :: (Monad m)
     => (r -> a)         -- ^ The selector function to apply to the environment.
     -> ReaderT r m a
