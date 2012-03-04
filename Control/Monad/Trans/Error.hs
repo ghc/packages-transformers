@@ -142,7 +142,7 @@ newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
 
 -- | Map the unwrapped computation using the given function.
 --
--- * @'runErrorT' ('mapErrorT' f m) = f ('runErrorT' m@)
+-- * @'runErrorT' ('mapErrorT' f m) = f ('runErrorT' m)@
 mapErrorT :: (m (Either e a) -> n (Either e' b))
           -> ErrorT e m a
           -> ErrorT e' n b
@@ -206,11 +206,17 @@ instance (Error e, MonadIO m) => MonadIO (ErrorT e m) where
 
 -- | Signal an error value @e@.
 --
--- * @'runErrorT' ('throwErrorT' e) = 'return' ('Left' e)@
+-- * @'runErrorT' ('throwError' e) = 'return' ('Left' e)@
+--
+-- * @'throwError' e >>= m = 'throwError' e@
 throwError :: (Monad m, Error e) => e -> ErrorT e m a
 throwError l = ErrorT $ return (Left l)
 
 -- | Handle an error.
+--
+-- * @'catchError' h ('lift' m) = 'lift' m@
+--
+-- * @'catchError' h ('throwError' e) = h e@
 catchError :: (Monad m, Error e) =>
     ErrorT e m a                -- ^ the inner computation
     -> (e -> ErrorT e m a)      -- ^ a handler for errors in the inner

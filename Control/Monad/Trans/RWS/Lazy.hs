@@ -76,19 +76,37 @@ rws f = RWST (\ r s -> Identity (f r s))
 runRWS :: RWS r w s a -> r -> s -> (a, s, w)
 runRWS m r s = runIdentity (runRWST m r s)
 
-evalRWS :: RWS r w s a -> r -> s -> (a, w)
+-- | Evaluate a computation with the given initial state and environment,
+-- returning the final value and output, discarding the final state.
+evalRWS :: RWS r w s a  -- ^RWS computation to execute
+        -> r            -- ^initial environment
+        -> s            -- ^initial value
+        -> (a, w)       -- ^final value and output
 evalRWS m r s = let
     (a, _, w) = runRWS m r s
     in (a, w)
 
-execRWS :: RWS r w s a -> r -> s -> (s, w)
+-- | Evaluate a computation with the given initial state and environment,
+-- returning the final state and output, discarding the final value.
+execRWS :: RWS r w s a  -- ^RWS computation to execute
+        -> r            -- ^initial environment
+        -> s            -- ^initial value
+        -> (s, w)       -- ^final state and output
 execRWS m r s = let
     (_, s', w) = runRWS m r s
     in (s', w)
 
+-- | Map the return value, final state and output of a computation using
+-- the given function.
+--
+-- * @'runRWS' ('mapRWS' f m) r s = f ('runRWS' m r s)@
 mapRWS :: ((a, s, w) -> (b, s, w')) -> RWS r w s a -> RWS r w' s b
 mapRWS f = mapRWST (Identity . f . runIdentity)
 
+-- | @'withRWS' f m@ executes action @m@ with an initial environment
+-- and state modified by applying @f@.
+--
+-- * @'runRWS' ('withRWS' f m) r s = 'uncurry' ('runRWS' m) (f r s)@
 withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 withRWS = withRWST
 
@@ -98,19 +116,38 @@ withRWS = withRWST
 -- to an inner monad @m@.
 newtype RWST r w s m a = RWST { runRWST :: r -> s -> m (a, s, w) }
 
-evalRWST :: (Monad m) => RWST r w s m a -> r -> s -> m (a, w)
+-- | Evaluate a computation with the given initial state and environment,
+-- returning the final value and output, discarding the final state.
+evalRWST :: (Monad m)
+         => RWST r w s m a      -- ^computation to execute
+         -> r                   -- ^initial environment
+         -> s                   -- ^initial value
+         -> m (a, w)            -- ^computation yielding final value and output
 evalRWST m r s = do
     ~(a, _, w) <- runRWST m r s
     return (a, w)
 
-execRWST :: (Monad m) => RWST r w s m a -> r -> s -> m (s, w)
+-- | Evaluate a computation with the given initial state and environment,
+-- returning the final state and output, discarding the final value.
+execRWST :: (Monad m)
+         => RWST r w s m a      -- ^computation to execute
+         -> r                   -- ^initial environment
+         -> s                   -- ^initial value
+         -> m (s, w)            -- ^computation yielding final state and output
 execRWST m r s = do
     ~(_, s', w) <- runRWST m r s
     return (s', w)
 
+-- | Map the inner computation using the given function.
+--
+-- * @'runRWST' ('mapRWST' f m) r s = f ('runRWST' m r s)@
 mapRWST :: (m (a, s, w) -> n (b, s, w')) -> RWST r w s m a -> RWST r w' s n b
 mapRWST f m = RWST $ \r s -> f (runRWST m r s)
 
+-- | @'withRWST' f m@ executes action @m@ with an initial environment
+-- and state modified by applying @f@.
+--
+-- * @'runRWST' ('withRWST' f m) r s = 'uncurry' ('runRWST' m) (f r s)@
 withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 withRWST f m = RWST $ \r s -> uncurry (runRWST m) (f r s)
 
@@ -161,10 +198,14 @@ ask :: (Monoid w, Monad m) => RWST r w s m r
 ask = RWST $ \r s -> return (r, s, mempty)
 
 -- | Execute a computation in a modified environment
+--
+-- * @'runRWST' ('local' f m) r s = 'runRWST' m (f r) s@
 local :: (Monoid w, Monad m) => (r -> r) -> RWST r w s m a -> RWST r w s m a
 local f m = RWST $ \r s -> runRWST m (f r) s
 
 -- | Retrieve a function of the current environment.
+--
+-- * @'asks' f = 'liftM' f 'ask'@
 asks :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
 asks f = RWST $ \r s -> return (f r, s, mempty)
 
@@ -181,6 +222,8 @@ tell w = RWST $ \_ s -> return ((),s,w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
+--
+-- * @'runRWST' ('listen' m) r s = 'liftM' (\\(a, w) -> ((a, w), w)) ('runRWST' m r s)@
 listen :: (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
 listen m = RWST $ \r s -> do
     ~(a, s', w) <- runRWST m r s
@@ -190,6 +233,8 @@ listen m = RWST $ \r s -> do
 -- the result of applying @f@ to the output to the value of the computation.
 --
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
+--
+-- * @'runRWST' ('listens' f m) r s = 'liftM' (\\(a, w) -> ((a, f w), w)) ('runRWST' m r s)@
 listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 listens f m = do
     ~(a, w) <- listen m
@@ -198,6 +243,8 @@ listens f m = do
 -- | @'pass' m@ is an action that executes the action @m@, which returns
 -- a value and a function, and returns the value, applying the function
 -- to the output.
+--
+-- * @'runRWST' ('pass' m) r s = 'liftM' (\\((a, f), w) -> (a, f w)) ('runRWST' m r s)@
 pass :: (Monoid w, Monad m) => RWST r w s m (a, w -> w) -> RWST r w s m a
 pass m = RWST $ \r s -> do
     ~((a, f), s', w) <- runRWST m r s
@@ -208,6 +255,8 @@ pass m = RWST $ \r s -> do
 -- unchanged.
 --
 -- * @'censor' f m = 'pass' ('liftM' (\\x -> (x,f)) m)@
+--
+-- * @'runRWST' ('censor' f m) r s = 'liftM' (\\(a, w) -> (a, f w)) ('runRWST' m r s)@
 censor :: (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
 censor f m = pass $ do
     a <- m
