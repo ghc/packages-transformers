@@ -77,8 +77,8 @@ from which arbitrarily complex parsers may be constructed:
 In this example we use the operations @get@ and @put@ from
 "Control.Monad.Trans.State", which are defined only for monads that are
 applications of @StateT@.  Alternatively one could use monad classes
-from other packages, which contain methods @get@ and @put@ with types
-generalized over all suitable monads.
+from the @mtl@ package or similar, which contain methods @get@ and @put@
+with types generalized over all suitable monads.
 -}
 
 {- $example2
@@ -109,10 +109,10 @@ the @WriterT@ transformers.
 
 In this case, we were able to do this with 'lift', but operations with
 more complex types require special lifting functions, which are provided
-by monad transformers for which they can be implemented.  If you use
-one of packages of monad classes, this lifting is handled automatically
-by the instances of the classes, and you need only use the generalized
-methods @get@ and @put@.
+by monad transformers for which they can be implemented.  If you use the
+monad classes of the @mtl@ package or similar, this lifting is handled
+automatically by the instances of the classes, and you need only use
+the generalized methods @get@ and @put@.
 
 We can also define a primitive using the Writer:
 
