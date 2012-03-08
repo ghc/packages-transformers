@@ -122,7 +122,7 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     m <|> n = WriterT $ runWriterT m <|> runWriterT n
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
-    return a = WriterT $ return (a, mempty)
+    return a = writer (a, mempty)
     m >>= k  = WriterT $ do
         ~(a, w)  <- runWriterT m
         ~(b, w') <- runWriterT (k a)
@@ -153,7 +153,7 @@ instance Traversable f => Traversable (WriterT w f) where
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> WriterT w m ()
-tell w = WriterT $ return ((), w)
+tell w = writer ((), w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
@@ -171,9 +171,9 @@ listen m = WriterT $ do
 --
 -- * @'runWriterT' ('listens' f m) = 'liftM' (\\(a, w) -> ((a, f w), w)) ('runWriterT' m)@
 listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
-listens f m = do
-    ~(a, w) <- listen m
-    return (a, f w)
+listens f m = WriterT $ do
+    ~(a, w) <- runWriterT m
+    return ((a, f w), w)
 
 -- | @'pass' m@ is an action that executes the action @m@, which returns
 -- a value and a function, and returns the value, applying the function
@@ -193,9 +193,9 @@ pass m = WriterT $ do
 --
 -- * @'runWriterT' ('censor' f m) = 'liftM' (\\(a, w) -> (a, f w)) ('runWriterT' m)@
 censor :: (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
-censor f m = pass $ do
-    a <- m
-    return (a, f)
+censor f m = WriterT $ do
+    ~(a, w) <- runWriterT m
+    return (a, f w)
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: (Monoid w) => ((((a,w) -> m (b,w)) -> m (a,w)) -> m (a,w)) ->

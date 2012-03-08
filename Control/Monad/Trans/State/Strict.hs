@@ -180,7 +180,7 @@ instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
     (<|>) = mplus
 
 instance (Monad m) => Monad (StateT s m) where
-    return a = StateT $ \s -> return (a, s)
+    return a = state $ \s -> (a, s)
     m >>= k  = StateT $ \s -> do
         (a, s') <- runStateT m s
         runStateT (k a) s'
@@ -203,27 +203,25 @@ instance (MonadIO m) => MonadIO (StateT s m) where
 
 -- | Fetch the current value of the state within the monad.
 get :: (Monad m) => StateT s m s
-get = StateT $ \s -> return (s, s)
+get = state $ \s -> (s, s)
 
 -- | @'put' s@ sets the state within the monad to @s@.
 put :: (Monad m) => s -> StateT s m ()
-put s = StateT $ \_ -> return ((), s)
+put s = state $ \_ -> ((), s)
 
 -- | @'modify' f@ is an action that updates the state to the result of
 -- applying @f@ to the current state.
+--
+-- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monad m) => (s -> s) -> StateT s m ()
-modify f = do
-    s <- get
-    put (f s)
+modify f = state $ \s -> ((), f s)
 
 -- | Get a specific component of the state, using a projection function
 -- supplied.
 --
 -- * @'gets' f = 'liftM' f 'get'@
 gets :: (Monad m) => (s -> a) -> StateT s m a
-gets f = do
-    s <- get
-    return (f s)
+gets f = state $ \s -> (f s, s)
 
 -- | Uniform lifting of a @callCC@ operation to the new monad.
 -- This version rolls back to the original state on entering the

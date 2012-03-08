@@ -236,9 +236,9 @@ listen m = RWST $ \r s -> do
 --
 -- * @'runRWST' ('listens' f m) r s = 'liftM' (\\(a, w) -> ((a, f w), w)) ('runRWST' m r s)@
 listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
-listens f m = do
-    (a, w) <- listen m
-    return (a, f w)
+listens f m = RWST $ \r s -> do
+    (a, s', w) <- runRWST m r s
+    return ((a, f w), s', w)
 
 -- | @'pass' m@ is an action that executes the action @m@, which returns
 -- a value and a function, and returns the value, applying the function
@@ -258,9 +258,9 @@ pass m = RWST $ \r s -> do
 --
 -- * @'runRWST' ('censor' f m) r s = 'liftM' (\\(a, w) -> (a, f w)) ('runRWST' m r s)@
 censor :: (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
-censor f m = pass $ do
-    a <- m
-    return (a, f)
+censor f m = RWST $ \r s -> do
+    (a, s', w) <- runRWST m r s
+    return (a, s', f w)
 
 -- ---------------------------------------------------------------------------
 -- State operations
@@ -279,19 +279,17 @@ put s = RWST $ \_ _ -> return ((), s, mempty)
 
 -- | @'modify' f@ is an action that updates the state to the result of
 -- applying @f@ to the current state.
+--
+-- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
-modify f = do
-    s <- get
-    put (f s)
+modify f = RWST $ \_ s -> return ((), f s, mempty)
  
 -- | Get a specific component of the state, using a projection function
 -- supplied.
 --
 -- * @'gets' f = 'liftM' f 'get'@
 gets :: (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
-gets f = do
-    s <- get
-    return (f s)
+gets f = RWST $ \_ s -> return (f s, s, mempty)
 
 -- | Uniform lifting of a @callCC@ operation to the new monad.
 -- This version rolls back to the original state on entering the
