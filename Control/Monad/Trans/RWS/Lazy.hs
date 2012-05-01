@@ -54,6 +54,7 @@ module Control.Monad.Trans.RWS.Lazy (
   ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
 
@@ -295,8 +296,7 @@ gets f = RWST $ \_ s -> return (f s, s, mempty)
 -- This version rolls back to the original state on entering the
 -- continuation.
 liftCallCC :: (Monoid w) =>
-    ((((a,s,w) -> m (b,s,w)) -> m (a,s,w)) -> m (a,s,w)) ->
-    ((a -> RWST r w s m b) -> RWST r w s m a) -> RWST r w s m a
+    CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
 liftCallCC callCC f = RWST $ \r s ->
     callCC $ \c ->
     runRWST (f (\a -> RWST $ \_ _ -> c (a, s, mempty))) r s
@@ -304,14 +304,12 @@ liftCallCC callCC f = RWST $ \r s ->
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
 liftCallCC' :: (Monoid w) =>
-    ((((a,s,w) -> m (b,s,w)) -> m (a,s,w)) -> m (a,s,w)) ->
-    ((a -> RWST r w s m b) -> RWST r w s m a) -> RWST r w s m a
+    CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
 liftCallCC' callCC f = RWST $ \r s ->
     callCC $ \c ->
     runRWST (f (\a -> RWST $ \_ s' -> c (a, s', mempty))) r s
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m (a,s,w) -> (e -> m (a,s,w)) -> m (a,s,w)) ->
-    RWST l w s m a -> (e -> RWST l w s m a) -> RWST l w s m a
+liftCatch :: Catch e m (a,s,w) -> Catch e (RWST r w s m) a
 liftCatch catchError m h =
     RWST $ \r s -> runRWST m r s `catchError` \e -> runRWST (h e) r s

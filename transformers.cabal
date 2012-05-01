@@ -45,6 +45,7 @@ library
     Control.Applicative.Backwards
     Control.Applicative.Lift
     Control.Monad.IO.Class
+    Control.Monad.Signatures
     Control.Monad.Trans.Class
     Control.Monad.Trans.Cont
     Control.Monad.Trans.Error

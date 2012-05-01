@@ -37,6 +37,7 @@ module Control.Monad.Trans.Reader (
     ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
 
@@ -163,18 +164,12 @@ asks :: (Monad m)
 asks f = ReaderT (return . f)
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC ::
-    (((a -> m b) -> m a) -> m a)        -- ^ @callCC@ on the argument monad.
-    -> ((a -> ReaderT r m b) -> ReaderT r m a) -> ReaderT r m a
+liftCallCC :: CallCC m a b -> CallCC (ReaderT r m) a b
 liftCallCC callCC f = ReaderT $ \ r ->
     callCC $ \ c ->
     runReaderT (f (ReaderT . const . c)) r
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch ::
-    (m a -> (e -> m a) -> m a)          -- ^ @catch@ on the argument monad.
-    -> ReaderT r m a                    -- ^ Computation to attempt.
-    -> (e -> ReaderT r m a)             -- ^ Exception handler.
-    -> ReaderT r m a
+liftCatch :: Catch e m a -> Catch e (ReaderT r m) a
 liftCatch f m h =
     ReaderT $ \ r -> f (runReaderT m r) (\ e -> runReaderT (h e) r)

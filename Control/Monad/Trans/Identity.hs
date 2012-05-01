@@ -26,6 +26,7 @@ import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
 import Control.Monad.Fix (MonadFix(mfix))
 import Control.Monad.IO.Class (MonadIO(liftIO))
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class (MonadTrans(lift))
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
@@ -78,12 +79,10 @@ lift2IdentityT ::
 lift2IdentityT f a b = IdentityT (f (runIdentityT a) (runIdentityT b))
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (((a -> m b) -> m a) ->
-    m a) -> ((a -> IdentityT m b) -> IdentityT m a) -> IdentityT m a
+liftCallCC :: CallCC m a b -> CallCC (IdentityT m) a b
 liftCallCC callCC f =
     IdentityT $ callCC $ \ c -> runIdentityT (f (IdentityT . c))
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m a -> (e -> m a) -> m a) ->
-    IdentityT m a -> (e -> IdentityT m a) -> IdentityT m a
+liftCatch :: Catch e m a -> Catch e (IdentityT m) a
 liftCatch f m h = IdentityT $ f (runIdentityT m) (runIdentityT . h)

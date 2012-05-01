@@ -62,6 +62,7 @@ module Control.Monad.Trans.State.Lazy (
   ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
 
@@ -226,8 +227,7 @@ gets f = state $ \s -> (f s, s)
 -- | Uniform lifting of a @callCC@ operation to the new monad.
 -- This version rolls back to the original state on entering the
 -- continuation.
-liftCallCC :: ((((a,s) -> m (b,s)) -> m (a,s)) -> m (a,s)) ->
-    ((a -> StateT s m b) -> StateT s m a) -> StateT s m a
+liftCallCC :: CallCC m (a,s) (b,s) -> CallCC (StateT s m) a b
 liftCallCC callCC f = StateT $ \s ->
     callCC $ \c ->
     runStateT (f (\a -> StateT $ \ _ -> c (a, s))) s
@@ -235,28 +235,24 @@ liftCallCC callCC f = StateT $ \s ->
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
 -- It does not satisfy the laws of a monad transformer.
-liftCallCC' :: ((((a,s) -> m (b,s)) -> m (a,s)) -> m (a,s)) ->
-    ((a -> StateT s m b) -> StateT s m a) -> StateT s m a
+liftCallCC' :: CallCC m (a,s) (b,s) -> CallCC (StateT s m) a b
 liftCallCC' callCC f = StateT $ \s ->
     callCC $ \c ->
     runStateT (f (\a -> StateT $ \s' -> c (a, s'))) s
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m (a,s) -> (e -> m (a,s)) -> m (a,s)) ->
-    StateT s m a -> (e -> StateT s m a) -> StateT s m a
+liftCatch :: Catch e m (a,s) -> Catch e (StateT s m) a
 liftCatch catchError m h =
     StateT $ \s -> runStateT m s `catchError` \e -> runStateT (h e) s
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m =>
-    (m (a,s) -> m ((a,s),w)) -> StateT s m a -> StateT s m (a,w)
+liftListen :: Monad m => Listen w m (a,s) -> Listen w (StateT s m) a
 liftListen listen m = StateT $ \s -> do
     ~((a, s'), w) <- listen (runStateT m s)
     return ((a, w), s')
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m =>
-    (m ((a,s),b) -> m (a,s)) -> StateT s m (a,b) -> StateT s m a
+liftPass :: Monad m => Pass w m (a,s) -> Pass w (StateT s m) a
 liftPass pass m = StateT $ \s -> pass $ do
     ~((a, f), s') <- runStateT m s
     return ((a, s'), f)

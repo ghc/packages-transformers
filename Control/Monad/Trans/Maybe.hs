@@ -30,6 +30,7 @@ module Control.Monad.Trans.Maybe (
   ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 
 import Control.Applicative
@@ -99,26 +100,22 @@ instance (MonadIO m) => MonadIO (MaybeT m) where
     liftIO = lift . liftIO
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (((Maybe a -> m (Maybe b)) -> m (Maybe a)) ->
-    m (Maybe a)) -> ((a -> MaybeT m b) -> MaybeT m a) -> MaybeT m a
+liftCallCC :: CallCC m (Maybe a) (Maybe b) -> CallCC (MaybeT m) a b
 liftCallCC callCC f =
     MaybeT $ callCC $ \ c -> runMaybeT (f (MaybeT . c . Just))
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m (Maybe a) -> (e -> m (Maybe a)) -> m (Maybe a)) ->
-    MaybeT m a -> (e -> MaybeT m a) -> MaybeT m a
+liftCatch :: Catch e m (Maybe a) -> Catch e (MaybeT m) a
 liftCatch f m h = MaybeT $ f (runMaybeT m) (runMaybeT . h)
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m =>
-    (m (Maybe a) -> m (Maybe a,w)) -> MaybeT m a -> MaybeT m (a,w)
+liftListen :: Monad m => Listen w m (Maybe a) -> Listen w (MaybeT m) a
 liftListen listen = mapMaybeT $ \ m -> do
     (a, w) <- listen m
     return $! fmap (\ r -> (r, w)) a
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => (m (Maybe a,w -> w) -> m (Maybe a)) ->
-    MaybeT m (a,w -> w) -> MaybeT m a
+liftPass :: Monad m => Pass w m (Maybe a) -> Pass w (MaybeT m) a
 liftPass pass = mapMaybeT $ \ m -> pass $ do
     a <- m
     return $! case a of

@@ -49,6 +49,7 @@ import Data.Functor.Identity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
+import Control.Monad.Signatures
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid
 import Data.Traversable (Traversable(traverse))
@@ -112,6 +113,13 @@ mapWriterT f m = WriterT $ f (runWriterT m)
 instance (Functor m) => Functor (WriterT w m) where
     fmap f = mapWriterT $ fmap $ \ ~(a, w) -> (f a, w)
 
+instance (Foldable f) => Foldable (WriterT w f) where
+    foldMap f (WriterT a) = foldMap (f . fst) a
+
+instance (Traversable f) => Traversable (WriterT w f) where
+    traverse f (WriterT a) = WriterT <$> traverse f' a where
+       f' (a, b) = fmap (\c -> (c, b)) (f a)
+
 instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
     pure a  = WriterT $ pure (a, mempty)
     f <*> v = WriterT $ liftA2 k (runWriterT f) (runWriterT v)
@@ -143,13 +151,6 @@ instance (Monoid w) => MonadTrans (WriterT w) where
 
 instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
     liftIO = lift . liftIO
-
-instance Foldable f => Foldable (WriterT w f) where
-    foldMap f (WriterT a) = foldMap (f . fst) a
-
-instance Traversable f => Traversable (WriterT w f) where
-    traverse f (WriterT a) = WriterT <$> traverse f' a where
-       f' (a, b) = fmap (\c -> (c, b)) (f a)
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> WriterT w m ()
@@ -198,14 +199,12 @@ censor f m = WriterT $ do
     return (a, f w)
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (Monoid w) => ((((a,w) -> m (b,w)) -> m (a,w)) -> m (a,w)) ->
-    ((a -> WriterT w m b) -> WriterT w m a) -> WriterT w m a
+liftCallCC :: (Monoid w) => CallCC m (a,w) (b,w) -> CallCC (WriterT w m) a b
 liftCallCC callCC f = WriterT $
     callCC $ \c ->
     runWriterT (f (\a -> WriterT $ c (a, mempty)))
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m (a,w) -> (e -> m (a,w)) -> m (a,w)) ->
-    WriterT w m a -> (e -> WriterT w m a) -> WriterT w m a
+liftCatch :: Catch e m (a,w) -> Catch e (WriterT w m) a
 liftCatch catchError m h =
     WriterT $ runWriterT m `catchError` \e -> runWriterT (h e)

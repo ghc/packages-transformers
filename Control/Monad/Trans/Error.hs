@@ -41,6 +41,7 @@ module Control.Monad.Trans.Error (
   ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 
 import Control.Applicative
@@ -229,22 +230,19 @@ m `catchError` h = ErrorT $ do
         Right r -> return (Right r)
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (((Either e a -> m (Either e b)) -> m (Either e a)) ->
-    m (Either e a)) -> ((a -> ErrorT e m b) -> ErrorT e m a) -> ErrorT e m a
+liftCallCC :: CallCC m (Either e a) (Either e b) -> CallCC (ErrorT e m) a b
 liftCallCC callCC f = ErrorT $
     callCC $ \c ->
     runErrorT (f (\a -> ErrorT $ c (Right a)))
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m =>
-    (m (Either e a) -> m (Either e a,w)) -> ErrorT e m a -> ErrorT e m (a,w)
+liftListen :: Monad m => Listen w m (Either e a) -> Listen w (ErrorT e m) a
 liftListen listen = mapErrorT $ \ m -> do
     (a, w) <- listen m
     return $! fmap (\ r -> (r, w)) a
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => (m (Either e a,w -> w) -> m (Either e a)) ->
-    ErrorT e m (a,w -> w) -> ErrorT e m a
+liftPass :: Monad m => Pass w m (Either e a) -> Pass w (ErrorT e m) a
 liftPass pass = mapErrorT $ \ m -> pass $ do
     a <- m
     return $! case a of

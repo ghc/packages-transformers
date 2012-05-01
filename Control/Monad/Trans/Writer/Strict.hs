@@ -49,6 +49,7 @@ import Data.Functor.Identity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
+import Control.Monad.Signatures
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid
 import Data.Traversable (Traversable(traverse))
@@ -129,7 +130,7 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     m <|> n = WriterT $ runWriterT m <|> runWriterT n
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
-    return a = WriterT $ return (a, mempty)
+    return a = writer (a, mempty)
     m >>= k  = WriterT $ do
         (a, w)  <- runWriterT m
         (b, w') <- runWriterT (k a)
@@ -153,7 +154,7 @@ instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> WriterT w m ()
-tell w = WriterT $ return ((), w)
+tell w = writer ((), w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
@@ -198,14 +199,12 @@ censor f m = WriterT $ do
     return (a, f w)
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: (Monoid w) => ((((a,w) -> m (b,w)) -> m (a,w)) -> m (a,w)) ->
-    ((a -> WriterT w m b) -> WriterT w m a) -> WriterT w m a
+liftCallCC :: (Monoid w) => CallCC m (a,w) (b,w) -> CallCC (WriterT w m) a b
 liftCallCC callCC f = WriterT $
     callCC $ \c ->
     runWriterT (f (\a -> WriterT $ c (a, mempty)))
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m (a,w) -> (e -> m (a,w)) -> m (a,w)) ->
-    WriterT w m a -> (e -> WriterT w m a) -> WriterT w m a
+liftCatch :: Catch e m (a,w) -> Catch e (WriterT w m) a
 liftCatch catchError m h =
     WriterT $ runWriterT m `catchError` \e -> runWriterT (h e)

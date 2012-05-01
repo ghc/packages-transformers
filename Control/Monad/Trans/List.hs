@@ -23,6 +23,7 @@ module Control.Monad.Trans.List (
   ) where
 
 import Control.Monad.IO.Class
+import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 
 import Control.Applicative
@@ -82,14 +83,12 @@ instance (MonadIO m) => MonadIO (ListT m) where
     liftIO = lift . liftIO
 
 -- | Lift a @callCC@ operation to the new monad.
-liftCallCC :: ((([a] -> m [b]) -> m [a]) -> m [a]) ->
-    ((a -> ListT m b) -> ListT m a) -> ListT m a
+liftCallCC :: CallCC m [a] [b] -> CallCC (ListT m) a b
 liftCallCC callCC f = ListT $
     callCC $ \c ->
     runListT (f (\a -> ListT $ c [a]))
 
 -- | Lift a @catchError@ operation to the new monad.
-liftCatch :: (m [a] -> (e -> m [a]) -> m [a]) ->
-    ListT m a -> (e -> ListT m a) -> ListT m a
+liftCatch :: Catch e m [a] -> Catch e (ListT m) a
 liftCatch catchError m h = ListT $ runListT m
     `catchError` \e -> runListT (h e)
