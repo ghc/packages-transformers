@@ -16,15 +16,18 @@ description:
     This package contains:
     .
     * the monad transformer class (in "Control.Monad.Trans.Class")
+      and IO monad class (in "Control.Monad.IO.Class")
     .
     * concrete functor and monad transformers, each with associated
       operations and functions to lift operations associated with other
       transformers.
     .
-    It can be used on its own in portable Haskell code, or with the monad
-    classes in the @mtl@ or @monads-tf@ packages, which automatically
-    lift operations introduced by monad transformers through other
-    transformers.
+    The package can be used on its own in portable Haskell code, in
+    which case operations need to be manually lifted through transformer
+    stacks (see "Control.Monad.Trans.Class" for some examples).
+    Alternatively, it can be used with the non-portable monad classes in
+    the @mtl@ or @monads-tf@ packages, which automatically lift operations
+    introduced by monad transformers through other transformers.
 build-type: Simple
 cabal-version: >= 1.6
 
