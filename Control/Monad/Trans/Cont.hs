@@ -49,7 +49,7 @@ type Cont r = ContT r Identity
 -- | Construct a continuation-passing computation from a function.
 -- (The inverse of 'runCont'.)
 cont :: ((a -> r) -> r) -> Cont r a
-cont f = ContT (\ k -> Identity (f (runIdentity . k)))
+cont f = ContT (\c -> Identity (f (runIdentity . c)))
 
 -- | Runs a CPS computation, returns its result after applying the final
 -- continuation to it.
@@ -98,12 +98,12 @@ instance Functor (ContT r m) where
     fmap f m = ContT $ \c -> runContT m (c . f)
 
 instance Applicative (ContT r m) where
-    pure a  = ContT ($ a)
-    f <*> v = ContT $ \ k -> runContT f $ \ g -> runContT v (k . g)
+    pure x  = ContT ($ x)
+    f <*> v = ContT $ \c -> runContT f $ \ g -> runContT v (c . g)
 
 instance Monad (ContT r m) where
-    return a = ContT ($ a)
-    m >>= k  = ContT $ \c -> runContT m (\a -> runContT (k a) c)
+    return x = ContT ($ x)
+    m >>= k  = ContT $ \c -> runContT m (\x -> runContT (k x) c)
 
 instance MonadTrans (ContT r) where
     lift m = ContT (m >>=)
@@ -127,10 +127,10 @@ instance (MonadIO m) => MonadIO (ContT r m) where
 -- within its scope will escape from the computation, even if it is many
 -- layers deep within nested computations.
 callCC :: ((a -> ContT r m b) -> ContT r m a) -> ContT r m a
-callCC f = ContT $ \c -> runContT (f (\a -> ContT $ \_ -> c a)) c
+callCC f = ContT $ \c -> runContT (f (\x -> ContT $ \_ -> c x)) c
 
 -- | @'liftLocal' ask local@ yields a @local@ function for @'ContT' r m@.
-liftLocal :: Monad m => m r' -> ((r' -> r') -> m r -> m r) ->
+liftLocal :: (Monad m) => m r' -> ((r' -> r') -> m r -> m r) ->
     (r' -> r') -> ContT r m a -> ContT r m a
 liftLocal ask local f m = ContT $ \c -> do
     r <- ask
