@@ -22,13 +22,13 @@ import Data.Traversable (Traversable(traverse))
 newtype Constant a b = Constant { getConstant :: a }
 
 instance Functor (Constant a) where
-    fmap f (Constant x) = Constant x
+    fmap _ (Constant x) = Constant x
 
 instance Foldable (Constant a) where
-    foldMap f (Constant x) = mempty
+    foldMap _ (Constant _) = mempty
 
 instance Traversable (Constant a) where
-    traverse f (Constant x) = pure (Constant x)
+    traverse _ (Constant x) = pure (Constant x)
 
 instance (Monoid a) => Applicative (Constant a) where
     pure _ = Constant mempty
