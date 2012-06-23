@@ -18,7 +18,7 @@ module Control.Applicative.Lift (
 import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Constant
-import Data.Monoid (Monoid(mappend))
+import Data.Monoid (Monoid)
 import Data.Traversable (Traversable(traverse))
 
 -- | Applicative functor formed by adding pure computations to a given

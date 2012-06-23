@@ -16,8 +16,6 @@ module Control.Monad.IO.Class (
     MonadIO(..)
   ) where
 
-import System.IO (IO)
-
 -- | Monads in which 'IO' computations may be embedded.
 -- Any monad built by applying a sequence of monad transformers to the
 -- 'IO' monad will be an instance of this class.

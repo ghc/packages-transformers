@@ -33,7 +33,6 @@ import Control.Monad.Trans.Class
 import Data.Functor.Identity
 
 import Control.Applicative
-import Control.Monad
 
 {- |
 Continuation monad.

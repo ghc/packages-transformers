@@ -25,7 +25,6 @@ module Data.Functor.Identity (
    ) where
 
 import Control.Applicative
-import Control.Monad
 import Control.Monad.Fix
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
