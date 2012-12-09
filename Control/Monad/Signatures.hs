@@ -12,7 +12,7 @@
 -----------------------------------------------------------------------------
 
 module Control.Monad.Signatures (
-    CallCC, Catch, Listen, Pass, Pause
+    CallCC, Catch, Listen, Pass
   ) where
 
 -- | Signature of the @callCC@ operation,
@@ -30,7 +30,3 @@ type Listen w m a = m a -> m (a, w)
 -- | Signature of the @pass@ operation,
 -- introduced in "Control.Monad.Trans.Writer".
 type Pass w m a =  m (a, w -> w) -> m a
-
--- | Signature of the @pause@ operation,
--- introduced in "Control.Monad.Trans.Free".
-type Pause f m a = f (m a) -> m a
