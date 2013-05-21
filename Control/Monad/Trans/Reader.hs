@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Trans.Reader
@@ -44,7 +45,9 @@ import Data.Functor.Identity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
-import Control.Monad.Instances ()
+#if !(MIN_VERSION_base(4,6,0))
+import Control.Monad.Instances ()  -- deprecated from base-4.6
+#endif
 
 -- | The parameterizable reader monad.
 --

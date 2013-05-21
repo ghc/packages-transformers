@@ -49,7 +49,9 @@ import Control.Applicative
 import Control.Exception (IOException)
 import Control.Monad
 import Control.Monad.Fix
-import Control.Monad.Instances ()
+#if !(MIN_VERSION_base(4,6,0))
+import Control.Monad.Instances ()  -- deprecated from base-4.6
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
