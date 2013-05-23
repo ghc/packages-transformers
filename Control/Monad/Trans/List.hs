@@ -47,14 +47,9 @@ instance (Show1 m, Show a) => Show (ListT m a) where
     showsPrec d (ListT m) = showParen (d > 10) $
         showString "ListT " . showsPrec1 11 m
 
-instance Eq1 m => Eq1 (ListT m) where
-    eq1 = (==)
- 
-instance Ord1 m => Ord1 (ListT m) where
-    compare1 = compare
- 
-instance Show1 m => Show1 (ListT m) where
-    showsPrec1 = showsPrec
+instance Eq1 m => Eq1 (ListT m) where eq1 = (==)
+instance Ord1 m => Ord1 (ListT m) where compare1 = compare
+instance Show1 m => Show1 (ListT m) where showsPrec1 = showsPrec
 
 -- | Map between 'ListT' computations.
 --

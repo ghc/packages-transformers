@@ -44,14 +44,9 @@ instance (Show1 f, Show a) => Show (Lift f a) where
     showsPrec d (Other y) = showParen (d > 10) $
         showString "Other " . showsPrec1 11 y
 
-instance Eq1 f => Eq1 (Lift f) where
-    eq1 = (==)
-
-instance Ord1 f => Ord1 (Lift f) where
-    compare1 = compare
-
-instance Show1 f => Show1 (Lift f) where
-    showsPrec1 = showsPrec
+instance Eq1 f => Eq1 (Lift f) where eq1 = (==)
+instance Ord1 f => Ord1 (Lift f) where compare1 = compare
+instance Show1 f => Show1 (Lift f) where showsPrec1 = showsPrec
 
 instance (Functor f) => Functor (Lift f) where
     fmap f (Pure x) = Pure (f x)

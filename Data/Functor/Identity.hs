@@ -40,14 +40,9 @@ instance Show a => Show (Identity a) where
     showsPrec d (Identity x) = showParen (d > 10) $
         showString "Identity " . showsPrec 11 x
 
-instance Eq1 Identity where
-    eq1 = (==)
-
-instance Ord1 Identity where
-    compare1 = compare
-
-instance Show1 Identity where
-    showsPrec1 = showsPrec
+instance Eq1 Identity where eq1 = (==)
+instance Ord1 Identity where compare1 = compare
+instance Show1 Identity where showsPrec1 = showsPrec
 
 -- ---------------------------------------------------------------------------
 -- Identity instances for Functor and Monad

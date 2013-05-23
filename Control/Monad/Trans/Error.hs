@@ -155,14 +155,9 @@ instance (Show e, Show1 m, Show a) => Show (ErrorT e m a) where
     showsPrec d (ErrorT m) = showParen (d > 10) $
         showString "ErrorT " . showsPrec1 11 m
 
-instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where
-    eq1 = (==)
-
-instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where
-    compare1 = compare
-
-instance (Show e, Show1 m) => Show1 (ErrorT e m) where
-    showsPrec1 = showsPrec
+instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where eq1 = (==)
+instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where compare1 = compare
+instance (Show e, Show1 m) => Show1 (ErrorT e m) where showsPrec1 = showsPrec
 
 -- | Map the unwrapped computation using the given function.
 --

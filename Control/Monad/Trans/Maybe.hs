@@ -60,14 +60,9 @@ instance (Show1 m, Show a) => Show (MaybeT m a) where
     showsPrec d (MaybeT m) = showParen (d > 10) $
         showString "MaybeT " . showsPrec1 11 m
 
-instance Eq1 m => Eq1 (MaybeT m) where
-    eq1 = (==)
- 
-instance Ord1 m => Ord1 (MaybeT m) where
-    compare1 = compare
- 
-instance Show1 m => Show1 (MaybeT m) where
-    showsPrec1 = showsPrec
+instance Eq1 m => Eq1 (MaybeT m) where eq1 = (==)
+instance Ord1 m => Ord1 (MaybeT m) where compare1 = compare
+instance Show1 m => Show1 (MaybeT m) where showsPrec1 = showsPrec
 
 -- | Transform the computation inside a @MaybeT@.
 --

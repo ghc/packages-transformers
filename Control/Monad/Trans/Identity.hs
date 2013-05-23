@@ -46,14 +46,9 @@ instance (Show1 f, Show a) => Show (IdentityT f a) where
     showsPrec d (IdentityT a) = showParen (d > 10) $
         showString "IdentityT " . showsPrec1 11 a
 
-instance Eq1 f => Eq1 (IdentityT f) where
-    eq1 = (==)
-
-instance Ord1 f => Ord1 (IdentityT f) where
-    compare1 = compare
-
-instance Show1 f => Show1 (IdentityT f) where
-    showsPrec1 = showsPrec
+instance Eq1 f => Eq1 (IdentityT f) where eq1 = (==)
+instance Ord1 f => Ord1 (IdentityT f) where compare1 = compare
+instance Show1 f => Show1 (IdentityT f) where showsPrec1 = showsPrec
 
 instance (Functor m) => Functor (IdentityT m) where
     fmap f = mapIdentityT (fmap f)
