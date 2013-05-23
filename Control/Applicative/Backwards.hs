@@ -12,6 +12,8 @@
 
 module Control.Applicative.Backwards where
 
+import Data.Functor.Classes
+
 import Prelude hiding (foldr, foldr1, foldl, foldl1)
 import Control.Applicative
 import Data.Foldable
@@ -20,6 +22,25 @@ import Data.Traversable
 -- | The same functor, but with an 'Applicative' instance that performs
 -- actions in the reverse order.
 newtype Backwards f a = Backwards { forwards :: f a }
+
+instance (Eq1 f, Eq a) => Eq (Backwards f a) where
+    Backwards x == Backwards y = eq1 x y
+
+instance (Ord1 f, Ord a) => Ord (Backwards f a) where
+    compare (Backwards x) (Backwards y) = compare1 x y
+
+instance (Show1 f, Show a) => Show (Backwards f a) where
+    showsPrec d (Backwards a) = showParen (d > 10) $
+        showString "Backwards " . showsPrec1 11 a
+
+instance Eq1 f => Eq1 (Backwards f) where
+    eq1 = (==)
+
+instance Ord1 f => Ord1 (Backwards f) where
+    compare1 = compare
+
+instance Show1 f => Show1 (Backwards f) where
+    showsPrec1 = showsPrec
 
 -- | Derived instance.
 instance (Functor f) => Functor (Backwards f) where

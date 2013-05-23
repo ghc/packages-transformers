@@ -22,17 +22,38 @@ module Control.Monad.Trans.Identity (
     liftCallCC,
   ) where
 
-import Control.Applicative
-import Control.Monad (MonadPlus(mzero, mplus))
-import Control.Monad.Fix (MonadFix(mfix))
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class (MonadTrans(lift))
+import Data.Functor.Classes
+
+import Control.Applicative
+import Control.Monad (MonadPlus(mzero, mplus))
+import Control.Monad.Fix (MonadFix(mfix))
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
 -- | The trivial monad transformer, which maps a monad to an equivalent monad.
-newtype IdentityT m a = IdentityT { runIdentityT :: m a }
+newtype IdentityT f a = IdentityT { runIdentityT :: f a }
+
+instance (Eq1 f, Eq a) => Eq (IdentityT f a) where
+    IdentityT x == IdentityT y = eq1 x y
+
+instance (Ord1 f, Ord a) => Ord (IdentityT f a) where
+    compare (IdentityT x) (IdentityT y) = compare1 x y
+
+instance (Show1 f, Show a) => Show (IdentityT f a) where
+    showsPrec d (IdentityT a) = showParen (d > 10) $
+        showString "IdentityT " . showsPrec1 11 a
+
+instance Eq1 f => Eq1 (IdentityT f) where
+    eq1 = (==)
+
+instance Ord1 f => Ord1 (IdentityT f) where
+    compare1 = compare
+
+instance Show1 f => Show1 (IdentityT f) where
+    showsPrec1 = showsPrec
 
 instance (Functor m) => Functor (IdentityT m) where
     fmap f = mapIdentityT (fmap f)

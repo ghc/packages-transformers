@@ -32,6 +32,7 @@ module Control.Monad.Trans.Maybe (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
@@ -48,6 +49,25 @@ import Data.Traversable (Traversable(traverse))
 -- The 'return' function yields a successful computation, while @>>=@
 -- sequences two subcomputations, failing on the first error.
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
+
+instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
+    MaybeT x == MaybeT y = eq1 x y
+
+instance (Ord1 m, Ord a) => Ord (MaybeT m a) where
+    compare (MaybeT x) (MaybeT y) = compare1 x y
+
+instance (Show1 m, Show a) => Show (MaybeT m a) where
+    showsPrec d (MaybeT m) = showParen (d > 10) $
+        showString "MaybeT " . showsPrec1 11 m
+
+instance Eq1 m => Eq1 (MaybeT m) where
+    eq1 = (==)
+ 
+instance Ord1 m => Ord1 (MaybeT m) where
+    compare1 = compare
+ 
+instance Show1 m => Show1 (MaybeT m) where
+    showsPrec1 = showsPrec
 
 -- | Transform the computation inside a @MaybeT@.
 --

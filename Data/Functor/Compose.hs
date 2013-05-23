@@ -11,7 +11,9 @@
 
 module Data.Functor.Compose (
     Compose(..),
-   ) where
+  ) where
+
+import Data.Functor.Classes
 
 import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
@@ -21,6 +23,23 @@ import Data.Traversable (Traversable(traverse))
 -- The composition of applicative functors is always applicative,
 -- but the composition of monads is not always a monad.
 newtype Compose f g a = Compose { getCompose :: f (g a) }
+
+-- Show instance
+
+-- kludge to get type with the same Show instance as g a
+newtype Dummy g a = Dummy (g a)
+
+instance (Show1 g, Show a) => Show (Dummy g a) where
+     showsPrec d (Dummy g) = showsPrec1 d g
+
+instance (Functor f, Show1 f, Show1 g, Show a) => Show (Compose f g a) where
+     showsPrec d (Compose x) = showParen (d > 10) $
+         showString "Compose " . showsPrec1 11 (fmap Dummy x)
+
+instance (Functor f, Show1 f, Show1 g) => Show1 (Compose f g) where
+     showsPrec1 = showsPrec
+
+-- Functor instances
 
 instance (Functor f, Functor g) => Functor (Compose f g) where
     fmap f (Compose x) = Compose (fmap (fmap f) x)

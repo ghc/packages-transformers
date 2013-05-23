@@ -11,7 +11,9 @@
 
 module Data.Functor.Constant (
     Constant(..),
-   ) where
+  ) where
+
+import Data.Functor.Classes
 
 import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
@@ -20,6 +22,21 @@ import Data.Traversable (Traversable(traverse))
 
 -- | Constant functor.
 newtype Constant a b = Constant { getConstant :: a }
+    deriving (Eq, Ord)
+
+-- less verbose than the derived instance
+instance Show a => Show (Constant a b) where
+    showsPrec d (Constant x) = showParen (d > 10) $
+        showString "Constant " . showsPrec 11 x
+
+instance Eq a => Eq1 (Constant a) where
+    eq1 = (==)
+
+instance Ord a => Ord1 (Constant a) where
+    compare1 = compare
+
+instance Show a => Show1 (Constant a) where
+    showsPrec1 = showsPrec
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x

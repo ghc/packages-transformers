@@ -11,17 +11,38 @@
 
 module Data.Functor.Product (
     Product(..),
-   ) where
+  ) where
 
 import Control.Applicative
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fix (MonadFix(..))
 import Data.Foldable (Foldable(foldMap))
+import Data.Functor.Classes
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
 
 -- | Lifted product of functors.
 data Product f g a = Pair (f a) (g a)
+
+instance (Eq1 f, Eq1 g, Eq a) => Eq (Product f g a) where
+    Pair x1 y1 == Pair x2 y2 = eq1 x1 x2 && eq1 y1 y2
+
+instance (Ord1 f, Ord1 g, Ord a) => Ord (Product f g a) where
+    compare (Pair x1 y1) (Pair x2 y2) =
+        compare1 x1 x2 `mappend` compare1 y1 y2
+
+instance (Show1 f, Show1 g, Show a) => Show (Product f g a) where
+    showsPrec d (Pair x y) = showParen (d > 10) $
+        showString "Pair " . showsPrec1 11 x . showChar ' ' . showsPrec1 11 y
+
+instance (Eq1 f, Eq1 g) => Eq1 (Product f g) where
+    eq1 = (==)
+
+instance (Ord1 f, Ord1 g) => Ord1 (Product f g) where
+    compare1 = compare
+
+instance (Show1 f, Show1 g) => Show1 (Product f g) where
+    showsPrec1 = showsPrec
 
 instance (Functor f, Functor g) => Functor (Product f g) where
     fmap f (Pair x y) = Pair (fmap f x) (fmap f y)
