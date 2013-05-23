@@ -24,18 +24,33 @@ import Data.Traversable (Traversable(traverse))
 -- but the composition of monads is not always a monad.
 newtype Compose f g a = Compose { getCompose :: f (g a) }
 
--- Show instance
+-- Instances of Prelude classes
 
--- kludge to get type with the same Show instance as g a
-newtype Dummy g a = Dummy (g a)
+-- kludge to get type with the same instances as g a
+newtype Apply g a = Apply (g a)
 
-instance (Show1 g, Show a) => Show (Dummy g a) where
-     showsPrec d (Dummy g) = showsPrec1 d g
+instance (Eq1 g, Eq a) => Eq (Apply g a) where
+     Apply x == Apply y = eq1 x y
+
+instance (Ord1 g, Ord a) => Ord (Apply g a) where
+     compare (Apply x) (Apply y) = compare1 x y
+
+instance (Show1 g, Show a) => Show (Apply g a) where
+     showsPrec d (Apply x) = showsPrec1 d x
+
+instance (Functor f, Eq1 f, Eq1 g, Eq a) => Eq (Compose f g a) where
+     Compose x == Compose y = eq1 (fmap Apply x) (fmap Apply y)
+
+instance (Functor f, Ord1 f, Ord1 g, Ord a) => Ord (Compose f g a) where
+     compare (Compose x) (Compose y) = compare1 (fmap Apply x) (fmap Apply y)
 
 instance (Functor f, Show1 f, Show1 g, Show a) => Show (Compose f g a) where
      showsPrec d (Compose x) = showParen (d > 10) $
-         showString "Compose " . showsPrec1 11 (fmap Dummy x)
+         showString "Compose " . showsPrec1 11 (fmap Apply x)
 
+instance (Functor f, Eq1 f, Eq1 g) => Eq1 (Compose f g) where eq1 = (==)
+instance (Functor f, Ord1 f, Ord1 g) => Ord1 (Compose f g) where
+     compare1 = compare
 instance (Functor f, Show1 f, Show1 g) => Show1 (Compose f g) where
      showsPrec1 = showsPrec
 
