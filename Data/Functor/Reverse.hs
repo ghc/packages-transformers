@@ -13,6 +13,7 @@
 module Data.Functor.Reverse where
 
 import Control.Applicative.Backwards
+import Data.Functor.Classes
 
 import Prelude hiding (foldr, foldr1, foldl, foldl1)
 import Control.Applicative
@@ -23,6 +24,25 @@ import Data.Monoid
 -- | The same functor, but with 'Foldable' and 'Traversable' instances
 -- that process the elements in the reverse order.
 newtype Reverse f a = Reverse { getReverse :: f a }
+
+instance (Eq1 f, Eq a) => Eq (Reverse f a) where
+    Reverse x == Reverse y = eq1 x y
+
+instance (Ord1 f, Ord a) => Ord (Reverse f a) where
+    compare (Reverse x) (Reverse y) = compare1 x y
+
+instance (Show1 f, Show a) => Show (Reverse f a) where
+    showsPrec d (Reverse a) = showParen (d > 10) $
+        showString "Reverse " . showsPrec1 11 a
+
+instance Eq1 f => Eq1 (Reverse f) where
+    eq1 = (==)
+
+instance Ord1 f => Ord1 (Reverse f) where
+    compare1 = compare
+
+instance Show1 f => Show1 (Reverse f) where
+    showsPrec1 = showsPrec
 
 -- | Derived instance.
 instance (Functor f) => Functor (Reverse f) where

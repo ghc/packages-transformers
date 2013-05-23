@@ -44,6 +44,7 @@ module Control.Monad.Trans.Error (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Exception (IOException)
@@ -143,6 +144,25 @@ instance (Error e) => MonadPlus (Either e) where
 -- The 'return' function yields a successful computation, while @>>=@
 -- sequences two subcomputations, failing on the first error.
 newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
+
+instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where
+    ErrorT x == ErrorT y = eq1 x y
+
+instance (Ord e, Ord1 m, Ord a) => Ord (ErrorT e m a) where
+    compare (ErrorT x) (ErrorT y) = compare1 x y
+
+instance (Show e, Show1 m, Show a) => Show (ErrorT e m a) where
+    showsPrec d (ErrorT m) = showParen (d > 10) $
+        showString "ErrorT " . showsPrec1 11 m
+
+instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where
+    eq1 = (==)
+
+instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where
+    compare1 = compare
+
+instance (Show e, Show1 m) => Show1 (ErrorT e m) where
+    showsPrec1 = showsPrec
 
 -- | Map the unwrapped computation using the given function.
 --

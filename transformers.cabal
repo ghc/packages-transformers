@@ -65,6 +65,7 @@ library
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
+    Data.Functor.Classes
     Data.Functor.Compose
     Data.Functor.Constant
     Data.Functor.Identity
