@@ -9,25 +9,21 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Classes for monad transformers.
+-- The class of monad transformers.
 --
 -- A monad transformer makes a new monad out of an existing monad, such
 -- that computations of the old monad may be embedded in the new one.
 -- To construct a monad with a desired set of features, one typically
 -- starts with a base monad, such as @Identity@, @[]@ or 'IO', and
 -- applies a sequence of monad transformers.
---
--- Most monad transformer modules include the special case of applying the
--- transformer to @Identity@.  For example, @State s@ is an abbreviation
--- for @StateT s Identity@.
---
--- Each monad transformer also comes with an operation @run@/XXX/ to
--- unwrap the transformer, exposing a computation of the inner monad.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Class (
     -- * Transformer class
     MonadTrans(..)
+
+    -- * Conventions
+    -- $conventions
 
     -- * Examples
     -- ** Parsing
@@ -41,7 +37,7 @@ module Control.Monad.Trans.Class (
   ) where
 
 -- | The class of monad transformers.  Instances should satisfy the
--- following laws, which state that 'lift' is a transformer of monads:
+-- following laws, which state that 'lift' is a monad transformation:
 --
 -- * @'lift' . 'return' = 'return'@
 --
@@ -50,6 +46,30 @@ module Control.Monad.Trans.Class (
 class MonadTrans t where
     -- | Lift a computation from the argument monad to the constructed monad.
     lift :: Monad m => m a -> t m a
+
+{- $conventions
+Most monad transformer modules include the special case of applying the
+transformer to @Identity@.  For example, @State s@ is an abbreviation
+for @StateT s Identity@.
+
+Each monad transformer also comes with an operation @run@/XXX/@T@ to
+unwrap the transformer, exposing a computation of the inner monad.
+
+All of the monad transformers except @ContT@ are functors on the
+category of monads: in addition to defining a mapping of monads,
+they also define a mapping from transformations between base monads
+to transformations between transformed monads, called @map@/XXX/@T@.
+Thus given a monad transformation @t :: M a -> N a@, the combinator
+@mapStateT@ constructs a monad transformation
+
+> mapStateT t :: StateT s M a -> StateT s N a
+
+Each of the monad transformers introduces relavant operations.
+In a sequence of monad transformers, most of these operations.can be
+lifted through other transformers using 'lift' or the @map@/XXX/@T@
+combinator, but a few with more complex type signatures require
+specialized lifting combinators, called @lift@/Op/.
+-}
 
 {- $example1
 
