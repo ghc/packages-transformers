@@ -25,6 +25,7 @@ module Control.Monad.Trans.RWS.Strict (
     withRWS,
     -- * The RWST monad transformer
     RWST(..),
+    runRWST,
     evalRWST,
     execRWST,
     mapRWST,
@@ -115,7 +116,11 @@ withRWS = withRWST
 -- | A monad transformer adding reading an environment of type @r@,
 -- collecting an output of type @w@ and updating a state of type @s@
 -- to an inner monad @m@.
-newtype RWST r w s m a = RWST { runRWST :: r -> s -> m (a, s, w) }
+newtype RWST r w s m a = RWST (r -> s -> m (a, s, w))
+
+-- | The inverse of 'RWST'.
+runRWST :: RWST r w s m a -> r -> s -> m (a, s, w)
+runRWST (RWST m) = m
 
 -- | Evaluate a computation with the given initial state and environment,
 -- returning the final value and output, discarding the final state.

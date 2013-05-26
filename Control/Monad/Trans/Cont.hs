@@ -28,6 +28,7 @@ module Control.Monad.Trans.Cont (
     reset, shift,
     -- * The ContT monad transformer
     ContT(..),
+    runContT,
     evalContT,
     mapContT,
     withContT,
@@ -106,7 +107,12 @@ shift f = shiftT (f . (runIdentity .))
 
 -- | The continuation monad transformer.
 -- Can be used to add continuation handling to other monads.
-newtype ContT r m a = ContT { runContT :: (a -> m r) -> m r }
+newtype ContT r m a = ContT ((a -> m r) -> m r)
+
+-- | The result of running a CPS computation with a given final continuation.
+-- (The inverse of 'cont')
+runContT :: ContT r m a -> (a -> m r) -> m r
+runContT (ContT m) = m
 
 -- | The result of running a CPS computation with 'return' as the
 -- final continuation.

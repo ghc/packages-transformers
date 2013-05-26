@@ -21,6 +21,7 @@
 module Control.Monad.Trans.Maybe (
     -- * The MaybeT monad transformer
     MaybeT(..),
+    runMaybeT,
     mapMaybeT,
     -- * Lifting other operations
     liftCallCC,
@@ -48,7 +49,7 @@ import Data.Traversable (Traversable(traverse))
 --
 -- The 'return' function yields a successful computation, while @>>=@
 -- sequences two subcomputations, failing on the first error.
-newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
+newtype MaybeT m a = MaybeT (m (Maybe a))
 
 instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
     MaybeT x == MaybeT y = eq1 x y
@@ -63,6 +64,10 @@ instance (Show1 m, Show a) => Show (MaybeT m a) where
 instance Eq1 m => Eq1 (MaybeT m) where eq1 = (==)
 instance Ord1 m => Ord1 (MaybeT m) where compare1 = compare
 instance Show1 m => Show1 (MaybeT m) where showsPrec1 = showsPrec
+
+-- | The inverse of 'MaybeT'.
+runMaybeT :: MaybeT m a -> m (Maybe a)
+runMaybeT (MaybeT m) = m
 
 -- | Transform the computation inside a @MaybeT@.
 --

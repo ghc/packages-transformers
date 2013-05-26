@@ -10,9 +10,11 @@
 -- Adding a new kind of pure computation to an applicative functor.
 
 module Control.Applicative.Lift (
-    Lift(..), unLift,
+    Lift(..),
+    unLift,
     -- * Collecting errors
-    Errors, failure
+    Errors,
+    failure
   ) where
 
 import Data.Functor.Classes

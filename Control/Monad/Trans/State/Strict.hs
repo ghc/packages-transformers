@@ -36,6 +36,7 @@ module Control.Monad.Trans.State.Strict (
     -- * The StateT monad transformer
     StateT(..),
     evalStateT,
+    runStateT,
     execStateT,
     mapStateT,
     withStateT,
@@ -134,7 +135,12 @@ withState = withStateT
 -- The 'return' function leaves the state unchanged, while @>>=@ uses
 -- the final state of the first computation as the initial state of
 -- the second.
-newtype StateT s m a = StateT { runStateT :: s -> m (a,s) }
+newtype StateT s m a = StateT (s -> m (a,s))
+
+-- | Evaluate a state computation with the given initial state
+-- and return the final value and state. (inverse of 'StateT')
+runStateT :: StateT s m a -> s -> m (a,s)
+runStateT (StateT m) = m
 
 -- | Evaluate a state computation with the given initial state
 -- and return the final value, discarding the final state.
