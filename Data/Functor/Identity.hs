@@ -22,6 +22,7 @@
 
 module Data.Functor.Identity (
     Identity(..),
+    runIdentity,
   ) where
 
 import Data.Functor.Classes
@@ -32,13 +33,12 @@ import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
 -- | Identity functor and monad.
-newtype Identity a = Identity { runIdentity :: a }
-    deriving (Eq, Ord)
+newtype Identity a = Identity a
+    deriving (Eq, Ord, Show)
 
--- less verbose than the derived instance
-instance Show a => Show (Identity a) where
-    showsPrec d (Identity x) = showParen (d > 10) $
-        showString "Identity " . showsPrec 11 x
+-- | Inverse of 'Identity'.
+runIdentity :: Identity a -> a
+runIdentity (Identity x) = x
 
 instance Eq1 Identity where eq1 = (==)
 instance Ord1 Identity where compare1 = compare

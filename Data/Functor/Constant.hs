@@ -11,6 +11,7 @@
 
 module Data.Functor.Constant (
     Constant(..),
+    getConstant,
   ) where
 
 import Data.Functor.Classes
@@ -21,13 +22,12 @@ import Data.Monoid (Monoid(..))
 import Data.Traversable (Traversable(traverse))
 
 -- | Constant functor.
-newtype Constant a b = Constant { getConstant :: a }
-    deriving (Eq, Ord)
+newtype Constant a b = Constant a
+    deriving (Eq, Ord, Show)
 
--- less verbose than the derived instance
-instance Show a => Show (Constant a b) where
-    showsPrec d (Constant x) = showParen (d > 10) $
-        showString "Constant " . showsPrec 11 x
+-- | Inverse of 'Constant'.
+getConstant :: Constant a b -> a
+getConstant (Constant x) = x
 
 instance Eq a => Eq1 (Constant a) where eq1 = (==)
 instance Ord a => Ord1 (Constant a) where compare1 = compare

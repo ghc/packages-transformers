@@ -10,7 +10,10 @@
 -- Making functors with an 'Applicative' instance that performs actions
 -- in the reverse order.
 
-module Control.Applicative.Backwards where
+module Control.Applicative.Backwards (
+    Backwards(..),
+    forwards,
+  ) where
 
 import Data.Functor.Classes
 
@@ -21,7 +24,11 @@ import Data.Traversable
 
 -- | The same functor, but with an 'Applicative' instance that performs
 -- actions in the reverse order.
-newtype Backwards f a = Backwards { forwards :: f a }
+newtype Backwards f a = Backwards (f a)
+
+-- | Inverse of 'Backwards'.
+forwards :: Backwards f a -> f a
+forwards (Backwards x) = x
 
 instance (Eq1 f, Eq a) => Eq (Backwards f a) where
     Backwards x == Backwards y = eq1 x y
