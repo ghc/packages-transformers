@@ -34,7 +34,7 @@ import Data.Traversable (Traversable(traverse))
 
 -- | Identity functor and monad.
 newtype Identity a = Identity a
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord, Read, Show)
 
 -- | Inverse of 'Identity'.
 runIdentity :: Identity a -> a
@@ -42,6 +42,7 @@ runIdentity (Identity x) = x
 
 instance Eq1 Identity where eq1 = (==)
 instance Ord1 Identity where compare1 = compare
+instance Read1 Identity where readsPrec1 = readsPrec
 instance Show1 Identity where showsPrec1 = showsPrec
 
 -- ---------------------------------------------------------------------------

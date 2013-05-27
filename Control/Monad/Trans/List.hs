@@ -44,12 +44,15 @@ instance (Eq1 m, Eq a) => Eq (ListT m a) where
 instance (Ord1 m, Ord a) => Ord (ListT m a) where
     compare (ListT x) (ListT y) = compare1 x y
 
+instance (Read1 m, Read a) => Read (ListT m a) where
+    readsPrec = readsData $ readsUnary1 "ListT" ListT
+
 instance (Show1 m, Show a) => Show (ListT m a) where
-    showsPrec d (ListT m) = showParen (d > 10) $
-        showString "ListT " . showsPrec1 11 m
+    showsPrec d (ListT m) = showsUnary1 "ListT" d m
 
 instance Eq1 m => Eq1 (ListT m) where eq1 = (==)
 instance Ord1 m => Ord1 (ListT m) where compare1 = compare
+instance Read1 m => Read1 (ListT m) where readsPrec1 = readsPrec
 instance Show1 m => Show1 (ListT m) where showsPrec1 = showsPrec
 
 -- | The inverse of 'ListT'.

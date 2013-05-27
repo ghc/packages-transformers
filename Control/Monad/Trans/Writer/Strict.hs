@@ -103,12 +103,15 @@ instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where
 instance (Ord w, Ord1 m, Ord a) => Ord (WriterT w m a) where
     compare (WriterT x) (WriterT y) = compare1 x y
 
+instance (Read w, Read1 m, Read a) => Read (WriterT w m a) where
+    readsPrec = readsData $ readsUnary1 "WriterT" WriterT
+
 instance (Show w, Show1 m, Show a) => Show (WriterT w m a) where
-    showsPrec d (WriterT m) = showParen (d > 10) $
-        showString "WriterT " . showsPrec1 11 m
+    showsPrec d (WriterT m) = showsUnary1 "WriterT" d m
 
 instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where eq1 = (==)
 instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where compare1 = compare
+instance (Read w, Read1 m) => Read1 (WriterT w m) where readsPrec1 = readsPrec
 instance (Show w, Show1 m) => Show1 (WriterT w m) where showsPrec1 = showsPrec
 
 -- | The inverse of 'WriterT'.
