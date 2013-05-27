@@ -22,7 +22,7 @@ import Data.Functor.Classes
 import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Constant
-import Data.Monoid (Monoid)
+import Data.Monoid (Monoid(..))
 import Data.Traversable (Traversable(traverse))
 
 -- | Applicative functor formed by adding pure computations to a given
@@ -40,11 +40,13 @@ instance (Ord1 f, Ord a) => Ord (Lift f a) where
     compare (Other _) (Pure _) = GT
     compare (Other y1) (Other y2) = compare1 y1 y2
 
+instance (Read1 f, Read a) => Read (Lift f a) where
+    readsPrec = readsData $
+        readsUnary "Pure" Pure `mappend` readsUnary1 "Other" Other
+
 instance (Show1 f, Show a) => Show (Lift f a) where
-    showsPrec d (Pure x) = showParen (d > 10) $
-        showString "Pure " . showsPrec 11 x
-    showsPrec d (Other y) = showParen (d > 10) $
-        showString "Other " . showsPrec1 11 y
+    showsPrec d (Pure x) = showsUnary "Pure" d x
+    showsPrec d (Other y) = showsUnary1 "Other" d y
 
 instance Eq1 f => Eq1 (Lift f) where eq1 = (==)
 instance Ord1 f => Ord1 (Lift f) where compare1 = compare

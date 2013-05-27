@@ -57,12 +57,15 @@ instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
 instance (Ord1 m, Ord a) => Ord (MaybeT m a) where
     compare (MaybeT x) (MaybeT y) = compare1 x y
 
+instance (Read1 m, Read a) => Read (MaybeT m a) where
+    readsPrec = readsData $ readsUnary1 "MaybeT" MaybeT
+
 instance (Show1 m, Show a) => Show (MaybeT m a) where
-    showsPrec d (MaybeT m) = showParen (d > 10) $
-        showString "MaybeT " . showsPrec1 11 m
+    showsPrec d (MaybeT m) = showsUnary1 "MaybeT" d m
 
 instance Eq1 m => Eq1 (MaybeT m) where eq1 = (==)
 instance Ord1 m => Ord1 (MaybeT m) where compare1 = compare
+instance Read1 m => Read1 (MaybeT m) where readsPrec1 = readsPrec
 instance Show1 m => Show1 (MaybeT m) where showsPrec1 = showsPrec
 
 -- | The inverse of 'MaybeT'.

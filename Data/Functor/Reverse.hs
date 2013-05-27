@@ -38,12 +38,15 @@ instance (Eq1 f, Eq a) => Eq (Reverse f a) where
 instance (Ord1 f, Ord a) => Ord (Reverse f a) where
     compare (Reverse x) (Reverse y) = compare1 x y
 
+instance (Read1 f, Read a) => Read (Reverse f a) where
+    readsPrec = readsData $ readsUnary1 "Reverse" Reverse
+
 instance (Show1 f, Show a) => Show (Reverse f a) where
-    showsPrec d (Reverse a) = showParen (d > 10) $
-        showString "Reverse " . showsPrec1 11 a
+    showsPrec d (Reverse x) = showsUnary1 "Reverse" d x
 
 instance Eq1 f => Eq1 (Reverse f) where eq1 = (==)
 instance Ord1 f => Ord1 (Reverse f) where compare1 = compare
+instance Read1 f => Read1 (Reverse f) where readsPrec1 = readsPrec
 instance Show1 f => Show1 (Reverse f) where showsPrec1 = showsPrec
 
 -- | Derived instance.
