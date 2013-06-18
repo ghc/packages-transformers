@@ -42,10 +42,10 @@ instance (Read1 f, Read a) => Read (Backwards f a) where
 instance (Show1 f, Show a) => Show (Backwards f a) where
     showsPrec d (Backwards x) = showsUnary1 "Backwards" d x
 
-instance Eq1 f => Eq1 (Backwards f) where eq1 = (==)
-instance Ord1 f => Ord1 (Backwards f) where compare1 = compare
-instance Read1 f => Read1 (Backwards f) where readsPrec1 = readsPrec
-instance Show1 f => Show1 (Backwards f) where showsPrec1 = showsPrec
+instance (Eq1 f) => Eq1 (Backwards f) where eq1 = (==)
+instance (Ord1 f) => Ord1 (Backwards f) where compare1 = compare
+instance (Read1 f) => Read1 (Backwards f) where readsPrec1 = readsPrec
+instance (Show1 f) => Show1 (Backwards f) where showsPrec1 = showsPrec
 
 -- | Derived instance.
 instance (Functor f) => Functor (Backwards f) where

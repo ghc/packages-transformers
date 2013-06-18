@@ -50,10 +50,10 @@ instance (Read1 m, Read a) => Read (ListT m a) where
 instance (Show1 m, Show a) => Show (ListT m a) where
     showsPrec d (ListT m) = showsUnary1 "ListT" d m
 
-instance Eq1 m => Eq1 (ListT m) where eq1 = (==)
-instance Ord1 m => Ord1 (ListT m) where compare1 = compare
-instance Read1 m => Read1 (ListT m) where readsPrec1 = readsPrec
-instance Show1 m => Show1 (ListT m) where showsPrec1 = showsPrec
+instance (Eq1 m) => Eq1 (ListT m) where eq1 = (==)
+instance (Ord1 m) => Ord1 (ListT m) where compare1 = compare
+instance (Read1 m) => Read1 (ListT m) where readsPrec1 = readsPrec
+instance (Show1 m) => Show1 (ListT m) where showsPrec1 = showsPrec
 
 -- | The inverse of 'ListT'.
 runListT :: ListT m a -> m [a]
@@ -68,10 +68,10 @@ mapListT f m = ListT $ f (runListT m)
 instance (Functor m) => Functor (ListT m) where
     fmap f = mapListT $ fmap $ map f
 
-instance Foldable f => Foldable (ListT f) where
+instance (Foldable f) => Foldable (ListT f) where
     foldMap f (ListT a) = foldMap (foldMap f) a
 
-instance Traversable f => Traversable (ListT f) where
+instance (Traversable f) => Traversable (ListT f) where
     traverse f (ListT a) = ListT <$> traverse (traverse f) a
 
 instance (Applicative m) => Applicative (ListT m) where
@@ -108,10 +108,10 @@ instance (MonadIO m) => MonadIO (ListT m) where
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: CallCC m [a] [b] -> CallCC (ListT m) a b
 liftCallCC callCC f = ListT $
-    callCC $ \c ->
-    runListT (f (\a -> ListT $ c [a]))
+    callCC $ \ c ->
+    runListT (f (\ a -> ListT $ c [a]))
 
 -- | Lift a @catchError@ operation to the new monad.
 liftCatch :: Catch e m [a] -> Catch e (ListT m) a
 liftCatch catchError m h = ListT $ runListT m
-    `catchError` \e -> runListT (h e)
+    `catchError` \ e -> runListT (h e)

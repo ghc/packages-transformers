@@ -27,19 +27,19 @@ module Data.Functor.Classes (
 
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where
-    eq1 :: Eq a => f a -> f a -> Bool
+    eq1 :: (Eq a) => f a -> f a -> Bool
 
 -- | Lifting of the 'Ord' class to unary type constructors.
-class Eq1 f => Ord1 f where
-    compare1 :: Ord a => f a -> f a -> Ordering
+class (Eq1 f) => Ord1 f where
+    compare1 :: (Ord a) => f a -> f a -> Ordering
 
 -- | Lifting of the 'Read' class to unary type constructors.
 class Read1 f where
-    readsPrec1 :: Read a => Int -> ReadS (f a)
+    readsPrec1 :: (Read a) => Int -> ReadS (f a)
 
 -- | Lifting of the 'Show' class to unary type constructors.
 class Show1 f where
-    showsPrec1 :: Show a => Int -> f a -> ShowS
+    showsPrec1 :: (Show a) => Int -> f a -> ShowS
 
 -- Instances for Prelude type constructors
 
@@ -53,15 +53,15 @@ instance Ord1 [] where compare1 = compare
 instance Read1 [] where readsPrec1 = readsPrec
 instance Show1 [] where showsPrec1 = showsPrec
 
-instance Eq a => Eq1 ((,) a) where eq1 = (==)
-instance Ord a => Ord1 ((,) a) where compare1 = compare
-instance Read a => Read1 ((,) a) where readsPrec1 = readsPrec
-instance Show a => Show1 ((,) a) where showsPrec1 = showsPrec
+instance (Eq a) => Eq1 ((,) a) where eq1 = (==)
+instance (Ord a) => Ord1 ((,) a) where compare1 = compare
+instance (Read a) => Read1 ((,) a) where readsPrec1 = readsPrec
+instance (Show a) => Show1 ((,) a) where showsPrec1 = showsPrec
 
-instance Eq a => Eq1 (Either a) where eq1 = (==)
-instance Ord a => Ord1 (Either a) where compare1 = compare
-instance Read a => Read1 (Either a) where readsPrec1 = readsPrec
-instance Show a => Show1 (Either a) where showsPrec1 = showsPrec
+instance (Eq a) => Eq1 (Either a) where eq1 = (==)
+instance (Ord a) => Ord1 (Either a) where compare1 = compare
+instance (Read a) => Read1 (Either a) where readsPrec1 = readsPrec
+instance (Show a) => Show1 (Either a) where showsPrec1 = showsPrec
 
 -- Building blocks
 
@@ -72,11 +72,11 @@ instance Show a => Show1 (Either a) where showsPrec1 = showsPrec
 -- @mappend@ from the @Monoid@ class.
 readsData :: (String -> ReadS a) -> Int -> ReadS a
 readsData reader d =
-    readParen (d > 10) $ \r -> [res | (kw,s) <- lex r, res <- reader kw s]
+    readParen (d > 10) $ \ r -> [res | (kw,s) <- lex r, res <- reader kw s]
 
 -- | @'readsUnary' n c n'@ matches the name of a unary data constructor
 -- and then parses its argument using 'readsPrec'.
-readsUnary :: Read a => String -> (a -> t) -> String -> ReadS t
+readsUnary :: (Read a) => String -> (a -> t) -> String -> ReadS t
 readsUnary name cons kw s =
     [(cons x,t) | kw == name, (x,t) <- readsPrec 11 s]
 
@@ -96,7 +96,7 @@ readsBinary1 name cons kw s =
 
 -- | @'showsUnary' n d x@ produces the string representation of a unary data
 -- constructor with name @n@ and argument @x@, in precedence context @d@.
-showsUnary :: Show a => String -> Int -> a -> ShowS
+showsUnary :: (Show a) => String -> Int -> a -> ShowS
 showsUnary name d x = showParen (d > 10) $
     showString name . showChar ' ' . showsPrec 11 x
 

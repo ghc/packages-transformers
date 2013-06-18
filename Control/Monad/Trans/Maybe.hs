@@ -63,10 +63,10 @@ instance (Read1 m, Read a) => Read (MaybeT m a) where
 instance (Show1 m, Show a) => Show (MaybeT m a) where
     showsPrec d (MaybeT m) = showsUnary1 "MaybeT" d m
 
-instance Eq1 m => Eq1 (MaybeT m) where eq1 = (==)
-instance Ord1 m => Ord1 (MaybeT m) where compare1 = compare
-instance Read1 m => Read1 (MaybeT m) where readsPrec1 = readsPrec
-instance Show1 m => Show1 (MaybeT m) where showsPrec1 = showsPrec
+instance (Eq1 m) => Eq1 (MaybeT m) where eq1 = (==)
+instance (Ord1 m) => Ord1 (MaybeT m) where compare1 = compare
+instance (Read1 m) => Read1 (MaybeT m) where readsPrec1 = readsPrec
+instance (Show1 m) => Show1 (MaybeT m) where showsPrec1 = showsPrec
 
 -- | The inverse of 'MaybeT'.
 runMaybeT :: MaybeT m a -> m (Maybe a)
@@ -132,13 +132,13 @@ liftCatch :: Catch e m (Maybe a) -> Catch e (MaybeT m) a
 liftCatch f m h = MaybeT $ f (runMaybeT m) (runMaybeT . h)
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m => Listen w m (Maybe a) -> Listen w (MaybeT m) a
+liftListen :: (Monad m) => Listen w m (Maybe a) -> Listen w (MaybeT m) a
 liftListen listen = mapMaybeT $ \ m -> do
     (a, w) <- listen m
     return $! fmap (\ r -> (r, w)) a
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => Pass w m (Maybe a) -> Pass w (MaybeT m) a
+liftPass :: (Monad m) => Pass w m (Maybe a) -> Pass w (MaybeT m) a
 liftPass pass = mapMaybeT $ \ m -> pass $ do
     a <- m
     return $! case a of

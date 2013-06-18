@@ -29,10 +29,10 @@ newtype Constant a b = Constant a
 getConstant :: Constant a b -> a
 getConstant (Constant x) = x
 
-instance Eq a => Eq1 (Constant a) where eq1 = (==)
-instance Ord a => Ord1 (Constant a) where compare1 = compare
-instance Read a => Read1 (Constant a) where readsPrec1 = readsPrec
-instance Show a => Show1 (Constant a) where showsPrec1 = showsPrec
+instance (Eq a) => Eq1 (Constant a) where eq1 = (==)
+instance (Ord a) => Ord1 (Constant a) where compare1 = compare
+instance (Read a) => Read1 (Constant a) where readsPrec1 = readsPrec
+instance (Show a) => Show1 (Constant a) where showsPrec1 = showsPrec
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x
