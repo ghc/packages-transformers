@@ -65,7 +65,7 @@ type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair.
 -- (The inverse of 'runWriter'.)
-writer :: Monad m => (a, w) -> WriterT w m a
+writer :: (Monad m) => (a, w) -> WriterT w m a
 writer = WriterT . return
 
 -- | Unwrap a writer computation as a (result, output) pair.
@@ -121,7 +121,7 @@ runWriterT (WriterT m) = m
 -- | Extract the output from a writer computation.
 --
 -- * @'execWriterT' m = 'liftM' 'snd' ('runWriterT' m)@
-execWriterT :: Monad m => WriterT w m a -> m w
+execWriterT :: (Monad m) => WriterT w m a -> m w
 execWriterT m = do
     (_, w) <- runWriterT m
     return w
@@ -141,7 +141,7 @@ instance (Foldable f) => Foldable (WriterT w f) where
 
 instance (Traversable f) => Traversable (WriterT w f) where
     traverse f = fmap WriterT . traverse f' . runWriterT where
-       f' (a, b) = fmap (\c -> (c, b)) (f a)
+       f' (a, b) = fmap (\ c -> (c, b)) (f a)
 
 instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
     pure a  = WriterT $ pure (a, mempty)
@@ -182,7 +182,7 @@ tell w = writer ((), w)
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
 --
--- * @'runWriterT' ('listen' m) = 'liftM' (\\(a, w) -> ((a, w), w)) ('runWriterT' m)@
+-- * @'runWriterT' ('listen' m) = 'liftM' (\\ (a, w) -> ((a, w), w)) ('runWriterT' m)@
 listen :: (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
 listen m = WriterT $ do
     (a, w) <- runWriterT m
@@ -193,7 +193,7 @@ listen m = WriterT $ do
 --
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 --
--- * @'runWriterT' ('listens' f m) = 'liftM' (\\(a, w) -> ((a, f w), w)) ('runWriterT' m)@
+-- * @'runWriterT' ('listens' f m) = 'liftM' (\\ (a, w) -> ((a, f w), w)) ('runWriterT' m)@
 listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 listens f m = WriterT $ do
     (a, w) <- runWriterT m
@@ -203,7 +203,7 @@ listens f m = WriterT $ do
 -- a value and a function, and returns the value, applying the function
 -- to the output.
 --
--- * @'runWriterT' ('pass' m) = 'liftM' (\\((a, f), w) -> (a, f w)) ('runWriterT' m)@
+-- * @'runWriterT' ('pass' m) = 'liftM' (\\ ((a, f), w) -> (a, f w)) ('runWriterT' m)@
 pass :: (Monoid w, Monad m) => WriterT w m (a, w -> w) -> WriterT w m a
 pass m = WriterT $ do
     ((a, f), w) <- runWriterT m
@@ -213,9 +213,9 @@ pass m = WriterT $ do
 -- applies the function @f@ to its output, leaving the return value
 -- unchanged.
 --
--- * @'censor' f m = 'pass' ('liftM' (\\x -> (x,f)) m)@
+-- * @'censor' f m = 'pass' ('liftM' (\\ x -> (x,f)) m)@
 --
--- * @'runWriterT' ('censor' f m) = 'liftM' (\\(a, w) -> (a, f w)) ('runWriterT' m)@
+-- * @'runWriterT' ('censor' f m) = 'liftM' (\\ (a, w) -> (a, f w)) ('runWriterT' m)@
 censor :: (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
 censor f m = WriterT $ do
     (a, w) <- runWriterT m
@@ -224,10 +224,10 @@ censor f m = WriterT $ do
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: (Monoid w) => CallCC m (a,w) (b,w) -> CallCC (WriterT w m) a b
 liftCallCC callCC f = WriterT $
-    callCC $ \c ->
-    runWriterT (f (\a -> WriterT $ c (a, mempty)))
+    callCC $ \ c ->
+    runWriterT (f (\ a -> WriterT $ c (a, mempty)))
 
 -- | Lift a @catchError@ operation to the new monad.
 liftCatch :: Catch e m (a,w) -> Catch e (WriterT w m) a
 liftCatch catchError m h =
-    WriterT $ runWriterT m `catchError` \e -> runWriterT (h e)
+    WriterT $ runWriterT m `catchError` \ e -> runWriterT (h e)

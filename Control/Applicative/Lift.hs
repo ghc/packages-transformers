@@ -48,9 +48,10 @@ instance (Show1 f, Show a) => Show (Lift f a) where
     showsPrec d (Pure x) = showsUnary "Pure" d x
     showsPrec d (Other y) = showsUnary1 "Other" d y
 
-instance Eq1 f => Eq1 (Lift f) where eq1 = (==)
-instance Ord1 f => Ord1 (Lift f) where compare1 = compare
-instance Show1 f => Show1 (Lift f) where showsPrec1 = showsPrec
+instance (Eq1 f) => Eq1 (Lift f) where eq1 = (==)
+instance (Ord1 f) => Ord1 (Lift f) where compare1 = compare
+instance (Read1 f) => Read1 (Lift f) where readsPrec1 = readsPrec
+instance (Show1 f) => Show1 (Lift f) where showsPrec1 = showsPrec
 
 instance (Functor f) => Functor (Lift f) where
     fmap f (Pure x) = Pure (f x)
@@ -73,14 +74,14 @@ instance (Applicative f) => Applicative (Lift f) where
     Other f <*> Other y = Other (f <*> y)
 
 -- | A combination is 'Pure' only either part is.
-instance Alternative f => Alternative (Lift f) where
+instance (Alternative f) => Alternative (Lift f) where
     empty = Other empty
     Pure x <|> _ = Pure x
     Other _ <|> Pure y = Pure y
     Other x <|> Other y = Other (x <|> y)
 
 -- | Projection to the other functor.
-unLift :: Applicative f => Lift f a -> f a
+unLift :: (Applicative f) => Lift f a -> f a
 unLift (Pure x) = pure x
 unLift (Other e) = e
 
@@ -91,5 +92,5 @@ unLift (Other e) = e
 type Errors e = Lift (Constant e)
 
 -- | Report an error.
-failure :: Monoid e => e -> Errors e a
+failure :: (Monoid e) => e -> Errors e a
 failure e = Other (Constant e)

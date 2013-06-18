@@ -59,7 +59,7 @@ type Cont r = ContT r Identity
 -- | Construct a continuation-passing computation from a function.
 -- (The inverse of 'runCont')
 cont :: ((a -> r) -> r) -> Cont r a
-cont f = ContT (\c -> Identity (f (runIdentity . c)))
+cont f = ContT (\ c -> Identity (f (runIdentity . c)))
 
 -- | The result of running a CPS computation with a given final continuation.
 -- (The inverse of 'cont')
@@ -118,7 +118,7 @@ runContT (ContT m) = m
 -- final continuation.
 --
 -- * @'evalContT' ('lift' m) = m@
-evalContT :: Monad m => ContT r m r -> m r
+evalContT :: (Monad m) => ContT r m r -> m r
 evalContT m = runContT m return
 
 -- | Apply a function to transform the result of a continuation-passing
@@ -136,15 +136,15 @@ withContT :: ((b -> m r) -> (a -> m r)) -> ContT r m a -> ContT r m b
 withContT f m = ContT $ runContT m . f
 
 instance Functor (ContT r m) where
-    fmap f m = ContT $ \c -> runContT m (c . f)
+    fmap f m = ContT $ \ c -> runContT m (c . f)
 
 instance Applicative (ContT r m) where
     pure x  = ContT ($ x)
-    f <*> v = ContT $ \c -> runContT f $ \ g -> runContT v (c . g)
+    f <*> v = ContT $ \ c -> runContT f $ \ g -> runContT v (c . g)
 
 instance Monad (ContT r m) where
     return x = ContT ($ x)
-    m >>= k  = ContT $ \c -> runContT m (\x -> runContT (k x) c)
+    m >>= k  = ContT $ \ c -> runContT m (\ x -> runContT (k x) c)
 
 instance MonadTrans (ContT r) where
     lift m = ContT (m >>=)
@@ -168,13 +168,13 @@ instance (MonadIO m) => MonadIO (ContT r m) where
 -- within its scope will escape from the computation, even if it is many
 -- layers deep within nested computations.
 callCC :: ((a -> ContT r m b) -> ContT r m a) -> ContT r m a
-callCC f = ContT $ \c -> runContT (f (\x -> ContT $ \_ -> c x)) c
+callCC f = ContT $ \ c -> runContT (f (\ x -> ContT $ \ _ -> c x)) c
 
 -- | @'resetT' m@ delimits the continuation of any 'shiftT' inside @m@.
 --
 -- * @'resetT' ('lift' m) = 'lift' m@
 --
-resetT :: Monad m => ContT r m r -> ContT r' m r
+resetT :: (Monad m) => ContT r m r -> ContT r' m r
 resetT = lift . evalContT
 
 -- | @'shiftT' f@ captures the continuation up to the nearest enclosing
@@ -182,12 +182,12 @@ resetT = lift . evalContT
 --
 -- * @'resetT' ('shiftT' f >>= k) = 'resetT' (f ('evalContT' . k))@
 --
-shiftT :: Monad m => ((a -> m r) -> ContT r m r) -> ContT r m a
+shiftT :: (Monad m) => ((a -> m r) -> ContT r m r) -> ContT r m a
 shiftT f = ContT (evalContT . f)
 
 -- | @'liftLocal' ask local@ yields a @local@ function for @'ContT' r m@.
 liftLocal :: (Monad m) => m r' -> ((r' -> r') -> m r -> m r) ->
     (r' -> r') -> ContT r m a -> ContT r m a
-liftLocal ask local f m = ContT $ \c -> do
+liftLocal ask local f m = ContT $ \ c -> do
     r <- ask
     local f (runContT m (local (const r) . c))

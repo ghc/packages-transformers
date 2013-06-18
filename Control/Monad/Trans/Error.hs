@@ -61,7 +61,7 @@ import System.IO.Error
 
 instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
-    m `mplus` n = m `catchIOError` \_ -> n
+    m `mplus` n = m `catchIOError` \ _ -> n
 
 #if !(MIN_VERSION_base(4,4,0))
 -- exported by System.IO.Error from base-4.4
@@ -87,7 +87,7 @@ instance Error IOException where
     strMsg = userError
 
 -- | A string can be thrown as an error.
-instance ErrorList a => Error [a] where
+instance (ErrorList a) => Error [a] where
     strMsg = listMsg
 
 -- | Workaround so that we can have a Haskell 98 instance @'Error' 'String'@.
@@ -219,7 +219,7 @@ instance (Monad m, Error e) => MonadPlus (ErrorT e m) where
             Right r -> return (Right r)
 
 instance (MonadFix m, Error e) => MonadFix (ErrorT e m) where
-    mfix f = ErrorT $ mfix $ \a -> runErrorT $ f $ case a of
+    mfix f = ErrorT $ mfix $ \ a -> runErrorT $ f $ case a of
         Right r -> r
         _       -> error "empty mfix argument"
 
@@ -258,17 +258,17 @@ m `catchError` h = ErrorT $ do
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: CallCC m (Either e a) (Either e b) -> CallCC (ErrorT e m) a b
 liftCallCC callCC f = ErrorT $
-    callCC $ \c ->
-    runErrorT (f (\a -> ErrorT $ c (Right a)))
+    callCC $ \ c ->
+    runErrorT (f (\ a -> ErrorT $ c (Right a)))
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m => Listen w m (Either e a) -> Listen w (ErrorT e m) a
+liftListen :: (Monad m) => Listen w m (Either e a) -> Listen w (ErrorT e m) a
 liftListen listen = mapErrorT $ \ m -> do
     (a, w) <- listen m
     return $! fmap (\ r -> (r, w)) a
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => Pass w m (Either e a) -> Pass w (ErrorT e m) a
+liftPass :: (Monad m) => Pass w m (Either e a) -> Pass w (ErrorT e m) a
 liftPass pass = mapErrorT $ \ m -> pass $ do
     a <- m
     return $! case a of

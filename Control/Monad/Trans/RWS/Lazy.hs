@@ -148,17 +148,17 @@ execRWST m r s = do
 --
 -- * @'runRWST' ('mapRWST' f m) r s = f ('runRWST' m r s)@
 mapRWST :: (m (a, s, w) -> n (b, s, w')) -> RWST r w s m a -> RWST r w' s n b
-mapRWST f m = RWST $ \r s -> f (runRWST m r s)
+mapRWST f m = RWST $ \ r s -> f (runRWST m r s)
 
 -- | @'withRWST' f m@ executes action @m@ with an initial environment
 -- and state modified by applying @f@.
 --
 -- * @'runRWST' ('withRWST' f m) r s = 'uncurry' ('runRWST' m) (f r s)@
 withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
-withRWST f m = RWST $ \r s -> uncurry (runRWST m) (f r s)
+withRWST f m = RWST $ \ r s -> uncurry (runRWST m) (f r s)
 
 instance (Functor m) => Functor (RWST r w s m) where
-    fmap f m = RWST $ \r s ->
+    fmap f m = RWST $ \ r s ->
         fmap (\ ~(a, s', w) -> (f a, s', w)) $ runRWST m r s
 
 instance (Monoid w, Functor m, Monad m) => Applicative (RWST r w s m) where
@@ -170,22 +170,22 @@ instance (Monoid w, Functor m, MonadPlus m) => Alternative (RWST r w s m) where
     (<|>) = mplus
 
 instance (Monoid w, Monad m) => Monad (RWST r w s m) where
-    return a = RWST $ \_ s -> return (a, s, mempty)
-    m >>= k  = RWST $ \r s -> do
+    return a = RWST $ \ _ s -> return (a, s, mempty)
+    m >>= k  = RWST $ \ r s -> do
         ~(a, s', w)  <- runRWST m r s
         ~(b, s'',w') <- runRWST (k a) r s'
         return (b, s'', w `mappend` w')
-    fail msg = RWST $ \_ _ -> fail msg
+    fail msg = RWST $ \ _ _ -> fail msg
 
 instance (Monoid w, MonadPlus m) => MonadPlus (RWST r w s m) where
-    mzero       = RWST $ \_ _ -> mzero
-    m `mplus` n = RWST $ \r s -> runRWST m r s `mplus` runRWST n r s
+    mzero       = RWST $ \ _ _ -> mzero
+    m `mplus` n = RWST $ \ r s -> runRWST m r s `mplus` runRWST n r s
 
 instance (Monoid w, MonadFix m) => MonadFix (RWST r w s m) where
-    mfix f = RWST $ \r s -> mfix $ \ ~(a, _, _) -> runRWST (f a) r s
+    mfix f = RWST $ \ r s -> mfix $ \ ~(a, _, _) -> runRWST (f a) r s
 
 instance (Monoid w) => MonadTrans (RWST r w s) where
-    lift m = RWST $ \_ s -> do
+    lift m = RWST $ \ _ s -> do
         a <- m
         return (a, s, mempty)
 
@@ -201,37 +201,37 @@ reader = asks
 
 -- | Fetch the value of the environment.
 ask :: (Monoid w, Monad m) => RWST r w s m r
-ask = RWST $ \r s -> return (r, s, mempty)
+ask = RWST $ \ r s -> return (r, s, mempty)
 
 -- | Execute a computation in a modified environment
 --
 -- * @'runRWST' ('local' f m) r s = 'runRWST' m (f r) s@
 local :: (Monoid w, Monad m) => (r -> r) -> RWST r w s m a -> RWST r w s m a
-local f m = RWST $ \r s -> runRWST m (f r) s
+local f m = RWST $ \ r s -> runRWST m (f r) s
 
 -- | Retrieve a function of the current environment.
 --
 -- * @'asks' f = 'liftM' f 'ask'@
 asks :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
-asks f = RWST $ \r s -> return (f r, s, mempty)
+asks f = RWST $ \ r s -> return (f r, s, mempty)
 
 -- ---------------------------------------------------------------------------
 -- Writer operations
 
 -- | Construct a writer computation from a (result, output) pair.
-writer :: Monad m => (a, w) -> RWST r w s m a
-writer (a, w) = RWST $ \_ s -> return (a, s, w)
+writer :: (Monad m) => (a, w) -> RWST r w s m a
+writer (a, w) = RWST $ \ _ s -> return (a, s, w)
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> RWST r w s m ()
-tell w = RWST $ \_ s -> return ((),s,w)
+tell w = RWST $ \ _ s -> return ((),s,w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
 --
--- * @'runRWST' ('listen' m) r s = 'liftM' (\\(a, w) -> ((a, w), w)) ('runRWST' m r s)@
+-- * @'runRWST' ('listen' m) r s = 'liftM' (\\ (a, w) -> ((a, w), w)) ('runRWST' m r s)@
 listen :: (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
-listen m = RWST $ \r s -> do
+listen m = RWST $ \ r s -> do
     ~(a, s', w) <- runRWST m r s
     return ((a, w), s', w)
 
@@ -240,9 +240,9 @@ listen m = RWST $ \r s -> do
 --
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 --
--- * @'runRWST' ('listens' f m) r s = 'liftM' (\\(a, w) -> ((a, f w), w)) ('runRWST' m r s)@
+-- * @'runRWST' ('listens' f m) r s = 'liftM' (\\ (a, w) -> ((a, f w), w)) ('runRWST' m r s)@
 listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
-listens f m = RWST $ \r s -> do
+listens f m = RWST $ \ r s -> do
     ~(a, s', w) <- runRWST m r s
     return ((a, f w), s', w)
 
@@ -250,9 +250,9 @@ listens f m = RWST $ \r s -> do
 -- a value and a function, and returns the value, applying the function
 -- to the output.
 --
--- * @'runRWST' ('pass' m) r s = 'liftM' (\\((a, f), w) -> (a, f w)) ('runRWST' m r s)@
+-- * @'runRWST' ('pass' m) r s = 'liftM' (\\ ((a, f), w) -> (a, f w)) ('runRWST' m r s)@
 pass :: (Monoid w, Monad m) => RWST r w s m (a, w -> w) -> RWST r w s m a
-pass m = RWST $ \r s -> do
+pass m = RWST $ \ r s -> do
     ~((a, f), s', w) <- runRWST m r s
     return (a, s', f w)
 
@@ -260,11 +260,11 @@ pass m = RWST $ \r s -> do
 -- applies the function @f@ to its output, leaving the return value
 -- unchanged.
 --
--- * @'censor' f m = 'pass' ('liftM' (\\x -> (x,f)) m)@
+-- * @'censor' f m = 'pass' ('liftM' (\\ x -> (x,f)) m)@
 --
--- * @'runRWST' ('censor' f m) r s = 'liftM' (\\(a, w) -> (a, f w)) ('runRWST' m r s)@
+-- * @'runRWST' ('censor' f m) r s = 'liftM' (\\ (a, w) -> (a, f w)) ('runRWST' m r s)@
 censor :: (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
-censor f m = RWST $ \r s -> do
+censor f m = RWST $ \ r s -> do
     ~(a, s', w) <- runRWST m r s
     return (a, s', f w)
 
@@ -273,48 +273,48 @@ censor f m = RWST $ \r s -> do
 
 -- | Construct a state monad computation from a state transformer function.
 state :: (Monoid w, Monad m) => (s -> (a,s)) -> RWST r w s m a
-state f = RWST $ \_ s -> let (a,s') = f s  in  return (a, s', mempty)
+state f = RWST $ \ _ s -> let (a,s') = f s  in  return (a, s', mempty)
 
 -- | Fetch the current value of the state within the monad.
 get :: (Monoid w, Monad m) => RWST r w s m s
-get = RWST $ \_ s -> return (s, s, mempty)
+get = RWST $ \ _ s -> return (s, s, mempty)
 
 -- | @'put' s@ sets the state within the monad to @s@.
 put :: (Monoid w, Monad m) => s -> RWST r w s m ()
-put s = RWST $ \_ _ -> return ((), s, mempty)
+put s = RWST $ \ _ _ -> return ((), s, mempty)
 
 -- | @'modify' f@ is an action that updates the state to the result of
 -- applying @f@ to the current state.
 --
 -- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
-modify f = RWST $ \_ s -> return ((), f s, mempty)
+modify f = RWST $ \ _ s -> return ((), f s, mempty)
  
 -- | Get a specific component of the state, using a projection function
 -- supplied.
 --
 -- * @'gets' f = 'liftM' f 'get'@
 gets :: (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
-gets f = RWST $ \_ s -> return (f s, s, mempty)
+gets f = RWST $ \ _ s -> return (f s, s, mempty)
 
 -- | Uniform lifting of a @callCC@ operation to the new monad.
 -- This version rolls back to the original state on entering the
 -- continuation.
 liftCallCC :: (Monoid w) =>
     CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
-liftCallCC callCC f = RWST $ \r s ->
-    callCC $ \c ->
-    runRWST (f (\a -> RWST $ \_ _ -> c (a, s, mempty))) r s
+liftCallCC callCC f = RWST $ \ r s ->
+    callCC $ \ c ->
+    runRWST (f (\ a -> RWST $ \ _ _ -> c (a, s, mempty))) r s
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
 liftCallCC' :: (Monoid w) =>
     CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
-liftCallCC' callCC f = RWST $ \r s ->
-    callCC $ \c ->
-    runRWST (f (\a -> RWST $ \_ s' -> c (a, s', mempty))) r s
+liftCallCC' callCC f = RWST $ \ r s ->
+    callCC $ \ c ->
+    runRWST (f (\ a -> RWST $ \ _ s' -> c (a, s', mempty))) r s
 
 -- | Lift a @catchError@ operation to the new monad.
 liftCatch :: Catch e m (a,s,w) -> Catch e (RWST r w s m) a
 liftCatch catchError m h =
-    RWST $ \r s -> runRWST m r s `catchError` \e -> runRWST (h e) r s
+    RWST $ \ r s -> runRWST m r s `catchError` \ e -> runRWST (h e) r s

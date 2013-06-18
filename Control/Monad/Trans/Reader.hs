@@ -59,7 +59,7 @@ import Control.Monad.Instances ()  -- deprecated from base-4.6
 type Reader r = ReaderT r Identity
 
 -- | Constructor for computations in the reader monad (equivalent to 'asks').
-reader :: Monad m => (r -> a) -> ReaderT r m a
+reader :: (Monad m) => (r -> a) -> ReaderT r m a
 reader f = ReaderT (return . f)
 
 -- | Runs a @Reader@ and extracts the final value from it.

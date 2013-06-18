@@ -45,7 +45,7 @@ module Control.Monad.Trans.Class (
 
 class MonadTrans t where
     -- | Lift a computation from the argument monad to the constructed monad.
-    lift :: Monad m => m a -> t m a
+    lift :: (Monad m) => m a -> t m a
 
 {- $conventions
 Most monad transformer modules include the special case of applying the

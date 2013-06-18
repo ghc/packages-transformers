@@ -35,8 +35,8 @@ module Control.Monad.Trans.State.Strict (
     withState,
     -- * The StateT monad transformer
     StateT(..),
-    evalStateT,
     runStateT,
+    evalStateT,
     execStateT,
     mapStateT,
     withStateT,
@@ -81,7 +81,7 @@ type State s = StateT s Identity
 
 -- | Construct a state monad computation from a function.
 -- (The inverse of 'runState'.)
-state :: Monad m
+state :: (Monad m)
       => (s -> (a, s))  -- ^pure state transformer
       -> StateT s m a   -- ^equivalent state-passing computation
 state f = StateT (return . f)
@@ -187,21 +187,21 @@ instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
     (<|>) = mplus
 
 instance (Monad m) => Monad (StateT s m) where
-    return a = state $ \s -> (a, s)
-    m >>= k  = StateT $ \s -> do
+    return a = state $ \ s -> (a, s)
+    m >>= k  = StateT $ \ s -> do
         (a, s') <- runStateT m s
         runStateT (k a) s'
     fail str = StateT $ \_ -> fail str
 
 instance (MonadPlus m) => MonadPlus (StateT s m) where
     mzero       = StateT $ \_ -> mzero
-    m `mplus` n = StateT $ \s -> runStateT m s `mplus` runStateT n s
+    m `mplus` n = StateT $ \ s -> runStateT m s `mplus` runStateT n s
 
 instance (MonadFix m) => MonadFix (StateT s m) where
-    mfix f = StateT $ \s -> mfix $ \ ~(a, _) -> runStateT (f a) s
+    mfix f = StateT $ \ s -> mfix $ \ ~(a, _) -> runStateT (f a) s
 
 instance MonadTrans (StateT s) where
-    lift m = StateT $ \s -> do
+    lift m = StateT $ \ s -> do
         a <- m
         return (a, s)
 
@@ -210,7 +210,7 @@ instance (MonadIO m) => MonadIO (StateT s m) where
 
 -- | Fetch the current value of the state within the monad.
 get :: (Monad m) => StateT s m s
-get = state $ \s -> (s, s)
+get = state $ \ s -> (s, s)
 
 -- | @'put' s@ sets the state within the monad to @s@.
 put :: (Monad m) => s -> StateT s m ()
@@ -221,45 +221,45 @@ put s = state $ \_ -> ((), s)
 --
 -- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monad m) => (s -> s) -> StateT s m ()
-modify f = state $ \s -> ((), f s)
+modify f = state $ \ s -> ((), f s)
 
 -- | Get a specific component of the state, using a projection function
 -- supplied.
 --
 -- * @'gets' f = 'liftM' f 'get'@
 gets :: (Monad m) => (s -> a) -> StateT s m a
-gets f = state $ \s -> (f s, s)
+gets f = state $ \ s -> (f s, s)
 
 -- | Uniform lifting of a @callCC@ operation to the new monad.
 -- This version rolls back to the original state on entering the
 -- continuation.
 liftCallCC :: CallCC m (a,s) (b,s) -> CallCC (StateT s m) a b
-liftCallCC callCC f = StateT $ \s ->
-    callCC $ \c ->
-    runStateT (f (\a -> StateT $ \ _ -> c (a, s))) s
+liftCallCC callCC f = StateT $ \ s ->
+    callCC $ \ c ->
+    runStateT (f (\ a -> StateT $ \ _ -> c (a, s))) s
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
 -- It does not satisfy the laws of a monad transformer.
 liftCallCC' :: CallCC m (a,s) (b,s) -> CallCC (StateT s m) a b
-liftCallCC' callCC f = StateT $ \s ->
-    callCC $ \c ->
-    runStateT (f (\a -> StateT $ \s' -> c (a, s'))) s
+liftCallCC' callCC f = StateT $ \ s ->
+    callCC $ \ c ->
+    runStateT (f (\ a -> StateT $ \ s' -> c (a, s'))) s
 
 -- | Lift a @catchError@ operation to the new monad.
 liftCatch :: Catch e m (a,s) -> Catch e (StateT s m) a
 liftCatch catchError m h =
-    StateT $ \s -> runStateT m s `catchError` \e -> runStateT (h e) s
+    StateT $ \ s -> runStateT m s `catchError` \ e -> runStateT (h e) s
 
 -- | Lift a @listen@ operation to the new monad.
-liftListen :: Monad m => Listen w m (a,s) -> Listen w (StateT s m) a
-liftListen listen m = StateT $ \s -> do
+liftListen :: (Monad m) => Listen w m (a,s) -> Listen w (StateT s m) a
+liftListen listen m = StateT $ \ s -> do
     ((a, s'), w) <- listen (runStateT m s)
     return ((a, w), s')
 
 -- | Lift a @pass@ operation to the new monad.
-liftPass :: Monad m => Pass w m (a,s) -> Pass w (StateT s m) a
-liftPass pass m = StateT $ \s -> pass $ do
+liftPass :: (Monad m) => Pass w m (a,s) -> Pass w (StateT s m) a
+liftPass pass m = StateT $ \ s -> pass $ do
     ((a, f), s') <- runStateT m s
     return ((a, s'), f)
 
