@@ -65,32 +65,50 @@ instance Show a => Show1 (Either a) where showsPrec1 = showsPrec
 
 -- Building blocks
 
+-- | @'readsData' p d@ is a parser for datatypes where each alternative
+-- begins with a data constructor.  It parses the constructor and
+-- passes it to @p@.  Parsers for various constructors can be constructed
+-- with 'readsUnary', 'readsUnary1' and 'readsBinary1', and combined with
+-- @mappend@ from the @Monoid@ class.
 readsData :: (String -> ReadS a) -> Int -> ReadS a
 readsData reader d =
     readParen (d > 10) $ \r -> [res | (kw,s) <- lex r, res <- reader kw s]
 
+-- | @'readsUnary' n c n'@ matches the name of a unary data constructor
+-- and then parses its argument using 'readsPrec'.
 readsUnary :: Read a => String -> (a -> t) -> String -> ReadS t
 readsUnary name cons kw s =
     [(cons x,t) | kw == name, (x,t) <- readsPrec 11 s]
 
+-- | @'readsUnary1' n c n'@ matches the name of a unary data constructor
+-- and then parses its argument using 'readsPrec1'.
 readsUnary1 :: (Read1 f, Read a) => String -> (f a -> t) -> String -> ReadS t
 readsUnary1 name cons kw s =
     [(cons x,t) | kw == name, (x,t) <- readsPrec1 11 s]
 
+-- | @'readsBinary1' n c n'@ matches the name of a binary data constructor
+-- and then parses its arguments using 'readsPrec1'.
 readsBinary1 :: (Read1 f, Read1 g, Read a) =>
     String -> (f a -> g a -> t) -> String -> ReadS t
 readsBinary1 name cons kw s =
     [(cons x y,u) | kw == name,
         (x,t) <- readsPrec1 11 s, (y,u) <- readsPrec1 11 t]
 
+-- | @'showsUnary' n d x@ produces the string representation of a unary data
+-- constructor with name @n@ and argument @x@, in precedence context @d@.
 showsUnary :: Show a => String -> Int -> a -> ShowS
 showsUnary name d x = showParen (d > 10) $
     showString name . showChar ' ' . showsPrec 11 x
 
+-- | @'showsUnary1' n d x@ produces the string representation of a unary data
+-- constructor with name @n@ and argument @x@, in precedence context @d@.
 showsUnary1 :: (Show1 f, Show a) => String -> Int -> f a -> ShowS
 showsUnary1 name d x = showParen (d > 10) $
     showString name . showChar ' ' . showsPrec1 11 x
 
+-- | @'showsBinary1' n d x@ produces the string representation of a binary
+-- data constructor with name @n@ and arguments @x@ and @y@, in precedence
+-- context @d@.
 showsBinary1 :: (Show1 f, Show1 g, Show a) =>
     String -> Int -> f a -> g a -> ShowS
 showsBinary1 name d x y = showParen (d > 10) $
