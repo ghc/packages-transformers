@@ -8,11 +8,12 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- The 'MaybeT' monad transformer adds the ability to fail to a monad.
+-- The 'MaybeT' monad transformer extends a monad with the ability to exit
+-- the computation without returning a value.
 --
--- A sequence of actions succeeds, producing a value, only if all the
--- actions in the sequence are successful.  If one fails, the rest of
--- the sequence is skipped and the composite action fails.
+-- A sequence of actions produces a value only if all the actions in
+-- the sequence do.  If one exits, the rest of the sequence is skipped
+-- and the composite action exits.
 --
 -- For a variant allowing a range of error values, see
 -- "Control.Monad.Trans.Error".
@@ -45,10 +46,11 @@ import Data.Traversable (Traversable(traverse))
 -- | The parameterizable maybe monad, obtained by composing an arbitrary
 -- monad with the 'Maybe' monad.
 --
--- Computations are actions that may produce a value or fail.
+-- Computations are actions that may produce a value or exit.
 --
--- The 'return' function yields a successful computation, while @>>=@
--- sequences two subcomputations, failing on the first error.
+-- The 'return' function yields a computation that produces that
+-- value, while @>>=@ sequences two subcomputations, exiting if either
+-- computation does.
 newtype MaybeT m a = MaybeT (m (Maybe a))
 
 instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
