@@ -191,10 +191,10 @@ instance (Monad m) => Monad (StateT s m) where
     m >>= k  = StateT $ \ s -> do
         (a, s') <- runStateT m s
         runStateT (k a) s'
-    fail str = StateT $ \_ -> fail str
+    fail str = StateT $ \ _ -> fail str
 
 instance (MonadPlus m) => MonadPlus (StateT s m) where
-    mzero       = StateT $ \_ -> mzero
+    mzero       = StateT $ \ _ -> mzero
     m `mplus` n = StateT $ \ s -> runStateT m s `mplus` runStateT n s
 
 instance (MonadFix m) => MonadFix (StateT s m) where
@@ -214,7 +214,7 @@ get = state $ \ s -> (s, s)
 
 -- | @'put' s@ sets the state within the monad to @s@.
 put :: (Monad m) => s -> StateT s m ()
-put s = state $ \_ -> ((), s)
+put s = state $ \ _ -> ((), s)
 
 -- | @'modify' f@ is an action that updates the state to the result of
 -- applying @f@ to the current state.
