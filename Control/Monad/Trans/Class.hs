@@ -14,7 +14,7 @@
 -- A monad transformer makes a new monad out of an existing monad, such
 -- that computations of the old monad may be embedded in the new one.
 -- To construct a monad with a desired set of features, one typically
--- starts with a base monad, such as @Identity@, @[]@ or 'IO', and
+-- starts with a base monad, such as 'Data.Functor.Identity.Identity', @[]@ or 'IO', and
 -- applies a sequence of monad transformers.
 -----------------------------------------------------------------------------
 
@@ -24,6 +24,9 @@ module Control.Monad.Trans.Class (
 
     -- * Conventions
     -- $conventions
+
+    -- * Strict monads
+    -- $strict
 
     -- * Examples
     -- ** Parsing
@@ -48,19 +51,21 @@ class MonadTrans t where
     lift :: (Monad m) => m a -> t m a
 
 {- $conventions
-Most monad transformer modules include the special case of applying the
-transformer to @Identity@.  For example, @State s@ is an abbreviation
-for @StateT s Identity@.
+Most monad transformer modules include the special case of applying
+the transformer to 'Data.Functor.Identity.Identity'.  For example,
+@'Control.Monad.Trans.State.Lazy.State' s@ is an abbreviation for
+@'Control.Monad.Trans.State.Lazy.StateT' s 'Data.Functor.Identity.Identity'@.
 
 Each monad transformer also comes with an operation @run@/XXX/@T@ to
 unwrap the transformer, exposing a computation of the inner monad.
 
-All of the monad transformers except @ContT@ are functors on the
-category of monads: in addition to defining a mapping of monads,
-they also define a mapping from transformations between base monads
-to transformations between transformed monads, called @map@/XXX/@T@.
-Thus given a monad transformation @t :: M a -> N a@, the combinator
-@mapStateT@ constructs a monad transformation
+All of the monad transformers except 'Control.Monad.Tra,s.Cont.ContT'
+are functors on the category of monads: in addition to defining a
+mapping of monads, they also define a mapping from transformations
+between base monads to transformations between transformed monads,
+called @map@/XXX/@T@.  Thus given a monad transformation @t :: M a -> N a@,
+the combinator 'Control.Monad.Trans.State.Lazy.mapStateT' constructs
+a monad transformation
 
 > mapStateT t :: StateT s M a -> StateT s N a
 
@@ -69,6 +74,24 @@ In a sequence of monad transformers, most of these operations.can be
 lifted through other transformers using 'lift' or the @map@/XXX/@T@
 combinator, but a few with more complex type signatures require
 specialized lifting combinators, called @lift@/Op/.
+-}
+
+{- $strict
+
+A monad is said to be /strict/ if its '>>=' operation is strict in its first
+argument.  The base monads 'Maybe', @[]@ and 'IO' are strict, but the monad
+'Data.Functor.Identity.Identity' is not:
+
+>>> undefined >> return 2 :: Maybe Integer
+*** Exception: Prelude.undefined
+
+>>> runIdentity (undefined >> return 2)
+2
+
+In a strict monad you know when each action is executed, but the monad
+is not necessarily strict in the return value, or in other components
+of the monad, such as a state.  However you can use 'seq' to create
+an action that is strict in the component you want evaluated.
 -}
 
 {- $example1
@@ -81,9 +104,8 @@ to be parsed) to the @[]@ monad, which provides non-determinism:
 > type Parser = StateT String []
 
 Then @Parser@ is an instance of @MonadPlus@: monadic sequencing implements
-concatenation of parsers, while @mplus@ provides choice.
-To use parsers, we need a primitive to run a constructed parser on an
-input string:
+concatenation of parsers, while @mplus@ provides choice.  To use parsers,
+we need a primitive to run a constructed parser on an input string:
 
 > runParser :: Parser a -> String -> [a]
 > runParser p s = [x | (x, "") <- runStateT p s]
@@ -99,14 +121,15 @@ from which arbitrarily complex parsers may be constructed:
 
 In this example we use the operations @get@ and @put@ from
 "Control.Monad.Trans.State", which are defined only for monads that are
-applications of @StateT@.  Alternatively one could use monad classes
-from the @mtl@ package or similar, which contain methods @get@ and @put@
-with types generalized over all suitable monads.
+applications of 'Control.Monad.Trans.State.Lazy.StateT'.  Alternatively one
+could use monad classes from the @mtl@ package or similar, which contain
+methods @get@ and @put@ with types generalized over all suitable monads.
 -}
 
 {- $example2
 
-We can define a parser that also counts by adding a @WriterT@ transformer:
+We can define a parser that also counts by adding a
+'Control.Monad.Trans.Writer.Lazy.WriterT' transformer:
 
 > import Control.Monad.Trans.Class
 > import Control.Monad.Trans.State
@@ -121,8 +144,9 @@ transformers in turn:
 > runParser :: Parser a -> String -> [(a, Int)]
 > runParser p s = [(x, n) | ((x, Sum n), "") <- runStateT (runWriterT p) s]
 
-To define the @item@ parser, we need to lift the @StateT@ operations through
-the @WriterT@ transformers.
+To define the @item@ parser, we need to lift the
+'Control.Monad.Trans.State.Lazy.StateT' operations through the
+'Control.Monad.Trans.Writer.Lazy.WriterT' transformer.
 
 > item :: Parser Char
 > item = do
@@ -166,40 +190,46 @@ a monad that supports all these things as a stack of monad transformers:
 for suitable types @Store@, @Env@ and @Err@.
 
 Now we would like to be able to use the operations associated with each
-of those monad transformers on @InterpM@ actions.
-Since the uppermost monad transformer of @InterpM@ is @StateT@,
+of those monad transformers on @InterpM@ actions.  Since the uppermost
+monad transformer of @InterpM@ is 'Control.Monad.Trans.State.Lazy.StateT',
 it already has the state operations @get@ and @set@.
 
-The first of the @ReaderT@ operations, @ask@, is a simple action,
-so we can lift it through @StateT@ to @InterpM@ using 'lift':
+The first of the 'Control.Monad.Trans.Reader.ReaderT' operations,
+'Control.Monad.Trans.Reader.ask', is a simple action, so we can lift it
+through 'Control.Monad.Trans.State.Lazy.StateT' to @InterpM@ using 'lift':
 
 > ask :: InterpM Env
 > ask = lift R.ask
 
-The other @ReaderT@ operation, @local@, has a suitable type for lifting
-using @mapStateT@:
+The other 'Control.Monad.Trans.Reader.ReaderT' operation,
+'Control.Monad.Trans.Reader.local', has a suitable type for lifting
+using 'Control.Monad.Trans.State.Lazy.mapStateT':
 
 > local :: (Env -> Env) -> InterpM a -> InterpM a
 > local f = mapStateT (R.local f)
 
-We also wish to lift the operations of @ErrorT@ through both @ReaderT@
-and @StateT@.  For the operation @throwError@, we know @throwError e@ is
-and simple action, so we can lift it through the two monad transformers
-to @InterpM@ with two @lift@s:
+We also wish to lift the operations of 'Control.Monad.Trans.Error.ErrorT'
+through both 'Control.Monad.Trans.Reader.ReaderT' and
+'Control.Monad.Trans.State.Lazy.StateT'.  For the operation
+'Control.Monad.Trans.Error.throwError', we know @throwError e@ is a simple
+action, so we can lift it through the two monad transformers to @InterpM@
+with two 'lift's:
 
 > throwError :: Err -> InterpM a
 > throwError e = lift (lift (E.throwError e))
 
-The @catchError@ operation has a more complex type, so we need to use
-the special-purpose lifting function @liftCatch@ provided by most monad
-transformers.  Here we use the @ReaderT@ version followed by the @StateT@
-version:
+The 'Control.Monad.Trans.Error.catchError' operation has a more
+complex type, so we need to use the special-purpose lifting function
+@liftCatch@ provided by most monad transformers.  Here we use
+the 'Control.Monad.Trans.Reader.ReaderT' version followed by the
+'Control.Monad.Trans.State.Lazy.StateT' version:
 
 > catchError :: InterpM a -> (Err -> InterpM a) -> InterpM a
 > catchError = liftCatch (R.liftCatch E.catchError)
 
-We could lift 'IO' actions to @InterpM@ using three @lift@s, but @InterpM@
-is automatically an instance of @MonadIO@, so we can use @liftIO@ instead:
+We could lift 'IO' actions to @InterpM@ using three 'lift's, but @InterpM@
+is automatically an instance of 'Control.Monad.IO.Class.MonadIO',
+so we can use 'Control.Monad.IO.Class.liftIO' instead:
 
 > putStr :: String -> InterpM ()
 > putStr s = liftIO (Prelude.putStr s)
