@@ -59,7 +59,7 @@ the transformer to 'Data.Functor.Identity.Identity'.  For example,
 Each monad transformer also comes with an operation @run@/XXX/@T@ to
 unwrap the transformer, exposing a computation of the inner monad.
 
-All of the monad transformers except 'Control.Monad.Tra,s.Cont.ContT'
+All of the monad transformers except 'Control.Monad.Trans.Cont.ContT'
 are functors on the category of monads: in addition to defining a
 mapping of monads, they also define a mapping from transformations
 between base monads to transformations between transformed monads,
