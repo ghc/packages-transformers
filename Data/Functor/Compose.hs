@@ -20,6 +20,8 @@ import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
+infixr 9 `Compose`
+
 -- | Right-to-left composition of functors.
 -- The composition of applicative functors is always applicative,
 -- but the composition of monads is not always a monad.
