@@ -32,7 +32,7 @@ import Control.Monad.Fix
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
--- | Identity functor and monad.
+-- | Identity functor and monad. (a non-strict monad)
 newtype Identity a = Identity a
     deriving (Eq, Ord, Read, Show)
 
