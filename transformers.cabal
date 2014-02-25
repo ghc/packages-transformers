@@ -51,6 +51,7 @@ library
     Control.Monad.Signatures
     Control.Monad.Trans.Class
     Control.Monad.Trans.Cont
+    Control.Monad.Trans.Except
     Control.Monad.Trans.Error
     Control.Monad.Trans.Identity
     Control.Monad.Trans.List
