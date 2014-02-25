@@ -22,9 +22,14 @@
 --
 -- If the value of the error is not required, the variant in
 -- "Control.Monad.Trans.Maybe" may be used instead.
+--
+-- /Note:/ This module will be removed in a future release.
+-- Instead, use "Control.Monad.Trans.Except", which does not restrict
+-- the exception type, and also includes a base excption monad.
 -----------------------------------------------------------------------------
 
-module Control.Monad.Trans.Error (
+module Control.Monad.Trans.Error
+  {-# DEPRECATED "Use Control.Monad.Trans.Except instead" #-} (
     -- * The ErrorT monad transformer
     Error(..),
     ErrorList(..),

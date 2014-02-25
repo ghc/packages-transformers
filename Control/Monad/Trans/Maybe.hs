@@ -15,8 +15,8 @@
 -- the sequence do.  If one exits, the rest of the sequence is skipped
 -- and the composite action exits.
 --
--- For a variant allowing a range of error values, see
--- "Control.Monad.Trans.Error".
+-- For a variant allowing a range of exception values, see
+-- "Control.Monad.Trans.Except".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Maybe (
@@ -24,6 +24,9 @@ module Control.Monad.Trans.Maybe (
     MaybeT(..),
     runMaybeT,
     mapMaybeT,
+    -- * Conversion
+    maybeToExceptT,
+    exceptToMaybeT,
     -- * Lifting other operations
     liftCallCC,
     liftCatch,
@@ -34,6 +37,7 @@ module Control.Monad.Trans.Maybe (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except (ExceptT(..))
 import Data.Functor.Classes
 
 import Control.Applicative
@@ -79,6 +83,16 @@ runMaybeT (MaybeT m) = m
 -- * @'runMaybeT' ('mapMaybeT' f m) = f ('runMaybeT' m)@
 mapMaybeT :: (m (Maybe a) -> n (Maybe b)) -> MaybeT m a -> MaybeT n b
 mapMaybeT f = MaybeT . f . runMaybeT
+
+-- | Convert a 'MaybeT' computation to 'ExceptT', with a default
+-- exception value.
+maybeToExceptT :: (Functor m) => e -> MaybeT m a -> ExceptT e m a
+maybeToExceptT e (MaybeT m) = ExceptT $ fmap (maybe (Left e) Right) m
+
+-- | Convert a 'ExceptT' computation to 'MaybeT', discarding the
+-- value of any exception.
+exceptToMaybeT :: (Functor m) => ExceptT e m a -> MaybeT m a
+exceptToMaybeT (ExceptT m) = MaybeT $ fmap (either (const Nothing) Just) m
 
 instance (Functor m) => Functor (MaybeT m) where
     fmap f = mapMaybeT (fmap (fmap f))
