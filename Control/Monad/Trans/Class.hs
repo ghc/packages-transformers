@@ -79,11 +79,12 @@ specialized lifting combinators, called @lift@/Op/.
 {- $strict
 
 A monad is said to be /strict/ if its '>>=' operation is strict in its first
-argument.  The base monads 'Maybe', @[]@ and 'IO' are strict, but the monad
-'Data.Functor.Identity.Identity' is not:
+argument.  The base monads 'Maybe', @[]@ and 'IO' are strict:
 
 >>> undefined >> return 2 :: Maybe Integer
 *** Exception: Prelude.undefined
+
+However the monad 'Data.Functor.Identity.Identity' is not:
 
 >>> runIdentity (undefined >> return 2)
 2
