@@ -17,7 +17,7 @@ module Control.Monad.Signatures (
 
 -- | Signature of the @callCC@ operation,
 -- introduced in "Control.Monad.Trans.Cont".
-type CallCC m a b = ((a -> m a) -> m b) -> m a
+type CallCC m a b = ((a -> m b) -> m a) -> m a
 
 -- | Signature of the @catchError@ operation,
 -- introduced in "Control.Monad.Trans.Error".
