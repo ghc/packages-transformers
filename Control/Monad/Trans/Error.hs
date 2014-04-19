@@ -68,6 +68,10 @@ instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
     m `mplus` n = m `catchIOError` \ _ -> n
 
+instance Alternative IO where
+    empty = mzero
+    (<|>) = mplus
+
 #if !(MIN_VERSION_base(4,4,0))
 -- exported by System.IO.Error from base-4.4
 catchIOError :: IO a -> (IOError -> IO a) -> IO a
