@@ -18,7 +18,7 @@
 	* Added Monad instances for Product
 
 0.2.2.1 Ross Paterson <ross@soi.city.ac.uk> Oct 2013
-	* backpatch to handle disappearance of Control.Monad.Instances
+	* Backport of fix for disappearance of Control.Monad.Instances
 
 0.2.2.0 Ross Paterson <ross@soi.city.ac.uk> Sep 2010
 	* Handled move of Either instances to base package
