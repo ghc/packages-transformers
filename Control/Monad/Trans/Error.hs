@@ -25,7 +25,7 @@
 --
 -- /Note:/ This module will be removed in a future release.
 -- Instead, use "Control.Monad.Trans.Except", which does not restrict
--- the exception type, and also includes a base excption monad.
+-- the exception type, and also includes a base exception monad.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Error

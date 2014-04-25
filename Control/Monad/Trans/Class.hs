@@ -69,7 +69,7 @@ a monad transformation
 
 > mapStateT t :: StateT s M a -> StateT s N a
 
-Each of the monad transformers introduces relavant operations.
+Each of the monad transformers introduces relevant operations.
 In a sequence of monad transformers, most of these operations.can be
 lifted through other transformers using 'lift' or the @map@/XXX/@T@
 combinator, but a few with more complex type signatures require
