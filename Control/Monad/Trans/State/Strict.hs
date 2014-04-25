@@ -12,16 +12,16 @@
 -- Strict state monads, passing an updatable state through a computation.
 -- See below for examples.
 --
--- In this version, sequencing of computations is strict.
--- For a lazy version, see "Control.Monad.Trans.State.Lazy", which
--- has the same interface.
---
 -- Some computations may not require the full power of state transformers:
 --
 -- * For a read-only state, see "Control.Monad.Trans.Reader".
 --
 -- * To accumulate a value without using it on the way, see
 --   "Control.Monad.Trans.Writer".
+--
+-- In this version, sequencing of computations is strict.
+-- For a lazy version, see "Control.Monad.Trans.State.Lazy", which
+-- has the same interface.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.State.Strict (
