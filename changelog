@@ -1,0 +1,56 @@
+-*-change-log-*-
+
+0.4.0.0 Ross Paterson <ross@soi.city.ac.uk> Apr 2014
+	* Added ExceptT and deprecated ErrorT
+	* Added infixr 9 `Compose` to match (.)
+	* Added Eq, Ord, Read and Show instances where possible
+	* Replaced record syntax for newtypes with separate inverse functions
+	* Added delimited continuation functions to ContT
+	* Added instance Alternative IO to ErrorT
+	* Handled disappearance of Control.Monad.Instances
+
+0.3.0.0 Ross Paterson <ross@soi.city.ac.uk> Mar 2012
+	* Added type synonyms for signatures of complex operations
+	* Generalized state, reader and writer constructor functions
+	* Added Lift, Backwards/Reverse
+	* Added MonadFix instances for IdentityT and MaybeT
+	* Added Foldable and Traversable instances
+	* Added Monad instances for Product
+
+0.2.2.1 Ross Paterson <ross@soi.city.ac.uk> Oct 2013
+	* backpatch to handle disappearance of Control.Monad.Instances
+
+0.2.2.0 Ross Paterson <ross@soi.city.ac.uk> Sep 2010
+	* Handled move of Either instances to base package
+
+0.2.1.0 Ross Paterson <ross@soi.city.ac.uk> Apr 2010
+	* Added Alternative instance for Compose
+	* Added Data.Functor.Product
+
+0.2.0.0 Ross Paterson <ross@soi.city.ac.uk> Mar 2010
+	* Added Constant and Compose
+	* Renamed modules to avoid clash with mtl
+	* Removed Monad constraint from Monad instance for ContT
+
+0.1.4.0 Ross Paterson <ross@soi.city.ac.uk> Mar 2009
+	* Adjusted lifting of Identity and Maybe transformers
+
+0.1.3.0 Ross Paterson <ross@soi.city.ac.uk> Mar 2009
+	* Added IdentityT transformer
+	* Added Applicative and Alternative instances for (Either e)
+
+0.1.1.0 Ross Paterson <ross@soi.city.ac.uk> Jan 2009
+	* Made all Functor instances assume Functor
+
+0.1.0.1 Ross Paterson <ross@soi.city.ac.uk> Jan 2009
+	* Adjusted dependencies
+
+0.1.0.0 Ross Paterson <ross@soi.city.ac.uk> Jan 2009
+	* Two versions of lifting of callcc through StateT
+	* Added Applicative instances
+
+0.0.1.0 Ross Paterson <ross@soi.city.ac.uk> Jan 2009
+	* Added constructors state, etc for simple monads
+
+0.0.0.0 Ross Paterson <ross@soi.city.ac.uk> Jan 2009
+	* Split Haskell 98 transformers from the mtl

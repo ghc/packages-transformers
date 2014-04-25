@@ -29,6 +29,8 @@ description:
     the @mtl@ or @monads-tf@ packages, which automatically lift operations
     introduced by monad transformers through other transformers.
 build-type: Simple
+extra-source-files:
+    changelog
 cabal-version: >= 1.6
 
 source-repository head
