@@ -12,12 +12,12 @@
 -- The lazy 'WriterT' monad transformer, which adds collection of
 -- outputs (such as a count or string output) to a given monad.
 --
--- This version builds its output lazily; for a strict version, see
--- "Control.Monad.Trans.Writer.Strict", which has the same interface.
---
 -- This monad transformer provides only limited access to the output
 -- during the computation.  For more general access, use
 -- "Control.Monad.Trans.State" instead.
+--
+-- This version builds its output lazily; for a strict version, see
+-- "Control.Monad.Trans.Writer.Strict", which has the same interface.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer.Lazy (
