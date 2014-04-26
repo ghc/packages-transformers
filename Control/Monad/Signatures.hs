@@ -19,8 +19,8 @@ module Control.Monad.Signatures (
 -- introduced in "Control.Monad.Trans.Cont".
 type CallCC m a b = ((a -> m b) -> m a) -> m a
 
--- | Signature of the @catchError@ operation,
--- introduced in "Control.Monad.Trans.Error".
+-- | Signature of the @catchE@ operation,
+-- introduced in "Control.Monad.Trans.Except".
 type Catch e m a = m a -> (e -> m a) -> m a
 
 -- | Signature of the @listen@ operation,

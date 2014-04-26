@@ -111,7 +111,7 @@ liftCallCC callCC f = ListT $
     callCC $ \ c ->
     runListT (f (\ a -> ListT $ c [a]))
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m [a] -> Catch e (ListT m) a
-liftCatch catchError m h = ListT $ runListT m
-    `catchError` \ e -> runListT (h e)
+liftCatch catchE m h = ListT $ runListT m
+    `catchE` \ e -> runListT (h e)

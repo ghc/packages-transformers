@@ -184,9 +184,9 @@ a monad that supports all these things as a stack of monad transformers:
 > import Control.Monad.Trans.Class
 > import Control.Monad.Trans.State
 > import qualified Control.Monad.Trans.Reader as R
-> import qualified Control.Monad.Trans.Error as E
+> import qualified Control.Monad.Trans.Except as E
 >
-> type InterpM = StateT Store (R.ReaderT Env (E.ErrorT Err []))
+> type InterpM = StateT Store (R.ReaderT Env (E.ExceptT Err []))
 
 for suitable types @Store@, @Env@ and @Err@.
 
@@ -209,24 +209,24 @@ using 'Control.Monad.Trans.State.Lazy.mapStateT':
 > local :: (Env -> Env) -> InterpM a -> InterpM a
 > local f = mapStateT (R.local f)
 
-We also wish to lift the operations of 'Control.Monad.Trans.Error.ErrorT'
+We also wish to lift the operations of 'Control.Monad.Trans.Except.ExceptT'
 through both 'Control.Monad.Trans.Reader.ReaderT' and
 'Control.Monad.Trans.State.Lazy.StateT'.  For the operation
-'Control.Monad.Trans.Error.throwError', we know @throwError e@ is a simple
+'Control.Monad.Trans.Except.throwE', we know @throwE e@ is a simple
 action, so we can lift it through the two monad transformers to @InterpM@
 with two 'lift's:
 
-> throwError :: Err -> InterpM a
-> throwError e = lift (lift (E.throwError e))
+> throwE :: Err -> InterpM a
+> throwE e = lift (lift (E.throwE e))
 
-The 'Control.Monad.Trans.Error.catchError' operation has a more
+The 'Control.Monad.Trans.Except.catchE' operation has a more
 complex type, so we need to use the special-purpose lifting function
 @liftCatch@ provided by most monad transformers.  Here we use
 the 'Control.Monad.Trans.Reader.ReaderT' version followed by the
 'Control.Monad.Trans.State.Lazy.StateT' version:
 
-> catchError :: InterpM a -> (Err -> InterpM a) -> InterpM a
-> catchError = liftCatch (R.liftCatch E.catchError)
+> catchE :: InterpM a -> (Err -> InterpM a) -> InterpM a
+> catchE = liftCatch (R.liftCatch E.catchE)
 
 We could lift 'IO' actions to @InterpM@ using three 'lift's, but @InterpM@
 is automatically an instance of 'Control.Monad.IO.Class.MonadIO',

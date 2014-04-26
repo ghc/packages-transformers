@@ -175,7 +175,7 @@ liftCallCC callCC f = ReaderT $ \ r ->
     callCC $ \ c ->
     runReaderT (f (ReaderT . const . c)) r
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m a -> Catch e (ReaderT r m) a
 liftCatch f m h =
     ReaderT $ \ r -> f (runReaderT m r) (\ e -> runReaderT (h e) r)

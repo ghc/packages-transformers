@@ -230,7 +230,7 @@ liftCallCC callCC f = WriterT $
     callCC $ \ c ->
     runWriterT (f (\ a -> WriterT $ c (a, mempty)))
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m (a,w) -> Catch e (WriterT w m) a
-liftCatch catchError m h =
-    WriterT $ runWriterT m `catchError` \ e -> runWriterT (h e)
+liftCatch catchE m h =
+    WriterT $ runWriterT m `catchE` \ e -> runWriterT (h e)

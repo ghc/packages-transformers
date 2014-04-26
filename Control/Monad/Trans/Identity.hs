@@ -107,6 +107,6 @@ liftCallCC :: CallCC m a b -> CallCC (IdentityT m) a b
 liftCallCC callCC f =
     IdentityT $ callCC $ \ c -> runIdentityT (f (IdentityT . c))
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m a -> Catch e (IdentityT m) a
 liftCatch f m h = IdentityT $ f (runIdentityT m) (runIdentityT . h)
