@@ -87,7 +87,7 @@ unLift (Other e) = e
 
 -- | An applicative functor that collects a monoid (e.g. lists) of errors.
 -- A sequence of computations fails if any of its components do, but
--- unlike monads made with 'ErrorT' from "Control.Monad.Trans.Error",
+-- unlike monads made with 'ExceptT' from "Control.Monad.Trans.Except",
 -- these computations continue after an error, collecting all the errors.
 type Errors e = Lift (Constant e)
 

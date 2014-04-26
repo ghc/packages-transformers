@@ -156,10 +156,10 @@ instance (MonadIO m) => MonadIO (ContT r m) where
 -- function, passing it the current continuation.  It provides
 -- an escape continuation mechanism for use with continuation
 -- monads.  Escape continuations one allow to abort the current
--- computation and return a value immediately.  They achieve a
--- similar effect to 'Control.Monad.Trans.Error.throwError'
--- and 'Control.Monad.Trans.Error.catchError' within an
--- 'Control.Monad.Trans.Error.ErrorT' monad.  The advantage of this
+-- computation and return a value immediately.  They achieve
+-- a similar effect to 'Control.Monad.Trans.Except.throwE'
+-- and 'Control.Monad.Trans.Except.catchE' within an
+-- 'Control.Monad.Trans.Except.ExceptT' monad.  The advantage of this
 -- function over calling 'return' is that it makes the continuation
 -- explicit, allowing more flexibility and better control.
 --

@@ -143,7 +143,7 @@ liftCallCC :: CallCC m (Maybe a) (Maybe b) -> CallCC (MaybeT m) a b
 liftCallCC callCC f =
     MaybeT $ callCC $ \ c -> runMaybeT (f (MaybeT . c . Just))
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m (Maybe a) -> Catch e (MaybeT m) a
 liftCatch f m h = MaybeT $ f (runMaybeT m) (runMaybeT . h)
 

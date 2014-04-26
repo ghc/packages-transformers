@@ -246,10 +246,10 @@ liftCallCC' callCC f = StateT $ \ s ->
     callCC $ \ c ->
     runStateT (f (\ a -> StateT $ \ s' -> c (a, s'))) s
 
--- | Lift a @catchError@ operation to the new monad.
+-- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m (a,s) -> Catch e (StateT s m) a
-liftCatch catchError m h =
-    StateT $ \ s -> runStateT m s `catchError` \ e -> runStateT (h e) s
+liftCatch catchE m h =
+    StateT $ \ s -> runStateT m s `catchE` \ e -> runStateT (h e) s
 
 -- | Lift a @listen@ operation to the new monad.
 liftListen :: (Monad m) => Listen w m (a,s) -> Listen w (StateT s m) a
