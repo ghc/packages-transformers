@@ -19,7 +19,7 @@
 -- This version builds its output strictly; for a lazy version, see
 -- "Control.Monad.Trans.Writer.Lazy", which has the same interface.
 -- Although the output is built strictly, it is not possible to
--- achieve linear space behaviour with this transformer: for that,
+-- achieve constant space behaviour with this transformer: for that,
 -- use "Control.Monad.Trans.State.Strict" instead.
 -----------------------------------------------------------------------------
 
