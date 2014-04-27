@@ -44,6 +44,7 @@ module Control.Monad.Trans.State.Strict (
     get,
     put,
     modify,
+    modify',
     gets,
     -- * Lifting other operations
     liftCallCC,
@@ -222,6 +223,15 @@ put s = state $ \ _ -> ((), s)
 -- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monad m) => (s -> s) -> StateT s m ()
 modify f = state $ \ s -> ((), f s)
+
+-- | A variant of 'modify' in which the computation is strict in the
+-- new state.
+--
+-- * @'modify'' f = 'get' >>= (('$!') 'put' . f)@
+modify' :: (Monad m) => (s -> s) -> StateT s m ()
+modify' f = do
+    s <- get
+    put $! f s
 
 -- | Get a specific component of the state, using a projection function
 -- supplied.
