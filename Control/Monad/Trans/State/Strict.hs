@@ -19,7 +19,8 @@
 -- * To accumulate a value without using it on the way, see
 --   "Control.Monad.Trans.Writer".
 --
--- In this version, sequencing of computations is strict.
+-- In this version, sequencing of computations is strict (but computations
+-- are not strict in the state unless you force it with 'seq' or the like).
 -- For a lazy version, see "Control.Monad.Trans.State.Lazy", which
 -- has the same interface.
 -----------------------------------------------------------------------------
