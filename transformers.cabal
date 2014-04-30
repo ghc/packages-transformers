@@ -74,3 +74,4 @@ library
     Data.Functor.Identity
     Data.Functor.Product
     Data.Functor.Reverse
+    Data.Functor.Sum
