@@ -171,7 +171,7 @@ instance (Monad m, Monoid e) => MonadPlus (ExceptT e m) where
     ExceptT m `mplus` ExceptT n = ExceptT $ do
         a <- m
         case a of
-            Left _ -> n
+            Left e -> liftM (either (Left . mappend e) Right) n
             Right x -> return (Right x)
 
 instance (MonadFix m) => MonadFix (ExceptT e m) where
