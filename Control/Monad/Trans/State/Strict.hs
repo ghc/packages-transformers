@@ -21,8 +21,8 @@
 --
 -- In this version, sequencing of computations is strict (but computations
 -- are not strict in the state unless you force it with 'seq' or the like).
--- For a lazy version, see "Control.Monad.Trans.State.Lazy", which
--- has the same interface.
+-- For a lazy version with the same interface, see
+-- "Control.Monad.Trans.State.Lazy".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.State.Strict (

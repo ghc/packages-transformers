@@ -16,8 +16,8 @@
 -- during the computation.  For more general access, use
 -- "Control.Monad.Trans.State" instead.
 --
--- This version builds its output strictly; for a lazy version, see
--- "Control.Monad.Trans.Writer.Lazy", which has the same interface.
+-- This version builds its output strictly; for a lazy version with
+-- the same interface, see "Control.Monad.Trans.Writer.Lazy".
 -- Although the output is built strictly, it is not possible to
 -- achieve constant space behaviour with this transformer: for that,
 -- use "Control.Monad.Trans.State.Strict" instead.

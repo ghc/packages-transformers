@@ -16,8 +16,8 @@
 -- during the computation.  For more general access, use
 -- "Control.Monad.Trans.State" instead.
 --
--- This version builds its output lazily; for a strict version, see
--- "Control.Monad.Trans.Writer.Strict", which has the same interface.
+-- This version builds its output lazily; for a strict version with
+-- the same interface, see "Control.Monad.Trans.Writer.Strict".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer.Lazy (

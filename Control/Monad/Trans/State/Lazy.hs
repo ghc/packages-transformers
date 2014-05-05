@@ -19,9 +19,13 @@
 -- * To accumulate a value without using it on the way, see
 --   "Control.Monad.Trans.Writer".
 --
--- In this version, sequencing of computations is lazy.
--- For a strict version, see "Control.Monad.Trans.State.Strict", which
--- has the same interface.
+-- In this version, sequencing of computations is lazy, so that for
+-- example the following produces a usable result:
+--
+-- > evalState (sequence $ repeat $ do { n <- get; put (n*2); return n }) 1
+--
+-- For a strict version with the same interface, see
+-- "Control.Monad.Trans.State.Strict".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.State.Lazy (
