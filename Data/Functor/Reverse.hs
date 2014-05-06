@@ -12,7 +12,6 @@
 
 module Data.Functor.Reverse (
     Reverse(..),
-    getReverse,
   ) where
 
 import Control.Applicative.Backwards
@@ -26,11 +25,7 @@ import Data.Monoid
 
 -- | The same functor, but with 'Foldable' and 'Traversable' instances
 -- that process the elements in the reverse order.
-newtype Reverse f a = Reverse (f a)
-
--- | Inverse of 'Reverse'.
-getReverse :: Reverse f a -> f a
-getReverse (Reverse x) = x
+newtype Reverse f a = Reverse { getReverse :: f a }
 
 instance (Eq1 f, Eq a) => Eq (Reverse f a) where
     Reverse x == Reverse y = eq1 x y

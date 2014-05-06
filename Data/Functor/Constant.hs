@@ -11,7 +11,6 @@
 
 module Data.Functor.Constant (
     Constant(..),
-    getConstant,
   ) where
 
 import Data.Functor.Classes
@@ -22,12 +21,17 @@ import Data.Monoid (Monoid(..))
 import Data.Traversable (Traversable(traverse))
 
 -- | Constant functor.
-newtype Constant a b = Constant a
-    deriving (Eq, Ord, Read, Show)
+newtype Constant a b = Constant { getConstant :: a }
+    deriving (Eq, Ord)
 
--- | Inverse of 'Constant'.
-getConstant :: Constant a b -> a
-getConstant (Constant x) = x
+-- These instances would be equivalent to the derived instances of the
+-- newtype if the field were removed.
+
+instance (Read a) => Read (Constant a b) where
+    readsPrec = readsData $ readsUnary "Constant" Constant
+
+instance (Show a) => Show (Constant a b) where
+    showsPrec d (Constant x) = showsUnary "Constant" d x
 
 instance (Eq a) => Eq1 (Constant a) where eq1 = (==)
 instance (Ord a) => Ord1 (Constant a) where compare1 = compare

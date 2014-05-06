@@ -26,7 +26,6 @@ module Control.Monad.Trans.Reader (
     withReader,
     -- * The ReaderT monad transformer
     ReaderT(..),
-    runReaderT,
     mapReaderT,
     withReaderT,
     -- * Reader operations
@@ -90,12 +89,7 @@ withReader = withReaderT
 --
 -- The 'return' function ignores the environment, while @>>=@ passes
 -- the inherited environment to both subcomputations.
-newtype ReaderT r m a = ReaderT (r -> m a)
-
--- | The underlying computation, as a function of the environment.
--- (inverse of 'ReaderT')
-runReaderT :: ReaderT r m a -> r -> m a
-runReaderT (ReaderT m) = m
+newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a }
 
 -- | Transform the computation inside a @ReaderT@.
 --

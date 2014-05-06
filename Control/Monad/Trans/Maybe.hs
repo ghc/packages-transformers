@@ -22,7 +22,6 @@
 module Control.Monad.Trans.Maybe (
     -- * The MaybeT monad transformer
     MaybeT(..),
-    runMaybeT,
     mapMaybeT,
     -- * Conversion
     maybeToExceptT,
@@ -55,7 +54,7 @@ import Data.Traversable (Traversable(traverse))
 -- The 'return' function yields a computation that produces that
 -- value, while @>>=@ sequences two subcomputations, exiting if either
 -- computation does.
-newtype MaybeT m a = MaybeT (m (Maybe a))
+newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 
 instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
     MaybeT x == MaybeT y = eq1 x y
@@ -73,10 +72,6 @@ instance (Eq1 m) => Eq1 (MaybeT m) where eq1 = (==)
 instance (Ord1 m) => Ord1 (MaybeT m) where compare1 = compare
 instance (Read1 m) => Read1 (MaybeT m) where readsPrec1 = readsPrec
 instance (Show1 m) => Show1 (MaybeT m) where showsPrec1 = showsPrec
-
--- | The inverse of 'MaybeT'.
-runMaybeT :: MaybeT m a -> m (Maybe a)
-runMaybeT (MaybeT m) = m
 
 -- | Transform the computation inside a @MaybeT@.
 --
