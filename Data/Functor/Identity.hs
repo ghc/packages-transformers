@@ -22,7 +22,6 @@
 
 module Data.Functor.Identity (
     Identity(..),
-    runIdentity,
   ) where
 
 import Data.Functor.Classes
@@ -33,12 +32,17 @@ import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
 -- | Identity functor and monad. (a non-strict monad)
-newtype Identity a = Identity a
-    deriving (Eq, Ord, Read, Show)
+newtype Identity a = Identity { runIdentity :: a }
+    deriving (Eq, Ord)
 
--- | Inverse of 'Identity'.
-runIdentity :: Identity a -> a
-runIdentity (Identity x) = x
+-- These instances would be equivalent to the derived instances of the
+-- newtype if the field were removed.
+
+instance (Read a) => Read (Identity a) where
+    readsPrec = readsData $ readsUnary "Identity" Identity
+
+instance (Show a) => Show (Identity a) where
+    showsPrec d (Identity x) = showsUnary "Identity" d x
 
 instance Eq1 Identity where eq1 = (==)
 instance Ord1 Identity where compare1 = compare

@@ -16,7 +16,6 @@
 module Control.Monad.Trans.List (
     -- * The ListT monad transformer
     ListT(..),
-    runListT,
     mapListT,
     -- * Lifting other operations
     liftCallCC,
@@ -36,7 +35,7 @@ import Data.Traversable (Traversable(traverse))
 -- | Parameterizable list monad, with an inner monad.
 --
 -- /Note:/ this does not yield a monad unless the argument monad is commutative.
-newtype ListT m a = ListT (m [a])
+newtype ListT m a = ListT { runListT :: m [a] }
 
 instance (Eq1 m, Eq a) => Eq (ListT m a) where
     ListT x == ListT y = eq1 x y
@@ -54,10 +53,6 @@ instance (Eq1 m) => Eq1 (ListT m) where eq1 = (==)
 instance (Ord1 m) => Ord1 (ListT m) where compare1 = compare
 instance (Read1 m) => Read1 (ListT m) where readsPrec1 = readsPrec
 instance (Show1 m) => Show1 (ListT m) where showsPrec1 = showsPrec
-
--- | The inverse of 'ListT'.
-runListT :: ListT m a -> m [a]
-runListT (ListT m) = m
 
 -- | Map between 'ListT' computations.
 --

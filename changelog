@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.4.1.0 Ross Paterson <ross@soi.city.ac.uk> May 2014
+	* Reverted to record syntax for newtypes until next major release
+
 0.4.0.0 Ross Paterson <ross@soi.city.ac.uk> May 2014
 	* Added Sum type
 	* Added modify', a strict version of modify, to the state monads

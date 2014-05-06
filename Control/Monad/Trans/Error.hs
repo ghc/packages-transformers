@@ -34,7 +34,6 @@ module Control.Monad.Trans.Error
     Error(..),
     ErrorList(..),
     ErrorT(..),
-    runErrorT,
     mapErrorT,
     -- * Error operations
     throwError,
@@ -153,7 +152,7 @@ instance (Error e) => MonadPlus (Either e) where
 --
 -- The 'return' function yields a successful computation, while @>>=@
 -- sequences two subcomputations, failing on the first error.
-newtype ErrorT e m a = ErrorT (m (Either e a))
+newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
 
 instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where
     ErrorT x == ErrorT y = eq1 x y
@@ -171,10 +170,6 @@ instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where eq1 = (==)
 instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where compare1 = compare
 instance (Read e, Read1 m) => Read1 (ErrorT e m) where readsPrec1 = readsPrec
 instance (Show e, Show1 m) => Show1 (ErrorT e m) where showsPrec1 = showsPrec
-
--- | Inverse of 'ErrorT'.
-runErrorT :: ErrorT e m a -> m (Either e a)
-runErrorT (ErrorT m) = m
 
 -- | Map the unwrapped computation using the given function.
 --

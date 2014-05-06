@@ -16,7 +16,6 @@
 module Control.Monad.Trans.Identity (
     -- * The identity monad transformer
     IdentityT(..),
-    runIdentityT,
     mapIdentityT,
     -- * Lifting other operations
     liftCatch,
@@ -35,7 +34,7 @@ import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
 -- | The trivial monad transformer, which maps a monad to an equivalent monad.
-newtype IdentityT f a = IdentityT (f a)
+newtype IdentityT f a = IdentityT { runIdentityT :: f a }
 
 instance (Eq1 f, Eq a) => Eq (IdentityT f a) where
     IdentityT x == IdentityT y = eq1 x y
@@ -88,10 +87,6 @@ instance (MonadIO m) => MonadIO (IdentityT m) where
 
 instance MonadTrans IdentityT where
     lift = IdentityT
-
--- | The inverse of 'IdentityT'.
-runIdentityT :: IdentityT f a -> f a
-runIdentityT (IdentityT m) = m
 
 -- | Lift a unary operation to the new monad.
 mapIdentityT :: (m a -> n b) -> IdentityT m a -> IdentityT n b

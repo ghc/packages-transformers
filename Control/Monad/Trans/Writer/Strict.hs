@@ -32,7 +32,6 @@ module Control.Monad.Trans.Writer.Strict (
     mapWriter,
     -- * The WriterT monad transformer
     WriterT(..),
-    runWriterT,
     execWriterT,
     mapWriterT,
     -- * Writer operations
@@ -98,7 +97,7 @@ mapWriter f = mapWriterT (Identity . f . runIdentity)
 --
 -- The 'return' function produces the output 'mempty', while @>>=@
 -- combines the outputs of the subcomputations using 'mappend'.
-newtype WriterT w m a = WriterT (m (a, w))
+newtype WriterT w m a = WriterT { runWriterT :: m (a, w) }
 
 instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where
     WriterT x == WriterT y = eq1 x y
@@ -116,10 +115,6 @@ instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where eq1 = (==)
 instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where compare1 = compare
 instance (Read w, Read1 m) => Read1 (WriterT w m) where readsPrec1 = readsPrec
 instance (Show w, Show1 m) => Show1 (WriterT w m) where showsPrec1 = showsPrec
-
--- | The inverse of 'WriterT'.
-runWriterT :: WriterT w m a -> m (a, w)
-runWriterT (WriterT m) = m
 
 -- | Extract the output from a writer computation.
 --

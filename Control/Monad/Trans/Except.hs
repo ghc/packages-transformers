@@ -27,7 +27,7 @@ module Control.Monad.Trans.Except (
     mapExcept,
     withExcept,
     -- * The ExceptT monad transformer
-    ExceptT(..),
+    ExceptT(ExceptT),
     runExceptT,
     mapExceptT,
     withExceptT,

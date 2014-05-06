@@ -11,7 +11,6 @@
 
 module Data.Functor.Compose (
     Compose(..),
-    getCompose,
   ) where
 
 import Data.Functor.Classes
@@ -25,11 +24,7 @@ infixr 9 `Compose`
 -- | Right-to-left composition of functors.
 -- The composition of applicative functors is always applicative,
 -- but the composition of monads is not always a monad.
-newtype Compose f g a = Compose (f (g a))
-
--- | Inverse of 'Compose'.
-getCompose :: Compose f g a -> f (g a)
-getCompose (Compose x) = x
+newtype Compose f g a = Compose { getCompose :: f (g a) }
 
 -- Instances of Prelude classes
 
