@@ -193,10 +193,11 @@ a monad that supports all these things as a stack of monad transformers:
 
 > import Control.Monad.Trans.Class
 > import Control.Monad.Trans.State
+> import Control.Monad.IO.Class
 > import qualified Control.Monad.Trans.Reader as R
 > import qualified Control.Monad.Trans.Except as E
 >
-> type InterpM = StateT Store (R.ReaderT Env (E.ExceptT Err []))
+> type InterpM = StateT Store (R.ReaderT Env (E.ExceptT Err IO))
 
 for suitable types @Store@, @Env@ and @Err@.
 
