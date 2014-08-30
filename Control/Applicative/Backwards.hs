@@ -1,3 +1,7 @@
+{-# LANGUAGE CPP #-}
+#if __GLASGOW_HASKELL__ >= 708
+{-# LANGUAGE AutoDeriveTypeable #-}
+#endif
 -- |
 -- Module      :  Control.Applicative.Backwards
 -- Copyright   :  (c) Russell O'Connor 2009

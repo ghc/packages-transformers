@@ -1,3 +1,7 @@
+{-# LANGUAGE CPP #-}
+#if __GLASGOW_HASKELL__ >= 708
+{-# LANGUAGE AutoDeriveTypeable #-}
+#endif
 -- |
 -- Module      :  Data.Functor.Classes
 -- Copyright   :  (c) Ross Paterson 2013
