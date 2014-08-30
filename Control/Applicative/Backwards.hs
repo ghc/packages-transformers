@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Applicative.Backwards
 -- Copyright   :  (c) Russell O'Connor 2009
@@ -13,6 +14,7 @@
 --
 -- Making functors with an 'Applicative' instance that performs actions
 -- in the reverse order.
+-----------------------------------------------------------------------------
 
 module Control.Applicative.Backwards (
     Backwards(..),

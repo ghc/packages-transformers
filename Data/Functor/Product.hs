@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Product
 -- Copyright   :  (c) Ross Paterson 2010
@@ -12,6 +13,7 @@
 -- Portability :  portable
 --
 -- Products, lifted to functors.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Product (
     Product(..),

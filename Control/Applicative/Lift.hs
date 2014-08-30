@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Applicative.Lift
 -- Copyright   :  (c) Ross Paterson 2010
@@ -12,6 +13,7 @@
 -- Portability :  portable
 --
 -- Adding a new kind of pure computation to an applicative functor.
+-----------------------------------------------------------------------------
 
 module Control.Applicative.Lift (
     Lift(..),

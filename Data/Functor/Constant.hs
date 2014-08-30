@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Constant
 -- Copyright   :  (c) Ross Paterson 2010
@@ -12,6 +13,7 @@
 -- Portability :  portable
 --
 -- The constant functor.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Constant (
     Constant(..),

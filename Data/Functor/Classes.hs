@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Classes
 -- Copyright   :  (c) Ross Paterson 2013
@@ -12,6 +13,7 @@
 -- Portability :  portable
 --
 -- Prelude classes, lifted to unary type constructors.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Classes (
     -- * Liftings of Prelude classes

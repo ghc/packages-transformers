@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Identity
 -- Copyright   :  (c) Andy Gill 2001,
@@ -23,6 +24,7 @@
 --   Most monad transformer modules include the special case of
 --   applying the transformer to 'Identity'.  For example, @State s@
 --   is an abbreviation for @StateT s 'Identity'@.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Identity (
     Identity(..),
