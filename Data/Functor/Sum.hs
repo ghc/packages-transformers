@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Sum
 -- Copyright   :  (c) Ross Paterson 2014
@@ -12,6 +13,7 @@
 -- Portability :  portable
 --
 -- Sums, lifted to functors.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Sum (
     Sum(..),

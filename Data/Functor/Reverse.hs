@@ -2,6 +2,7 @@
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Reverse
 -- Copyright   :  (c) Russell O'Connor 2009
@@ -13,6 +14,7 @@
 --
 -- Making functors whose elements are notionally in the reverse order
 -- from the original functor.
+-----------------------------------------------------------------------------
 
 module Data.Functor.Reverse (
     Reverse(..),
