@@ -128,8 +128,8 @@ instance (Monad m) => MonadPlus (MaybeT m) where
             Just _  -> return v
 
 instance (MonadFix m) => MonadFix (MaybeT m) where
-    mfix f = MaybeT (mfix (runMaybeT . f . unJust))
-      where unJust = fromMaybe (error "mfix MaybeT: Nothing")
+    mfix f = MaybeT (mfix (runMaybeT . f . fromMaybe bomb))
+      where bomb = error "mfix (MaybeT): inner computation returned Nothing"
 
 instance MonadTrans MaybeT where
     lift = MaybeT . liftM Just
