@@ -179,9 +179,8 @@ instance (Monad m, Monoid e) => MonadPlus (ExceptT e m) where
             Right x -> return (Right x)
 
 instance (MonadFix m) => MonadFix (ExceptT e m) where
-    mfix f = ExceptT $ mfix $ \ a -> runExceptT $ f $ case a of
-        Right x -> x
-        Left _ -> error "mfix ExceptT: Left"
+    mfix f = ExceptT (mfix (runExceptT . f . either (const bomb) id))
+      where bomb = error "mfix (ExceptT): inner computation returned Left value"
 
 instance MonadTrans (ExceptT e) where
     lift = ExceptT . liftM Right
