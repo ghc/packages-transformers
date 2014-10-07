@@ -30,8 +30,6 @@ module Data.Functor.Identity (
     Identity(..),
   ) where
 
-import Data.Functor.Classes
-
 import Control.Applicative
 import Control.Monad.Fix
 import Data.Foldable (Foldable(foldMap))
@@ -45,15 +43,12 @@ newtype Identity a = Identity { runIdentity :: a }
 -- newtype if the field were removed.
 
 instance (Read a) => Read (Identity a) where
-    readsPrec = readsData $ readsUnary "Identity" Identity
+    readsPrec d = readParen (d > 10) $ \ r ->
+        [(Identity x,t) | ("Identity",s) <- lex r, (x,t) <- readsPrec 11 s]
 
 instance (Show a) => Show (Identity a) where
-    showsPrec d (Identity x) = showsUnary "Identity" d x
-
-instance Eq1 Identity where eq1 = (==)
-instance Ord1 Identity where compare1 = compare
-instance Read1 Identity where readsPrec1 = readsPrec
-instance Show1 Identity where showsPrec1 = showsPrec
+    showsPrec d (Identity x) = showParen (d > 10) $
+        showString "Identity " . showsPrec 11 x
 
 -- ---------------------------------------------------------------------------
 -- Identity instances for Functor and Monad
