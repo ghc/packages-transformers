@@ -31,6 +31,8 @@ module Data.Functor.Classes (
     showsBinary1,
   ) where
 
+import Data.Functor.Identity
+
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where
     eq1 :: (Eq a) => f a -> f a -> Bool
@@ -68,6 +70,13 @@ instance (Eq a) => Eq1 (Either a) where eq1 = (==)
 instance (Ord a) => Ord1 (Either a) where compare1 = compare
 instance (Read a) => Read1 (Either a) where readsPrec1 = readsPrec
 instance (Show a) => Show1 (Either a) where showsPrec1 = showsPrec
+
+-- Instances for other functors
+
+instance Eq1 Identity where eq1 = (==)
+instance Ord1 Identity where compare1 = compare
+instance Read1 Identity where readsPrec1 = readsPrec
+instance Show1 Identity where showsPrec1 = showsPrec
 
 -- Building blocks
 
