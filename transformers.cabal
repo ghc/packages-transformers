@@ -37,15 +37,8 @@ source-repository head
   type: darcs
   location: http://code.haskell.org/~ross/transformers
 
-flag ApplicativeInBase
-  description: Use the current base package, including Applicative and
-    other Functor classes.
-
 library
-  if flag(ApplicativeInBase)
-    build-depends: base >= 2 && < 6
-  else
-    build-depends: base >= 1.0 && < 2, special-functors >= 1.0 && < 1.1
+  build-depends: base >= 2 && < 6
   exposed-modules:
     Control.Applicative.Backwards
     Control.Applicative.Lift
