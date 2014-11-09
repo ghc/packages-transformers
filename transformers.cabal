@@ -39,6 +39,13 @@ source-repository head
 
 library
   build-depends: base >= 2 && < 6
+  hs-source-dirs: .
+  if !impl(ghc>=7.9)
+    -- Data.Functor.Identity was moved into base-4.8.0.0 (GHC 7.10)
+    -- see also https://ghc.haskell.org/trac/ghc/ticket/9664
+    -- NB: using impl(ghc>=7.9) instead of fragile Cabal flags
+    hs-source-dirs: oldsrc
+    exposed-modules: Data.Functor.Identity
   exposed-modules:
     Control.Applicative.Backwards
     Control.Applicative.Lift
@@ -64,7 +71,6 @@ library
     Data.Functor.Classes
     Data.Functor.Compose
     Data.Functor.Constant
-    Data.Functor.Identity
     Data.Functor.Product
     Data.Functor.Reverse
     Data.Functor.Sum
