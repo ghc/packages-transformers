@@ -16,10 +16,13 @@
 -----------------------------------------------------------------------------
 
 module Control.Applicative.Lift (
+    -- * Lifting an applicative
     Lift(..),
     unLift,
+    mapLift,
     -- * Collecting errors
     Errors,
+    runErrors,
     failure
   ) where
 
@@ -91,11 +94,35 @@ unLift :: (Applicative f) => Lift f a -> f a
 unLift (Pure x) = pure x
 unLift (Other e) = e
 
+-- | Apply a transformation to the other computation.
+mapLift :: (f a -> g a) -> Lift f a -> Lift g a
+mapLift f (Pure x) = Pure x
+mapLift f (Other e) = Other (f e)
+
 -- | An applicative functor that collects a monoid (e.g. lists) of errors.
 -- A sequence of computations fails if any of its components do, but
 -- unlike monads made with 'ExceptT' from "Control.Monad.Trans.Except",
 -- these computations continue after an error, collecting all the errors.
+--
+-- * @'pure' f '<*>' 'pure' x = 'pure' (f x)@
+--
+-- * @'pure' f '<*>' 'failure' e = 'failure' e@
+--
+-- * @'failure' e '<*>' 'pure' x = 'failure' e@
+--
+-- * @'failure' e1 '<*>' 'failure' e2 = 'failure' (e1 '<>' e2)@
+--
 type Errors e = Lift (Constant e)
+
+-- | Extractor for computations with accumulating errors.
+--
+-- * @'runErrors' ('pure' x) = 'Right' x@
+--
+-- * @'runErrors' ('failure' e) = 'Left' e@
+--
+runErrors :: Errors e a -> Either e a
+runErrors (Other (Constant e)) = Left e
+runErrors (Pure x) = Right x
 
 -- | Report an error.
 failure :: (Monoid e) => e -> Errors e a
