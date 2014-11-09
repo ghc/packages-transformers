@@ -61,8 +61,9 @@ import Data.Traversable (Traversable(traverse))
 --
 -- Computations are either exceptions or normal values.
 --
--- The 'return' function returns a normal value, while @>>=@ exits
--- on the first exception.
+-- The 'return' function returns a normal value, while @>>=@ exits on
+-- the first exception.  For a variant that continies after an error
+-- and collects all the errors, see 'Control.Applicative.Lift.Errors'.
 type Except e = ExceptT e Identity
 
 -- | Constructor for computations in the exception monad.
