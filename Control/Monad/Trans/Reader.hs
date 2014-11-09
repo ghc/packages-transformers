@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 708
+#if __GLASGOW_HASKELL__ >= 709
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
 -----------------------------------------------------------------------------
