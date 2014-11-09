@@ -1,5 +1,12 @@
 -*-change-log-*-
 
+0.4.2.0 Ross Paterson <ross@soi.city.ac.uk> Nov 2014
+	* Dropped compatibility with base-1.x
+	* Data.Functor.Identity in base for GHC >= 7.10
+	* Added mapLift and runErrors to Control.Applicative.Lift
+	* Added AutoDeriveTypeable for GHC >= 7.10
+	* Expanded messages from mfix on ExceptT and MaybeT
+
 0.4.1.0 Ross Paterson <ross@soi.city.ac.uk> May 2014
 	* Reverted to record syntax for newtypes until next major release
 
