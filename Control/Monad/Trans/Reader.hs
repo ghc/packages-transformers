@@ -153,8 +153,8 @@ ask = ReaderT return
 -- (a specialization of 'withReaderT').
 --
 -- * @'runReaderT' ('local' f m) = 'runReaderT' m . f@
-local :: (Monad m)
-    => (r -> r)         -- ^ The function to modify the environment.
+local
+    :: (r -> r)         -- ^ The function to modify the environment.
     -> ReaderT r m a    -- ^ Computation to run in the modified environment.
     -> ReaderT r m a
 local = withReaderT

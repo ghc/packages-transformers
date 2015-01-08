@@ -178,14 +178,14 @@ instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
     liftIO = lift . liftIO
 
 -- | @'tell' w@ is an action that produces the output @w@.
-tell :: (Monoid w, Monad m) => w -> WriterT w m ()
+tell :: (Monad m) => w -> WriterT w m ()
 tell w = writer ((), w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
 --
 -- * @'runWriterT' ('listen' m) = 'liftM' (\\ (a, w) -> ((a, w), w)) ('runWriterT' m)@
-listen :: (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
+listen :: (Monad m) => WriterT w m a -> WriterT w m (a, w)
 listen m = WriterT $ do
     (a, w) <- runWriterT m
     return ((a, w), w)
@@ -196,7 +196,7 @@ listen m = WriterT $ do
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 --
 -- * @'runWriterT' ('listens' f m) = 'liftM' (\\ (a, w) -> ((a, f w), w)) ('runWriterT' m)@
-listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
+listens :: (Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 listens f m = WriterT $ do
     (a, w) <- runWriterT m
     return ((a, f w), w)
@@ -206,7 +206,7 @@ listens f m = WriterT $ do
 -- to the output.
 --
 -- * @'runWriterT' ('pass' m) = 'liftM' (\\ ((a, f), w) -> (a, f w)) ('runWriterT' m)@
-pass :: (Monoid w, Monad m) => WriterT w m (a, w -> w) -> WriterT w m a
+pass :: (Monad m) => WriterT w m (a, w -> w) -> WriterT w m a
 pass m = WriterT $ do
     ((a, f), w) <- runWriterT m
     return (a, f w)
@@ -218,7 +218,7 @@ pass m = WriterT $ do
 -- * @'censor' f m = 'pass' ('liftM' (\\ x -> (x,f)) m)@
 --
 -- * @'runWriterT' ('censor' f m) = 'liftM' (\\ (a, w) -> (a, f w)) ('runWriterT' m)@
-censor :: (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
+censor :: (Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
 censor f m = WriterT $ do
     (a, w) <- runWriterT m
     return (a, f w)

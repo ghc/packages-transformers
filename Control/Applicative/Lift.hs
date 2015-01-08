@@ -125,5 +125,5 @@ runErrors (Other (Constant e)) = Left e
 runErrors (Pure x) = Right x
 
 -- | Report an error.
-failure :: (Monoid e) => e -> Errors e a
+failure :: e -> Errors e a
 failure e = Other (Constant e)

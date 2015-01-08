@@ -205,7 +205,7 @@ ask = RWST $ \ r s -> return (r, s, mempty)
 -- | Execute a computation in a modified environment
 --
 -- * @'runRWST' ('local' f m) r s = 'runRWST' m (f r) s@
-local :: (Monoid w, Monad m) => (r -> r) -> RWST r w s m a -> RWST r w s m a
+local :: (r -> r) -> RWST r w s m a -> RWST r w s m a
 local f m = RWST $ \ r s -> runRWST m (f r) s
 
 -- | Retrieve a function of the current environment.
@@ -222,14 +222,14 @@ writer :: (Monad m) => (a, w) -> RWST r w s m a
 writer (a, w) = RWST $ \ _ s -> return (a, s, w)
 
 -- | @'tell' w@ is an action that produces the output @w@.
-tell :: (Monoid w, Monad m) => w -> RWST r w s m ()
+tell :: (Monad m) => w -> RWST r w s m ()
 tell w = RWST $ \ _ s -> return ((),s,w)
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
 --
 -- * @'runRWST' ('listen' m) r s = 'liftM' (\\ (a, w) -> ((a, w), w)) ('runRWST' m r s)@
-listen :: (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
+listen :: (Monad m) => RWST r w s m a -> RWST r w s m (a, w)
 listen m = RWST $ \ r s -> do
     (a, s', w) <- runRWST m r s
     return ((a, w), s', w)
@@ -240,7 +240,7 @@ listen m = RWST $ \ r s -> do
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 --
 -- * @'runRWST' ('listens' f m) r s = 'liftM' (\\ (a, w) -> ((a, f w), w)) ('runRWST' m r s)@
-listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
+listens :: (Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 listens f m = RWST $ \ r s -> do
     (a, s', w) <- runRWST m r s
     return ((a, f w), s', w)
@@ -250,7 +250,7 @@ listens f m = RWST $ \ r s -> do
 -- to the output.
 --
 -- * @'runRWST' ('pass' m) r s = 'liftM' (\\ ((a, f), w) -> (a, f w)) ('runRWST' m r s)@
-pass :: (Monoid w, Monad m) => RWST r w s m (a, w -> w) -> RWST r w s m a
+pass :: (Monad m) => RWST r w s m (a, w -> w) -> RWST r w s m a
 pass m = RWST $ \ r s -> do
     ((a, f), s', w) <- runRWST m r s
     return (a, s', f w)
@@ -262,7 +262,7 @@ pass m = RWST $ \ r s -> do
 -- * @'censor' f m = 'pass' ('liftM' (\\ x -> (x,f)) m)@
 --
 -- * @'runRWST' ('censor' f m) r s = 'liftM' (\\ (a, w) -> (a, f w)) ('runRWST' m r s)@
-censor :: (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
+censor :: (Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
 censor f m = RWST $ \ r s -> do
     (a, s', w) <- runRWST m r s
     return (a, s', f w)

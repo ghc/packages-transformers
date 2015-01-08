@@ -230,7 +230,7 @@ instance (MonadFix m, Error e) => MonadFix (ErrorT e m) where
         Right r -> r
         _       -> error "empty mfix argument"
 
-instance (Error e) => MonadTrans (ErrorT e) where
+instance MonadTrans (ErrorT e) where
     lift m = ErrorT $ do
         a <- m
         return (Right a)
@@ -243,7 +243,7 @@ instance (Error e, MonadIO m) => MonadIO (ErrorT e m) where
 -- * @'runErrorT' ('throwError' e) = 'return' ('Left' e)@
 --
 -- * @'throwError' e >>= m = 'throwError' e@
-throwError :: (Monad m, Error e) => e -> ErrorT e m a
+throwError :: (Monad m) => e -> ErrorT e m a
 throwError l = ErrorT $ return (Left l)
 
 -- | Handle an error.
@@ -251,7 +251,7 @@ throwError l = ErrorT $ return (Left l)
 -- * @'catchError' h ('lift' m) = 'lift' m@
 --
 -- * @'catchError' h ('throwError' e) = h e@
-catchError :: (Monad m, Error e) =>
+catchError :: (Monad m) =>
     ErrorT e m a                -- ^ the inner computation
     -> (e -> ErrorT e m a)      -- ^ a handler for errors in the inner
                                 -- computation
