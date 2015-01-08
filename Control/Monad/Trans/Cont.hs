@@ -66,9 +66,10 @@ cont f = ContT (\ c -> Identity (f (runIdentity . c)))
 
 -- | The result of running a CPS computation with a given final continuation.
 -- (The inverse of 'cont')
-runCont :: Cont r a	-- ^ continuation computation (@Cont@).
-    -> (a -> r)		-- ^ the final continuation, which produces
-			-- the final result (often 'id').
+runCont
+    :: Cont r a         -- ^ continuation computation (@Cont@).
+    -> (a -> r)         -- ^ the final continuation, which produces
+                        -- the final result (often 'id').
     -> r
 runCont m k = runIdentity (runContT m (Identity . k))
 

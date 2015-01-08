@@ -66,8 +66,9 @@ reader f = ReaderT (return . f)
 
 -- | Runs a @Reader@ and extracts the final value from it.
 -- (The inverse of 'reader'.)
-runReader :: Reader r a		-- ^ A @Reader@ to run.
-    -> r			-- ^ An initial environment.
+runReader
+     :: Reader r a      -- ^ A @Reader@ to run.
+    -> r                -- ^ An initial environment.
     -> a
 runReader m = runIdentity . runReaderT m
 
