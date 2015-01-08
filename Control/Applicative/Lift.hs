@@ -96,7 +96,7 @@ unLift (Other e) = e
 
 -- | Apply a transformation to the other computation.
 mapLift :: (f a -> g a) -> Lift f a -> Lift g a
-mapLift f (Pure x) = Pure x
+mapLift _ (Pure x) = Pure x
 mapLift f (Other e) = Other (f e)
 
 -- | An applicative functor that collects a monoid (e.g. lists) of errors.
