@@ -79,7 +79,8 @@ Each of the monad transformers introduces relevant operations.
 In a sequence of monad transformers, most of these operations.can be
 lifted through other transformers using 'lift' or the @map@/XXX/@T@
 combinator, but a few with more complex type signatures require
-specialized lifting combinators, called @lift@/Op/.
+specialized lifting combinators, called @lift@/Op/
+(see "Control.Monad.Signatures").
 -}
 
 {- $strict
