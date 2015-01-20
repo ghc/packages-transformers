@@ -249,7 +249,7 @@ liftCallCC callCC f = StateT $ \ s ->
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
--- It does not satisfy the laws of a monad transformer.
+-- It does not satisfy the uniformity property (see "Control.Monad.Signatures").
 liftCallCC' :: CallCC m (a,s) (b,s) -> CallCC (StateT s m) a b
 liftCallCC' callCC f = StateT $ \ s ->
     callCC $ \ c ->

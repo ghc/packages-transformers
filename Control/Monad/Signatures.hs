@@ -9,6 +9,7 @@
 -- Portability :  portable
 --
 -- Signatures for monad operations that require specialized lifting.
+-- Each signature has a uniformity property that the lifting should satisfy.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Signatures (
@@ -27,7 +28,7 @@ type CallCC m a b = ((a -> m b) -> m a) -> m a
 -- introduced in "Control.Monad.Trans.Except".
 -- Any lifting function @liftCatch@ should satisfy
 --
--- * @'lift' (cf m f) = liftCatch ('lift' . cf) ('lift' f')@
+-- * @'lift' (cf m f) = liftCatch ('lift' . cf) ('lift' f)@
 --
 type Catch e m a = m a -> (e -> m a) -> m a
 
