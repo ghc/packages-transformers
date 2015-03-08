@@ -35,7 +35,7 @@ cabal-version: >= 1.6
 
 source-repository head
   type: darcs
-  location: http://code.haskell.org/~ross/transformers
+  location: http://hub.darcs.net/ross/transformers
 
 library
   build-depends: base >= 2 && < 6
