@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.4.3.0 Ross Paterson <R.Paterson@city.ac.uk> Mar 2015
+	* Added Eq1, Ord1, Show1 and Read1 instances for Const
+
 0.4.2.0 Ross Paterson <ross@soi.city.ac.uk> Nov 2014
 	* Dropped compatibility with base-1.x
 	* Data.Functor.Identity in base for GHC >= 7.10
