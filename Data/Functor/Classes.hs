@@ -12,7 +12,26 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Prelude classes, lifted to unary type constructors.
+-- Liftings of the Prelude classes 'Eq', 'Ord', 'Read' and 'Show' to
+-- unary type constructors.
+--
+-- These classes are needed to express the constraints on arguments of
+-- transformers in portable Haskell.  Thus for a new transformer @T@,
+-- one might write instances like
+--
+-- > instance (Eq1 f) => Eq (T f a) where ...
+-- > instance (Ord1 f) => Ord (T f a) where ...
+-- > instance (Read1 f) => Read (T f a) where ...
+-- > instance (Show1 f) => Show (T f a) where ...
+--
+-- If these instances can be defined, defining instances of the lifted
+-- classes is mechanical:
+--
+-- > instance (Eq1 f) => Eq1 (T f) where eq1 = (==)
+-- > instance (Ord1 f) => Ord1 (T f) where compare1 = compare
+-- > instance (Read1 f) => Read1 (T f) where readsPrec1 = readsPrec
+-- > instance (Show1 f) => Show1 (T f) where showsPrec1 = showsPrec
+--
 -----------------------------------------------------------------------------
 
 module Data.Functor.Classes (
@@ -22,6 +41,7 @@ module Data.Functor.Classes (
     Read1(..),
     Show1(..),
     -- * Helper functions
+    -- $example
     readsData,
     readsUnary,
     readsUnary1,
@@ -151,3 +171,26 @@ showsBinary1 :: (Show1 f, Show1 g, Show a) =>
 showsBinary1 name d x y = showParen (d > 10) $
     showString name . showChar ' ' . showsPrec1 11 x .
         showChar ' ' . showsPrec1 11 y
+
+{- $example
+These functions can be used to assemble 'Read' and 'Show' instances for
+new algebraic types.  For example, given the definition
+
+> data T f a = Zero a | One (f a) | Two (f a) (f a)
+
+a standard 'Read' instance may be defined as
+
+> instance (Read1 f, Read a) => Read (T f a) where
+>     readsPrec = readsData $
+>         readsUnary "Zero" Zero `mappend`
+>         readsUnary1 "One" One `mappend`
+>         readsBinary1 "Two" Two
+
+and the corresponding 'Show' instance as
+
+> instance (Show1 f, Show a) => Show (T f a) where
+>     showsPrec d (Zero x) = showsUnary "Zero" d x
+>     showsPrec d (One x) = showsUnary1 "One" d x
+>     showsPrec d (Two x y) = showsBinary1 "Two" d x y
+
+-}
