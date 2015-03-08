@@ -31,7 +31,12 @@ module Data.Functor.Classes (
     showsBinary1,
   ) where
 
-import Data.Functor.Identity
+#if MIN_VERSION_base(4,8,0)
+import Control.Applicative (Const)
+#else
+import Control.Applicative (Const(Const))
+#endif
+import Data.Functor.Identity (Identity)
 
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where
@@ -71,12 +76,29 @@ instance (Ord a) => Ord1 (Either a) where compare1 = compare
 instance (Read a) => Read1 (Either a) where readsPrec1 = readsPrec
 instance (Show a) => Show1 (Either a) where showsPrec1 = showsPrec
 
--- Instances for other functors
+-- Instances for other functors defined in the base package
 
 instance Eq1 Identity where eq1 = (==)
 instance Ord1 Identity where compare1 = compare
 instance Read1 Identity where readsPrec1 = readsPrec
 instance Show1 Identity where showsPrec1 = showsPrec
+
+#if MIN_VERSION_base(4,8,0)
+-- Eq, etc instances for Const were introduced in base-4.8
+instance (Eq a) => Eq1 (Const a) where eq1 = (==)
+instance (Ord a) => Ord1 (Const a) where compare1 = compare
+instance (Read a) => Read1 (Const a) where readsPrec1 = readsPrec
+instance (Show a) => Show1 (Const a) where showsPrec1 = showsPrec
+#else
+instance (Eq a) => Eq1 (Const a) where
+    eq1 (Const x) (Const y) = x == y
+instance (Ord a) => Ord1 (Const a) where
+    compare1 (Const x) (Const y) = compare x y
+instance (Read a) => Read1 (Const a) where
+    readsPrec1 = readsData $ readsUnary "Const" Const
+instance (Show a) => Show1 (Const a) where
+    showsPrec1 d (Const x) = showsUnary "Const" d x
+#endif
 
 -- Building blocks
 
