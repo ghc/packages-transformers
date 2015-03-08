@@ -3,7 +3,7 @@ version:      0.4.2.0
 license:      BSD3
 license-file: LICENSE
 author:       Andy Gill, Ross Paterson
-maintainer:   Ross Paterson <ross@soi.city.ac.uk>
+maintainer:   Ross Paterson <R.Paterson@city.ac.uk>
 category:     Control
 synopsis:     Concrete functor and monad transformers
 description:
