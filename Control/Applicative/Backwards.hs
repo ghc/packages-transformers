@@ -67,8 +67,8 @@ instance (Foldable f) => Foldable (Backwards f) where
     foldMap f (Backwards t) = foldMap f t
     foldr f z (Backwards t) = foldr f z t
     foldl f z (Backwards t) = foldl f z t
-    foldr1 f (Backwards t) = foldl1 f t
-    foldl1 f (Backwards t) = foldr1 f t
+    foldr1 f (Backwards t) = foldr1 f t
+    foldl1 f (Backwards t) = foldl1 f t
 
 -- | Derived instance.
 instance (Traversable f) => Traversable (Backwards f) where
