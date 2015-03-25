@@ -41,22 +41,24 @@ import Data.Traversable (Traversable(traverse))
 -- /Note:/ this does not yield a monad unless the argument monad is commutative.
 newtype ListT m a = ListT { runListT :: m [a] }
 
-instance (Eq1 m, Eq a) => Eq (ListT m a) where
-    ListT x == ListT y = eq1 x y
+instance (Eq1 m) => Eq1 (ListT m) where
+    eqWith eq (ListT x) (ListT y) = eqWith (eqWith eq) x y
 
-instance (Ord1 m, Ord a) => Ord (ListT m a) where
-    compare (ListT x) (ListT y) = compare1 x y
+instance (Ord1 m) => Ord1 (ListT m) where
+    compareWith comp (ListT x) (ListT y) = compareWith (compareWith comp) x y
 
-instance (Read1 m, Read a) => Read (ListT m a) where
-    readsPrec = readsData $ readsUnary1 "ListT" ListT
+instance (Read1 m) => Read1 (ListT m) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ListT" ListT
 
-instance (Show1 m, Show a) => Show (ListT m a) where
-    showsPrec d (ListT m) = showsUnary1 "ListT" d m
+instance (Show1 m) => Show1 (ListT m) where
+    showsPrecWith sp d (ListT m) =
+        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ListT" d m
 
-instance (Eq1 m) => Eq1 (ListT m) where eq1 = (==)
-instance (Ord1 m) => Ord1 (ListT m) where compare1 = compare
-instance (Read1 m) => Read1 (ListT m) where readsPrec1 = readsPrec
-instance (Show1 m) => Show1 (ListT m) where showsPrec1 = showsPrec
+instance (Eq1 m, Eq a) => Eq (ListT m a) where (==) = eq1
+instance (Ord1 m, Ord a) => Ord (ListT m a) where compare = compare1
+instance (Read1 m, Read a) => Read (ListT m a) where readsPrec = readsPrec1
+instance (Show1 m, Show a) => Show (ListT m a) where showsPrec = showsPrec1
 
 -- | Map between 'ListT' computations.
 --

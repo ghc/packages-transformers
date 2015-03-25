@@ -157,22 +157,26 @@ instance (Error e) => MonadPlus (Either e) where
 -- sequences two subcomputations, failing on the first error.
 newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
 
-instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where
-    ErrorT x == ErrorT y = eq1 x y
+instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where
+    eqWith eq (ErrorT x) (ErrorT y) = eqWith (eqWith eq) x y
 
-instance (Ord e, Ord1 m, Ord a) => Ord (ErrorT e m a) where
-    compare (ErrorT x) (ErrorT y) = compare1 x y
+instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where
+    compareWith comp (ErrorT x) (ErrorT y) = compareWith (compareWith comp) x y
 
+instance (Read e, Read1 m) => Read1 (ErrorT e m) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ErrorT" ErrorT
+
+instance (Show e, Show1 m) => Show1 (ErrorT e m) where
+    showsPrecWith sp d (ErrorT m) =
+        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ErrorT" d m
+
+instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where (==) = eq1
+instance (Ord e, Ord1 m, Ord a) => Ord (ErrorT e m a) where compare = compare1
 instance (Read e, Read1 m, Read a) => Read (ErrorT e m a) where
-    readsPrec = readsData $ readsUnary1 "ErrorT" ErrorT
-
+    readsPrec = readsPrec1
 instance (Show e, Show1 m, Show a) => Show (ErrorT e m a) where
-    showsPrec d (ErrorT m) = showsUnary1 "ErrorT" d m
-
-instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where eq1 = (==)
-instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where compare1 = compare
-instance (Read e, Read1 m) => Read1 (ErrorT e m) where readsPrec1 = readsPrec
-instance (Show e, Show1 m) => Show1 (ErrorT e m) where showsPrec1 = showsPrec
+    showsPrec = showsPrec1
 
 -- | Map the unwrapped computation using the given function.
 --

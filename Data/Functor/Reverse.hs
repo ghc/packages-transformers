@@ -33,22 +33,24 @@ import Data.Monoid
 -- that process the elements in the reverse order.
 newtype Reverse f a = Reverse { getReverse :: f a }
 
-instance (Eq1 f, Eq a) => Eq (Reverse f a) where
-    Reverse x == Reverse y = eq1 x y
+instance (Eq1 f) => Eq1 (Reverse f) where
+    eqWith eq (Reverse x) (Reverse y) = eqWith eq x y
 
-instance (Ord1 f, Ord a) => Ord (Reverse f a) where
-    compare (Reverse x) (Reverse y) = compare1 x y
+instance (Ord1 f) => Ord1 (Reverse f) where
+    compareWith comp (Reverse x) (Reverse y) = compareWith comp x y
 
-instance (Read1 f, Read a) => Read (Reverse f a) where
-    readsPrec = readsData $ readsUnary1 "Reverse" Reverse
+instance (Read1 f) => Read1 (Reverse f) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith rp) "Reverse" Reverse
 
-instance (Show1 f, Show a) => Show (Reverse f a) where
-    showsPrec d (Reverse x) = showsUnary1 "Reverse" d x
+instance (Show1 f) => Show1 (Reverse f) where
+    showsPrecWith sp d (Reverse x) =
+        showsUnaryWith (showsPrecWith sp) "Reverse" d x
 
-instance (Eq1 f) => Eq1 (Reverse f) where eq1 = (==)
-instance (Ord1 f) => Ord1 (Reverse f) where compare1 = compare
-instance (Read1 f) => Read1 (Reverse f) where readsPrec1 = readsPrec
-instance (Show1 f) => Show1 (Reverse f) where showsPrec1 = showsPrec
+instance (Eq1 f, Eq a) => Eq (Reverse f a) where (==) = eq1
+instance (Ord1 f, Ord a) => Ord (Reverse f a) where compare = compare1
+instance (Read1 f, Read a) => Read (Reverse f a) where readsPrec = readsPrec1
+instance (Show1 f, Show a) => Show (Reverse f a) where showsPrec = showsPrec1
 
 -- | Derived instance.
 instance (Functor f) => Functor (Reverse f) where

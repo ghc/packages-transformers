@@ -38,29 +38,32 @@ import Data.Traversable (Traversable(traverse))
 -- applicative functor.
 data Lift f a = Pure a | Other (f a)
 
-instance (Eq1 f, Eq a) => Eq (Lift f a) where
-    Pure x1 == Pure x2 = x1 == x2
-    Other y1 == Other y2 = eq1 y1 y2
-    _ == _ = False
+instance (Eq1 f) => Eq1 (Lift f) where
+    eqWith eq (Pure x1) (Pure x2) = eq x1 x2
+    eqWith eq (Pure _) (Other _) = False
+    eqWith eq (Other _) (Pure _) = False
+    eqWith eq (Other y1) (Other y2) = eqWith eq y1 y2
 
-instance (Ord1 f, Ord a) => Ord (Lift f a) where
-    compare (Pure x1) (Pure x2) = compare x1 x2
-    compare (Pure _) (Other _) = LT
-    compare (Other _) (Pure _) = GT
-    compare (Other y1) (Other y2) = compare1 y1 y2
+instance (Ord1 f) => Ord1 (Lift f) where
+    compareWith comp (Pure x1) (Pure x2) = comp x1 x2
+    compareWith comp (Pure _) (Other _) = LT
+    compareWith comp (Other _) (Pure _) = GT
+    compareWith comp (Other y1) (Other y2) = compareWith comp y1 y2
 
-instance (Read1 f, Read a) => Read (Lift f a) where
-    readsPrec = readsData $
-        readsUnary "Pure" Pure `mappend` readsUnary1 "Other" Other
+instance (Read1 f) => Read1 (Lift f) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith rp "Pure" Pure `mappend`
+        readsUnaryWith (readsPrecWith rp) "Other" Other
 
-instance (Show1 f, Show a) => Show (Lift f a) where
-    showsPrec d (Pure x) = showsUnary "Pure" d x
-    showsPrec d (Other y) = showsUnary1 "Other" d y
+instance (Show1 f) => Show1 (Lift f) where
+    showsPrecWith sp d (Pure x) = showsUnaryWith sp "Pure" d x
+    showsPrecWith sp d (Other y) =
+        showsUnaryWith (showsPrecWith sp) "Other" d y
 
-instance (Eq1 f) => Eq1 (Lift f) where eq1 = (==)
-instance (Ord1 f) => Ord1 (Lift f) where compare1 = compare
-instance (Read1 f) => Read1 (Lift f) where readsPrec1 = readsPrec
-instance (Show1 f) => Show1 (Lift f) where showsPrec1 = showsPrec
+instance (Eq1 f, Eq a) => Eq (Lift f a) where (==) = eq1
+instance (Ord1 f, Ord a) => Ord (Lift f a) where compare = compare1
+instance (Read1 f, Read a) => Read (Lift f a) where readsPrec = readsPrec1
+instance (Show1 f, Show a) => Show (Lift f a) where showsPrec = showsPrec1
 
 instance (Functor f) => Functor (Lift f) where
     fmap f (Pure x) = Pure (f x)

@@ -102,22 +102,27 @@ withExcept = withExceptT
 -- first exception.
 newtype ExceptT e m a = ExceptT (m (Either e a))
 
-instance (Eq e, Eq1 m, Eq a) => Eq (ExceptT e m a) where
-    ExceptT x == ExceptT y = eq1 x y
+instance (Eq e, Eq1 m) => Eq1 (ExceptT e m) where
+    eqWith eq (ExceptT x) (ExceptT y) = eqWith (eqWith eq) x y
 
-instance (Ord e, Ord1 m, Ord a) => Ord (ExceptT e m a) where
-    compare (ExceptT x) (ExceptT y) = compare1 x y
+instance (Ord e, Ord1 m) => Ord1 (ExceptT e m) where
+    compareWith comp (ExceptT x) (ExceptT y) =
+        compareWith (compareWith comp) x y
 
+instance (Read e, Read1 m) => Read1 (ExceptT e m) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ExceptT" ExceptT
+
+instance (Show e, Show1 m) => Show1 (ExceptT e m) where
+    showsPrecWith sp d (ExceptT m) =
+        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ExceptT" d m
+
+instance (Eq e, Eq1 m, Eq a) => Eq (ExceptT e m a) where (==) = eq1
+instance (Ord e, Ord1 m, Ord a) => Ord (ExceptT e m a) where compare = compare1
 instance (Read e, Read1 m, Read a) => Read (ExceptT e m a) where
-    readsPrec = readsData $ readsUnary1 "ExceptT" ExceptT
-
+    readsPrec = readsPrec1
 instance (Show e, Show1 m, Show a) => Show (ExceptT e m a) where
-    showsPrec d (ExceptT m) = showsUnary1 "ExceptT" d m
-
-instance (Eq e, Eq1 m) => Eq1 (ExceptT e m) where eq1 = (==)
-instance (Ord e, Ord1 m) => Ord1 (ExceptT e m) where compare1 = compare
-instance (Read e, Read1 m) => Read1 (ExceptT e m) where readsPrec1 = readsPrec
-instance (Show e, Show1 m) => Show1 (ExceptT e m) where showsPrec1 = showsPrec
+    showsPrec = showsPrec1
 
 -- | The inverse of 'ExceptT'.
 runExceptT :: ExceptT e m a -> m (Either e a)

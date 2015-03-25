@@ -100,22 +100,28 @@ mapWriter f = mapWriterT (Identity . f . runIdentity)
 -- combines the outputs of the subcomputations using 'mappend'.
 newtype WriterT w m a = WriterT { runWriterT :: m (a, w) }
 
-instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where
-    WriterT x == WriterT y = eq1 x y
+instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where
+    eqWith eq (WriterT m1) (WriterT m2) = eqWith (eqWith2 eq (==)) m1 m2
 
-instance (Ord w, Ord1 m, Ord a) => Ord (WriterT w m a) where
-    compare (WriterT x) (WriterT y) = compare1 x y
+instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where
+    compareWith comp (WriterT m1) (WriterT m2) =
+        compareWith (compareWith2 comp compare) m1 m2
 
+instance (Read w, Read1 m) => Read1 (WriterT w m) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith2 rp readsPrec))
+            "WriterT" WriterT
+
+instance (Show w, Show1 m) => Show1 (WriterT w m) where
+    showsPrecWith sp d (WriterT m) =
+        showsUnaryWith (showsPrecWith (showsPrecWith2 sp showsPrec)) "WriterT" d m
+
+instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where (==) = eq1
+instance (Ord w, Ord1 m, Ord a) => Ord (WriterT w m a) where compare = compare1
 instance (Read w, Read1 m, Read a) => Read (WriterT w m a) where
-    readsPrec = readsData $ readsUnary1 "WriterT" WriterT
-
+    readsPrec = readsPrec1
 instance (Show w, Show1 m, Show a) => Show (WriterT w m a) where
-    showsPrec d (WriterT m) = showsUnary1 "WriterT" d m
-
-instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where eq1 = (==)
-instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where compare1 = compare
-instance (Read w, Read1 m) => Read1 (WriterT w m) where readsPrec1 = readsPrec
-instance (Show w, Show1 m) => Show1 (WriterT w m) where showsPrec1 = showsPrec
+    showsPrec = showsPrec1
 
 -- | Extract the output from a writer computation.
 --

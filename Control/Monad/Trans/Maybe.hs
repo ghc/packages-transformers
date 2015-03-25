@@ -60,22 +60,24 @@ import Data.Traversable (Traversable(traverse))
 -- computation does.
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 
-instance (Eq1 m, Eq a) => Eq (MaybeT m a) where
-    MaybeT x == MaybeT y = eq1 x y
+instance (Eq1 m) => Eq1 (MaybeT m) where
+    eqWith eq (MaybeT x) (MaybeT y) = eqWith (eqWith eq) x y
 
-instance (Ord1 m, Ord a) => Ord (MaybeT m a) where
-    compare (MaybeT x) (MaybeT y) = compare1 x y
+instance (Ord1 m) => Ord1 (MaybeT m) where
+    compareWith comp (MaybeT x) (MaybeT y) = compareWith (compareWith comp) x y
 
-instance (Read1 m, Read a) => Read (MaybeT m a) where
-    readsPrec = readsData $ readsUnary1 "MaybeT" MaybeT
+instance (Read1 m) => Read1 (MaybeT m) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "MaybeT" MaybeT
 
-instance (Show1 m, Show a) => Show (MaybeT m a) where
-    showsPrec d (MaybeT m) = showsUnary1 "MaybeT" d m
+instance (Show1 m) => Show1 (MaybeT m) where
+    showsPrecWith sp d (MaybeT m) =
+        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "MaybeT" d m
 
-instance (Eq1 m) => Eq1 (MaybeT m) where eq1 = (==)
-instance (Ord1 m) => Ord1 (MaybeT m) where compare1 = compare
-instance (Read1 m) => Read1 (MaybeT m) where readsPrec1 = readsPrec
-instance (Show1 m) => Show1 (MaybeT m) where showsPrec1 = showsPrec
+instance (Eq1 m, Eq a) => Eq (MaybeT m a) where (==) = eq1
+instance (Ord1 m, Ord a) => Ord (MaybeT m a) where compare = compare1
+instance (Read1 m, Read a) => Read (MaybeT m a) where readsPrec = readsPrec1
+instance (Show1 m, Show a) => Show (MaybeT m a) where showsPrec = showsPrec1
 
 -- | Transform the computation inside a @MaybeT@.
 --

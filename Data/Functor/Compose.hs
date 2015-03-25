@@ -32,45 +32,36 @@ infixr 9 `Compose`
 -- but the composition of monads is not always a monad.
 newtype Compose f g a = Compose { getCompose :: f (g a) }
 
+-- Instances of lifted Prelude classes
+
+instance (Eq1 f, Eq1 g) => Eq1 (Compose f g) where
+    eqWith eq (Compose x) (Compose y) = eqWith (eqWith eq) x y
+
+instance (Ord1 f, Ord1 g) => Ord1 (Compose f g) where
+    compareWith comp (Compose x) (Compose y) =
+        compareWith (compareWith comp) x y
+
+instance (Read1 f, Read1 g) => Read1 (Compose f g) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "Compose" Compose
+
+instance (Show1 f, Show1 g) => Show1 (Compose f g) where
+    showsPrecWith sp d (Compose x) =
+        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "Compose" d x
+
 -- Instances of Prelude classes
 
--- kludge to get type with the same instances as g a
-newtype Apply g a = Apply (g a)
+instance (Eq1 f, Eq1 g, Eq a) => Eq (Compose f g a) where
+    (==) = eq1
 
-getApply :: Apply g a -> g a
-getApply (Apply x) = x
+instance (Ord1 f, Ord1 g, Ord a) => Ord (Compose f g a) where
+    compare = compare1
 
-instance (Eq1 g, Eq a) => Eq (Apply g a) where
-    Apply x == Apply y = eq1 x y
+instance (Read1 f, Read1 g, Read a) => Read (Compose f g a) where
+    readsPrec = readsPrec1
 
-instance (Ord1 g, Ord a) => Ord (Apply g a) where
-    compare (Apply x) (Apply y) = compare1 x y
-
-instance (Read1 g, Read a) => Read (Apply g a) where
-    readsPrec d s = [(Apply a, t) | (a, t) <- readsPrec1 d s]
-
-instance (Show1 g, Show a) => Show (Apply g a) where
-    showsPrec d (Apply x) = showsPrec1 d x
-
-instance (Functor f, Eq1 f, Eq1 g, Eq a) => Eq (Compose f g a) where
-    Compose x == Compose y = eq1 (fmap Apply x) (fmap Apply y)
-
-instance (Functor f, Ord1 f, Ord1 g, Ord a) => Ord (Compose f g a) where
-    compare (Compose x) (Compose y) = compare1 (fmap Apply x) (fmap Apply y)
-
-instance (Functor f, Read1 f, Read1 g, Read a) => Read (Compose f g a) where
-    readsPrec = readsData $ readsUnary1 "Compose" (Compose . fmap getApply)
-
-instance (Functor f, Show1 f, Show1 g, Show a) => Show (Compose f g a) where
-    showsPrec d (Compose x) = showsUnary1 "Compose" d (fmap Apply x)
-
-instance (Functor f, Eq1 f, Eq1 g) => Eq1 (Compose f g) where eq1 = (==)
-instance (Functor f, Ord1 f, Ord1 g) => Ord1 (Compose f g) where
-    compare1 = compare
-instance (Functor f, Read1 f, Read1 g) => Read1 (Compose f g) where
-    readsPrec1 = readsPrec
-instance (Functor f, Show1 f, Show1 g) => Show1 (Compose f g) where
-    showsPrec1 = showsPrec
+instance (Show1 f, Show1 g, Show a) => Show (Compose f g a) where
+    showsPrec = showsPrec1
 
 -- Functor instances
 

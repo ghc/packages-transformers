@@ -40,22 +40,24 @@ import Data.Traversable (Traversable(traverse))
 -- | The trivial monad transformer, which maps a monad to an equivalent monad.
 newtype IdentityT f a = IdentityT { runIdentityT :: f a }
 
-instance (Eq1 f, Eq a) => Eq (IdentityT f a) where
-    IdentityT x == IdentityT y = eq1 x y
+instance (Eq1 f) => Eq1 (IdentityT f) where
+    eqWith eq (IdentityT x) (IdentityT y) = eqWith eq x y
 
-instance (Ord1 f, Ord a) => Ord (IdentityT f a) where
-    compare (IdentityT x) (IdentityT y) = compare1 x y
+instance (Ord1 f) => Ord1 (IdentityT f) where
+    compareWith comp (IdentityT x) (IdentityT y) = compareWith comp x y
 
-instance (Read1 f, Read a) => Read (IdentityT f a) where
-    readsPrec = readsData $ readsUnary1 "IdentityT" IdentityT
+instance (Read1 f) => Read1 (IdentityT f) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith rp) "IdentityT" IdentityT
 
-instance (Show1 f, Show a) => Show (IdentityT f a) where
-    showsPrec d (IdentityT m) = showsUnary1 "IdentityT" d m
+instance (Show1 f) => Show1 (IdentityT f) where
+    showsPrecWith sp d (IdentityT m) =
+        showsUnaryWith (showsPrecWith sp) "IdentityT" d m
 
-instance (Eq1 f) => Eq1 (IdentityT f) where eq1 = (==)
-instance (Ord1 f) => Ord1 (IdentityT f) where compare1 = compare
-instance (Read1 f) => Read1 (IdentityT f) where readsPrec1 = readsPrec
-instance (Show1 f) => Show1 (IdentityT f) where showsPrec1 = showsPrec
+instance (Eq1 f, Eq a) => Eq (IdentityT f a) where (==) = eq1
+instance (Ord1 f, Ord a) => Ord (IdentityT f a) where compare = compare1
+instance (Read1 f, Read a) => Read (IdentityT f a) where readsPrec = readsPrec1
+instance (Show1 f, Show a) => Show (IdentityT f a) where showsPrec = showsPrec1
 
 instance (Functor m) => Functor (IdentityT m) where
     fmap f = mapIdentityT (fmap f)

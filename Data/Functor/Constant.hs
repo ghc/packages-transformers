@@ -34,15 +34,26 @@ newtype Constant a b = Constant { getConstant :: a }
 -- newtype if the field were removed.
 
 instance (Read a) => Read (Constant a b) where
-    readsPrec = readsData $ readsUnary "Constant" Constant
+    readsPrec = readsData $
+         readsUnaryWith readsPrec "Constant" Constant
 
 instance (Show a) => Show (Constant a b) where
-    showsPrec d (Constant x) = showsUnary "Constant" d x
+    showsPrec d (Constant x) = showsUnaryWith showsPrec "Constant" d x
 
-instance (Eq a) => Eq1 (Constant a) where eq1 = (==)
-instance (Ord a) => Ord1 (Constant a) where compare1 = compare
-instance (Read a) => Read1 (Constant a) where readsPrec1 = readsPrec
-instance (Show a) => Show1 (Constant a) where showsPrec1 = showsPrec
+-- Instances of lifted Prelude classes
+
+instance (Eq a) => Eq1 (Constant a) where
+    eqWith _ (Constant x) (Constant y) = x == y
+
+instance (Ord a) => Ord1 (Constant a) where
+    compareWith _ (Constant x) (Constant y) = compare x y
+
+instance (Read a) => Read1 (Constant a) where
+    readsPrecWith _ = readsData $
+         readsUnaryWith readsPrec "Constant" Constant
+
+instance (Show a) => Show1 (Constant a) where
+    showsPrecWith _ d (Constant x) = showsUnaryWith showsPrec "Constant" d x
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x

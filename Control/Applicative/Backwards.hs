@@ -31,22 +31,24 @@ import Data.Traversable
 -- actions in the reverse order.
 newtype Backwards f a = Backwards { forwards :: f a }
 
-instance (Eq1 f, Eq a) => Eq (Backwards f a) where
-    Backwards x == Backwards y = eq1 x y
+instance (Eq1 f) => Eq1 (Backwards f) where
+    eqWith eq (Backwards x) (Backwards y) = eqWith eq x y
 
-instance (Ord1 f, Ord a) => Ord (Backwards f a) where
-    compare (Backwards x) (Backwards y) = compare1 x y
+instance (Ord1 f) => Ord1 (Backwards f) where
+    compareWith comp (Backwards x) (Backwards y) = compareWith comp x y
 
-instance (Read1 f, Read a) => Read (Backwards f a) where
-    readsPrec = readsData $ readsUnary1 "Backwards" Backwards
+instance (Read1 f) => Read1 (Backwards f) where
+    readsPrecWith rp = readsData $
+        readsUnaryWith (readsPrecWith rp) "Backwards" Backwards
 
-instance (Show1 f, Show a) => Show (Backwards f a) where
-    showsPrec d (Backwards x) = showsUnary1 "Backwards" d x
+instance (Show1 f) => Show1 (Backwards f) where
+    showsPrecWith sp d (Backwards x) =
+        showsUnaryWith (showsPrecWith sp) "Backwards" d x
 
-instance (Eq1 f) => Eq1 (Backwards f) where eq1 = (==)
-instance (Ord1 f) => Ord1 (Backwards f) where compare1 = compare
-instance (Read1 f) => Read1 (Backwards f) where readsPrec1 = readsPrec
-instance (Show1 f) => Show1 (Backwards f) where showsPrec1 = showsPrec
+instance (Eq1 f, Eq a) => Eq (Backwards f a) where (==) = eq1
+instance (Ord1 f, Ord a) => Ord (Backwards f a) where compare = compare1
+instance (Read1 f, Read a) => Read (Backwards f a) where readsPrec = readsPrec1
+instance (Show1 f, Show a) => Show (Backwards f a) where showsPrec = showsPrec1
 
 -- | Derived instance.
 instance (Functor f) => Functor (Backwards f) where
