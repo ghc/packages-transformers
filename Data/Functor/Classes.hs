@@ -37,15 +37,15 @@
 module Data.Functor.Classes (
     -- * Liftings of Prelude classes
     -- ** For unary constructors
-    Eq1(..),
-    Ord1(..),
-    Read1(..),
-    Show1(..),
+    Eq1(..), eq1,
+    Ord1(..), compare1,
+    Read1(..), readsPrec1,
+    Show1(..), showsPrec1,
     -- ** For binary constructors
-    Eq2(..),
-    Ord2(..),
-    Read2(..),
-    Show2(..),
+    Eq2(..), eq2,
+    Ord2(..), compare2,
+    Read2(..), readsPrec2,
+    Show2(..), showsPrec2,
     -- * Helper functions
     -- $example
     readsData,
@@ -70,45 +70,45 @@ class Eq1 f where
     -- | Lift an equality test through the type constructor.
     eqWith :: (a -> a -> Bool) -> f a -> f a -> Bool
 
-    -- | Lift the standard @('==')@ function through the type constructor.
-    eq1 :: (Eq a) => f a -> f a -> Bool
-    eq1 = eqWith (==)
+-- | Lift the standard @('==')@ function through the type constructor.
+eq1 :: (Eq1 f, Eq a) => f a -> f a -> Bool
+eq1 = eqWith (==)
 
 -- | Lifting of the 'Ord' class to unary type constructors.
 class (Eq1 f) => Ord1 f where
     -- | Lift a 'compare' function through the type constructor.
     compareWith :: (a -> a -> Ordering) -> f a -> f a -> Ordering
 
-    -- | Lift the standard 'compare' function through the type constructor.
-    compare1 :: (Ord a) => f a -> f a -> Ordering
-    compare1 = compareWith compare
+-- | Lift the standard 'compare' function through the type constructor.
+compare1 :: (Ord1 f, Ord a) => f a -> f a -> Ordering
+compare1 = compareWith compare
 
 -- | Lifting of the 'Read' class to unary type constructors.
 class Read1 f where
     -- | Lift a 'readsPrec' function through the type constructor.
     readsPrecWith :: (Int -> ReadS a) -> Int -> ReadS (f a)
 
-    -- | Lift the standard 'readsPrec' function through the type constructor.
-    readsPrec1 :: (Read a) => Int -> ReadS (f a)
-    readsPrec1 = readsPrecWith readsPrec
+-- | Lift the standard 'readsPrec' function through the type constructor.
+readsPrec1 :: (Read1 f, Read a) => Int -> ReadS (f a)
+readsPrec1 = readsPrecWith readsPrec
 
 -- | Lifting of the 'Show' class to unary type constructors.
 class Show1 f where
     -- | Lift a 'showsPrec' function through the type constructor.
     showsPrecWith :: (Int -> a -> ShowS) -> Int -> f a -> ShowS
 
-    -- | Lift the standard 'showsPrec' function through the type constructor.
-    showsPrec1 :: (Show a) => Int -> f a -> ShowS
-    showsPrec1 = showsPrecWith showsPrec
+-- | Lift the standard 'showsPrec' function through the type constructor.
+showsPrec1 :: (Show1 f, Show a) => Int -> f a -> ShowS
+showsPrec1 = showsPrecWith showsPrec
 
 -- | Lifting of the 'Eq' class to binary type constructors.
 class Eq2 f where
     -- | Lift equality tests through the type constructor.
     eqWith2 :: (a -> a -> Bool) -> (b -> b -> Bool) -> f a b -> f a b -> Bool
 
-    -- | Lift the standard @('==')@ function through the type constructor.
-    eq2 :: (Eq a, Eq b) => f a b -> f a b -> Bool
-    eq2 = eqWith2 (==) (==)
+-- | Lift the standard @('==')@ function through the type constructor.
+eq2 :: (Eq2 f, Eq a, Eq b) => f a b -> f a b -> Bool
+eq2 = eqWith2 (==) (==)
 
 -- | Lifting of the 'Ord' class to binary type constructors.
 class (Eq2 f) => Ord2 f where
@@ -116,9 +116,9 @@ class (Eq2 f) => Ord2 f where
     compareWith2 :: (a -> a -> Ordering) -> (b -> b -> Ordering) ->
         f a b -> f a b -> Ordering
 
-    -- | Lift the standard 'compare' function through the type constructor.
-    compare2 :: (Ord a, Ord b) => f a b -> f a b -> Ordering
-    compare2 = compareWith2 compare compare
+-- | Lift the standard 'compare' function through the type constructor.
+compare2 :: (Ord2 f, Ord a, Ord b) => f a b -> f a b -> Ordering
+compare2 = compareWith2 compare compare
 
 -- | Lifting of the 'Read' class to binary type constructors.
 class Read2 f where
@@ -126,9 +126,9 @@ class Read2 f where
     readsPrecWith2 :: (Int -> ReadS a) -> (Int -> ReadS b) ->
         Int -> ReadS (f a b)
 
-    -- | Lift the standard 'readsPrec' function through the type constructor.
-    readsPrec2 :: (Read a, Read b) => Int -> ReadS (f a b)
-    readsPrec2 = readsPrecWith2 readsPrec readsPrec
+-- | Lift the standard 'readsPrec' function through the type constructor.
+readsPrec2 :: (Read2 f, Read a, Read b) => Int -> ReadS (f a b)
+readsPrec2 = readsPrecWith2 readsPrec readsPrec
 
 -- | Lifting of the 'Show' class to binary type constructors.
 class Show2 f where
@@ -136,9 +136,9 @@ class Show2 f where
     showsPrecWith2 :: (Int -> a -> ShowS) -> (Int -> b -> ShowS) ->
         Int -> f a b -> ShowS
 
-    -- | Lift the standard 'showsPrec' function through the type constructor.
-    showsPrec2 :: (Show a, Show b) => Int -> f a b -> ShowS
-    showsPrec2 = showsPrecWith2 showsPrec showsPrec
+-- | Lift the standard 'showsPrec' function through the type constructor.
+showsPrec2 :: (Show2 f, Show a, Show b) => Int -> f a b -> ShowS
+showsPrec2 = showsPrecWith2 showsPrec showsPrec
 
 -- Instances for Prelude type constructors
 
