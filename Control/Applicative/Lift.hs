@@ -40,14 +40,14 @@ data Lift f a = Pure a | Other (f a)
 
 instance (Eq1 f) => Eq1 (Lift f) where
     eqWith eq (Pure x1) (Pure x2) = eq x1 x2
-    eqWith eq (Pure _) (Other _) = False
-    eqWith eq (Other _) (Pure _) = False
+    eqWith _ (Pure _) (Other _) = False
+    eqWith _ (Other _) (Pure _) = False
     eqWith eq (Other y1) (Other y2) = eqWith eq y1 y2
 
 instance (Ord1 f) => Ord1 (Lift f) where
     compareWith comp (Pure x1) (Pure x2) = comp x1 x2
-    compareWith comp (Pure _) (Other _) = LT
-    compareWith comp (Other _) (Pure _) = GT
+    compareWith _ (Pure _) (Other _) = LT
+    compareWith _ (Other _) (Pure _) = GT
     compareWith comp (Other y1) (Other y2) = compareWith comp y1 y2
 
 instance (Read1 f) => Read1 (Lift f) where

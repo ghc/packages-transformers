@@ -187,14 +187,14 @@ instance Read1 [] where
 
 
 instance Show1 [] where
-    showsPrecWith sp _ [] = showString "[]"
+    showsPrecWith _ _ [] = showString "[]"
     showsPrecWith sp _ (x:xs) = showChar '[' . sp 0 x . showl xs
       where
         showl []     = showChar ']'
-        showl (x:xs) = showChar ',' . sp 0 x . showl xs
+        showl (y:ys) = showChar ',' . sp 0 y . showl ys
 
 instance Eq2 (,) where
-    eqWith2 eq1 eq2 (x1, y1) (x2, y2) = eq1 x1 x2 && eq2 y1 y2
+    eqWith2 e1 e2 (x1, y1) (x2, y2) = e1 x1 x2 && e2 y1 y2
 
 instance Ord2 (,) where
     compareWith2 comp1 comp2 (x1, y1) (x2, y2) =
@@ -225,10 +225,10 @@ instance (Show a) => Show1 ((,) a) where
     showsPrecWith = showsPrecWith2 showsPrec
 
 instance Eq2 Either where
-    eqWith2 eq1 _ (Left x) (Left y) = eq1 x y
+    eqWith2 e1 _ (Left x) (Left y) = e1 x y
     eqWith2 _ _ (Left _) (Right _) = False
     eqWith2 _ _ (Right _) (Left _) = False
-    eqWith2 _ eq2 (Right x) (Right y) = eq2 x y
+    eqWith2 _ e2 (Right x) (Right y) = e2 x y
 
 instance Ord2 Either where
     compareWith2 comp1 _ (Left x) (Left y) = comp1 x y

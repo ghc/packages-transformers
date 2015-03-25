@@ -30,14 +30,14 @@ data Sum f g a = InL (f a) | InR (g a)
 
 instance (Eq1 f, Eq1 g) => Eq1 (Sum f g) where
     eqWith eq (InL x1) (InL x2) = eqWith eq x1 x2
-    eqWith eq (InL _) (InR _) = False
-    eqWith eq (InR _) (InL _) = False
+    eqWith _ (InL _) (InR _) = False
+    eqWith _ (InR _) (InL _) = False
     eqWith eq (InR y1) (InR y2) = eqWith eq y1 y2
 
 instance (Ord1 f, Ord1 g) => Ord1 (Sum f g) where
     compareWith comp (InL x1) (InL x2) = compareWith comp x1 x2
-    compareWith comp (InL _) (InR _) = LT
-    compareWith comp (InR _) (InL _) = GT
+    compareWith _ (InL _) (InR _) = LT
+    compareWith _ (InR _) (InL _) = GT
     compareWith comp (InR y1) (InR y2) = compareWith comp y1 y2
 
 instance (Read1 f, Read1 g) => Read1 (Sum f g) where
