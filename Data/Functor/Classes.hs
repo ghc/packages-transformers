@@ -272,18 +272,27 @@ instance Read1 Identity where
 instance Show1 Identity where
     showsPrecWith sp d (Identity x) = showsUnaryWith sp "Identity" d x
 
+instance Eq2 Const where
+    eqWith2 eq _ (Const x) (Const y) = eq x y
+
+instance Ord2 Const where
+    compareWith2 comp _ (Const x) (Const y) = comp x y
+
+instance Read2 Const where
+    readsPrecWith2 rp _ = readsData $
+         readsUnaryWith rp "Const" Const
+
+instance Show2 Const where
+    showsPrecWith2 sp _ d (Const x) = showsUnaryWith sp "Const" d x
+
 instance (Eq a) => Eq1 (Const a) where
-    eqWith _ (Const x) (Const y) = x == y
-
+    eqWith = eqWith2 (==)
 instance (Ord a) => Ord1 (Const a) where
-    compareWith _ (Const x) (Const y) = compare x y
-
+    compareWith = compareWith2 compare
 instance (Read a) => Read1 (Const a) where
-    readsPrecWith _ = readsData $
-         readsUnaryWith readsPrec "Const" Const
-
+    readsPrecWith = readsPrecWith2 readsPrec
 instance (Show a) => Show1 (Const a) where
-    showsPrecWith _ d (Const x) = showsUnaryWith showsPrec "Const" d x
+    showsPrecWith = showsPrecWith2 showsPrec
 
 -- Building blocks
 

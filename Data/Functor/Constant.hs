@@ -42,18 +42,27 @@ instance (Show a) => Show (Constant a b) where
 
 -- Instances of lifted Prelude classes
 
+instance Eq2 Constant where
+    eqWith2 eq _ (Constant x) (Constant y) = eq x y
+
+instance Ord2 Constant where
+    compareWith2 comp _ (Constant x) (Constant y) = comp x y 
+
+instance Read2 Constant where
+    readsPrecWith2 rp _ = readsData $
+         readsUnaryWith rp "Constant" Constant
+
+instance Show2 Constant where
+    showsPrecWith2 sp _ d (Constant x) = showsUnaryWith sp "Constant" d x
+
 instance (Eq a) => Eq1 (Constant a) where
-    eqWith _ (Constant x) (Constant y) = x == y
-
+    eqWith = eqWith2 (==)
 instance (Ord a) => Ord1 (Constant a) where
-    compareWith _ (Constant x) (Constant y) = compare x y
-
+    compareWith = compareWith2 compare
 instance (Read a) => Read1 (Constant a) where
-    readsPrecWith _ = readsData $
-         readsUnaryWith readsPrec "Constant" Constant
-
+    readsPrecWith = readsPrecWith2 readsPrec
 instance (Show a) => Show1 (Constant a) where
-    showsPrecWith _ d (Constant x) = showsUnaryWith showsPrec "Constant" d x
+    showsPrecWith = showsPrecWith2 showsPrec
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x
