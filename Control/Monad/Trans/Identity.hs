@@ -34,6 +34,9 @@ import Data.Functor.Classes
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
 import Control.Monad.Fix (MonadFix(mfix))
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
@@ -90,6 +93,11 @@ instance (MonadFix m) => MonadFix (IdentityT m) where
 
 instance (MonadIO m) => MonadIO (IdentityT m) where
     liftIO = IdentityT . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip m) => MonadZip (IdentityT m) where
+    mzipWith f = lift2IdentityT (mzipWith f)
+#endif
 
 instance MonadTrans IdentityT where
     lift = IdentityT

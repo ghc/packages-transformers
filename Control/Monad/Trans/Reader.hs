@@ -51,6 +51,9 @@ import Control.Monad.Fix
 #if !(MIN_VERSION_base(4,6,0))
 import Control.Monad.Instances ()  -- deprecated from base-4.6
 #endif
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 
 -- | The parameterizable reader monad.
 --
@@ -141,6 +144,12 @@ instance MonadTrans (ReaderT r) where
 
 instance (MonadIO m) => MonadIO (ReaderT r m) where
     liftIO = lift . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip m) => MonadZip (ReaderT r m) where
+    mzipWith f (ReaderT m) (ReaderT n) = ReaderT $ \ a ->
+        mzipWith f (m a) (n a)
+#endif
 
 liftReaderT :: m a -> ReaderT r m a
 liftReaderT m = ReaderT (const m)

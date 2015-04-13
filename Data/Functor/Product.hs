@@ -22,6 +22,9 @@ module Data.Functor.Product (
 import Control.Applicative
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fix (MonadFix(..))
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Classes
 import Data.Monoid (mappend)
@@ -87,3 +90,8 @@ instance (MonadFix f, MonadFix g) => MonadFix (Product f g) where
       where
         fstP (Pair a _) = a
         sndP (Pair _ b) = b
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip f, MonadZip g) => MonadZip (Product f g) where
+    mzipWith f (Pair x1 y1) (Pair x2 y2) = Pair (mzipWith f x1 x2) (mzipWith f y1 y2)
+#endif

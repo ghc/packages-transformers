@@ -53,6 +53,9 @@ import Data.Functor.Identity
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid
 import Data.Traversable (Traversable(traverse))
@@ -193,6 +196,11 @@ instance MonadTrans (ExceptT e) where
 
 instance (MonadIO m) => MonadIO (ExceptT e m) where
     liftIO = lift . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip m) => MonadZip (ExceptT e m) where
+    mzipWith f (ExceptT a) (ExceptT b) = ExceptT $ mzipWith (liftA2 f) a b
+#endif
 
 -- | Signal an exception value @e@.
 --

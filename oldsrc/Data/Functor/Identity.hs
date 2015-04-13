@@ -1,3 +1,10 @@
+{-# LANGUAGE CPP #-}
+#if __GLASGOW_HASKELL__ >= 612
+{-# LANGUAGE DeriveDataTypeable #-}
+#endif
+#if __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE DeriveGeneric #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Functor.Identity
@@ -28,12 +35,31 @@ module Data.Functor.Identity (
 
 import Control.Applicative
 import Control.Monad.Fix
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith, munzip))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
+#if __GLASGOW_HASKELL__ >= 612
+import Data.Data
+#endif
+#if __GLASGOW_HASKELL__ >= 702
+import GHC.Generics
+#endif
 
 -- | Identity functor and monad. (a non-strict monad)
 newtype Identity a = Identity { runIdentity :: a }
-    deriving (Eq, Ord)
+    deriving ( Eq, Ord
+#if __GLASGOW_HASKELL__ >= 612
+             , Data, Typeable
+#endif
+#if __GLASGOW_HASKELL__ >= 702
+             , Generic
+#endif
+#if __GLASGOW_HASKELL__ >= 706
+             , Generic1
+#endif
+             )
 
 -- These instances would be equivalent to the derived instances of the
 -- newtype if the field were removed.
@@ -68,3 +94,9 @@ instance Monad Identity where
 
 instance MonadFix Identity where
     mfix f = Identity (fix (runIdentity . f))
+
+#if MIN_VERSION_base(4,4,0)
+instance MonadZip Identity where
+    mzipWith f (Identity x) (Identity y) = Identity (f x y)
+    munzip (Identity (a, b)) = (Identity a, Identity b)
+#endif

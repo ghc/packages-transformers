@@ -46,6 +46,9 @@ import Data.Functor.Classes
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
 import Control.Monad.Fix (MonadFix(mfix))
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Maybe (fromMaybe)
 import Data.Traversable (Traversable(traverse))
@@ -138,6 +141,11 @@ instance MonadTrans MaybeT where
 
 instance (MonadIO m) => MonadIO (MaybeT m) where
     liftIO = lift . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip m) => MonadZip (MaybeT m) where
+    mzipWith f (MaybeT a) (MaybeT b) = MaybeT $ mzipWith (liftA2 f) a b
+#endif
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: CallCC m (Maybe a) (Maybe b) -> CallCC (MaybeT m) a b

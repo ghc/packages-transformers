@@ -46,6 +46,9 @@ library
     -- NB: using impl(ghc>=7.9) instead of fragile Cabal flags
     hs-source-dirs: oldsrc
     exposed-modules: Data.Functor.Identity
+    if impl(ghc>=7.2 && <7.5)
+      -- Prior to GHC 7.5, GHC.Generics lived in ghc-prim
+      build-depends: ghc-prim
   exposed-modules:
     Control.Applicative.Backwards
     Control.Applicative.Lift

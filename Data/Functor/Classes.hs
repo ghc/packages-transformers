@@ -64,6 +64,7 @@ module Data.Functor.Classes (
 
 import Control.Applicative (Const(Const))
 import Data.Functor.Identity (Identity(Identity))
+import Data.Monoid (mappend)
 
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where

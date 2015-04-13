@@ -33,6 +33,9 @@ import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
 
@@ -105,6 +108,11 @@ instance MonadTrans ListT where
 
 instance (MonadIO m) => MonadIO (ListT m) where
     liftIO = lift . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (MonadZip m) => MonadZip (ListT m) where
+    mzipWith f (ListT a) (ListT b) = ListT $ mzipWith (zipWith f) a b
+#endif
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: CallCC m [a] [b] -> CallCC (ListT m) a b

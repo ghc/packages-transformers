@@ -58,6 +58,9 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Signatures
+#if MIN_VERSION_base(4,4,0)
+import Control.Monad.Zip (MonadZip(mzipWith))
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid
 import Data.Traversable (Traversable(traverse))
@@ -182,6 +185,12 @@ instance (Monoid w) => MonadTrans (WriterT w) where
 
 instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
     liftIO = lift . liftIO
+
+#if MIN_VERSION_base(4,4,0)
+instance (Monoid w, MonadZip m) => MonadZip (WriterT w m) where
+    mzipWith f (WriterT x) (WriterT y) = WriterT $
+        mzipWith (\ (a, w) (b, w') -> (f a b, w `mappend` w')) x y
+#endif
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monad m) => w -> WriterT w m ()
