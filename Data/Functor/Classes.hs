@@ -64,12 +64,16 @@ module Data.Functor.Classes (
 
 import Control.Applicative (Const(Const))
 import Data.Functor.Identity (Identity(Identity))
-import Data.Monoid (mappend)
 
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where
     -- | Lift an equality test through the type constructor.
-    eqWith :: (a -> a -> Bool) -> f a -> f a -> Bool
+    --
+    -- The function will usually be applied to an equality function,
+    -- but the more general type ensures that the implementation uses
+    -- it to compare elements of the first container with elements of
+    -- the second.
+    eqWith :: (a -> b -> Bool) -> f a -> f b -> Bool
 
 -- | Lift the standard @('==')@ function through the type constructor.
 eq1 :: (Eq1 f, Eq a) => f a -> f a -> Bool
@@ -78,7 +82,12 @@ eq1 = eqWith (==)
 -- | Lifting of the 'Ord' class to unary type constructors.
 class (Eq1 f) => Ord1 f where
     -- | Lift a 'compare' function through the type constructor.
-    compareWith :: (a -> a -> Ordering) -> f a -> f a -> Ordering
+    --
+    -- The function will usually be applied to a comparison function,
+    -- but the more general type ensures that the implementation uses
+    -- it to compare elements of the first container with elements of
+    -- the second.
+    compareWith :: (a -> b -> Ordering) -> f a -> f b -> Ordering
 
 -- | Lift the standard 'compare' function through the type constructor.
 compare1 :: (Ord1 f, Ord a) => f a -> f a -> Ordering
@@ -105,7 +114,12 @@ showsPrec1 = showsPrecWith showsPrec
 -- | Lifting of the 'Eq' class to binary type constructors.
 class Eq2 f where
     -- | Lift equality tests through the type constructor.
-    eqWith2 :: (a -> a -> Bool) -> (b -> b -> Bool) -> f a b -> f a b -> Bool
+    --
+    -- The function will usually be applied to equality functions,
+    -- but the more general type ensures that the implementation uses
+    -- them to compare elements of the first container with elements of
+    -- the second.
+    eqWith2 :: (a -> b -> Bool) -> (c -> d -> Bool) -> f a c -> f b d -> Bool
 
 -- | Lift the standard @('==')@ function through the type constructor.
 eq2 :: (Eq2 f, Eq a, Eq b) => f a b -> f a b -> Bool
@@ -114,8 +128,13 @@ eq2 = eqWith2 (==) (==)
 -- | Lifting of the 'Ord' class to binary type constructors.
 class (Eq2 f) => Ord2 f where
     -- | Lift 'compare' functions through the type constructor.
-    compareWith2 :: (a -> a -> Ordering) -> (b -> b -> Ordering) ->
-        f a b -> f a b -> Ordering
+    --
+    -- The function will usually be applied to comparison functions,
+    -- but the more general type ensures that the implementation uses
+    -- them to compare elements of the first container with elements of
+    -- the second.
+    compareWith2 :: (a -> b -> Ordering) -> (c -> d -> Ordering) ->
+        f a c -> f b d -> Ordering
 
 -- | Lift the standard 'compare' function through the type constructor.
 compare2 :: (Ord2 f, Ord a, Ord b) => f a b -> f a b -> Ordering
