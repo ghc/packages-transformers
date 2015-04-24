@@ -4,6 +4,7 @@ license:      BSD3
 license-file: LICENSE
 author:       Andy Gill, Ross Paterson
 maintainer:   Ross Paterson <R.Paterson@city.ac.uk>
+bug-reports:  http://hub.darcs.net/ross/transformers/issues
 category:     Control
 synopsis:     Concrete functor and monad transformers
 description:
