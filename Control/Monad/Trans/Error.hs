@@ -61,9 +61,6 @@ import Control.Monad.Fix
 #if !(MIN_VERSION_base(4,6,0))
 import Control.Monad.Instances ()  -- deprecated from base-4.6
 #endif
-#if MIN_VERSION_base(4,4,0)
-import Control.Monad.Zip (MonadZip(mzipWith))
-#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
@@ -244,11 +241,6 @@ instance MonadTrans (ErrorT e) where
 
 instance (Error e, MonadIO m) => MonadIO (ErrorT e m) where
     liftIO = lift . liftIO
-
-#if MIN_VERSION_base(4,4,0)
-instance (MonadZip m, Error e) => MonadZip (ErrorT e m) where
-    mzipWith f (ErrorT a) (ErrorT b) = ErrorT $ mzipWith (liftA2 f) a b
-#endif
 
 -- | Signal an error value @e@.
 --
