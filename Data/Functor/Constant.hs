@@ -82,3 +82,7 @@ instance Traversable (Constant a) where
 instance (Monoid a) => Applicative (Constant a) where
     pure _ = Constant mempty
     Constant x <*> Constant y = Constant (x `mappend` y)
+
+instance (Monoid a) => Monoid (Constant a b) where
+    mempty = Constant mempty
+    Constant x `mappend` Constant y = Constant (x `mappend` y)
