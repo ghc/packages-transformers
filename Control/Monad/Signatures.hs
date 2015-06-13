@@ -2,6 +2,9 @@
 #if __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Safe #-}
 #endif
+#if __GLASGOW_HASKELL__ >= 704
+{-# LANGUAGE PolyKinds #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Signatures
