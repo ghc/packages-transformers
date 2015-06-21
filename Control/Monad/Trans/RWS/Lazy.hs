@@ -164,12 +164,15 @@ instance (Functor m) => Functor (RWST r w s m) where
         fmap (\ ~(a, s', w) -> (f a, s', w)) $ runRWST m r s
 
 instance (Monoid w, Functor m, Monad m) => Applicative (RWST r w s m) where
-    pure = return
-    (<*>) = ap
+    pure a = RWST $ \ _ s -> return (a, s, mempty)
+    RWST mf <*> RWST mx  = RWST $ \ r s -> do
+        ~(f, s', w)  <- mf r s
+        ~(x, s'',w') <- mx r s'
+        return (f x, s'', w `mappend` w')
 
 instance (Monoid w, Functor m, MonadPlus m) => Alternative (RWST r w s m) where
-    empty = mzero
-    (<|>) = mplus
+    empty = RWST $ \ _ _ -> mzero
+    RWST m <|> RWST n = RWST $ \ r s -> m r s `mplus` n r s
 
 instance (Monoid w, Monad m) => Monad (RWST r w s m) where
     return a = RWST $ \ _ s -> return (a, s, mempty)
@@ -180,8 +183,8 @@ instance (Monoid w, Monad m) => Monad (RWST r w s m) where
     fail msg = RWST $ \ _ _ -> fail msg
 
 instance (Monoid w, MonadPlus m) => MonadPlus (RWST r w s m) where
-    mzero       = RWST $ \ _ _ -> mzero
-    m `mplus` n = RWST $ \ r s -> runRWST m r s `mplus` runRWST n r s
+    mzero = RWST $ \ _ _ -> mzero
+    RWST m `mplus` RWST n = RWST $ \ r s -> m r s `mplus` n r s
 
 instance (Monoid w, MonadFix m) => MonadFix (RWST r w s m) where
     mfix f = RWST $ \ r s -> mfix $ \ ~(a, _, _) -> runRWST (f a) r s
@@ -291,7 +294,7 @@ put s = RWST $ \ _ _ -> return ((), s, mempty)
 -- * @'modify' f = 'get' >>= ('put' . f)@
 modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
 modify f = RWST $ \ _ s -> return ((), f s, mempty)
- 
+
 -- | Get a specific component of the state, using a projection function
 -- supplied.
 --

@@ -170,8 +170,12 @@ instance (Functor m, Monad m) => Applicative (ExceptT e m) where
                     Right x -> return (Right (k x))
 
 instance (Functor m, Monad m, Monoid e) => Alternative (ExceptT e m) where
-    empty = mzero
-    (<|>) = mplus
+    empty = ExceptT $ return (Left mempty)
+    ExceptT mx <|> ExceptT my = ExceptT $ do
+        ex <- mx
+        case ex of
+            Left e -> liftM (either (Left . mappend e) Right) my
+            Right x -> return (Right x)
 
 instance (Monad m) => Monad (ExceptT e m) where
     return a = ExceptT $ return (Right a)
@@ -184,10 +188,10 @@ instance (Monad m) => Monad (ExceptT e m) where
 
 instance (Monad m, Monoid e) => MonadPlus (ExceptT e m) where
     mzero = ExceptT $ return (Left mempty)
-    ExceptT m `mplus` ExceptT n = ExceptT $ do
-        a <- m
-        case a of
-            Left e -> liftM (either (Left . mappend e) Right) n
+    ExceptT mx `mplus` ExceptT my = ExceptT $ do
+        ex <- mx
+        case ex of
+            Left e -> liftM (either (Left . mappend e) Right) my
             Right x -> return (Right x)
 
 instance (MonadFix m) => MonadFix (ExceptT e m) where

@@ -182,15 +182,19 @@ instance (Functor m) => Functor (StateT s m) where
         fmap (\ (a, s') -> (f a, s')) $ runStateT m s
 
 instance (Functor m, Monad m) => Applicative (StateT s m) where
-    pure = return
-    (<*>) = ap
+    pure a = StateT $ \ s -> return (a, s)
+    StateT mf <*> StateT mx = StateT $ \ s -> do
+        (f, s') <- mf s
+        (x, s'') <- mx s'
+        return (f x, s'')
+    {-# INLINE (<*>) #-}
 
 instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
-    empty = mzero
-    (<|>) = mplus
+    empty = StateT $ \ _ -> mzero
+    StateT m <|> StateT n = StateT $ \ s -> m s `mplus` n s
 
 instance (Monad m) => Monad (StateT s m) where
-    return a = state $ \ s -> (a, s)
+    return a = StateT $ \ s -> return (a, s)
     m >>= k  = StateT $ \ s -> do
         (a, s') <- runStateT m s
         runStateT (k a) s'

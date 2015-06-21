@@ -111,12 +111,24 @@ instance (Traversable f) => Traversable (MaybeT f) where
     traverse f (MaybeT a) = MaybeT <$> traverse (traverse f) a
 
 instance (Functor m, Monad m) => Applicative (MaybeT m) where
-    pure = return
-    (<*>) = ap
- 
+    pure = lift . return
+    mf <*> mx = MaybeT $ do
+        mb_f <- runMaybeT mf
+        case mb_f of
+            Nothing -> return Nothing
+            Just f  -> do
+                mb_x <- runMaybeT mx
+                case mb_x of
+                    Nothing -> return Nothing
+                    Just x  -> return (Just (f x))
+
 instance (Functor m, Monad m) => Alternative (MaybeT m) where
-    empty = mzero
-    (<|>) = mplus
+    empty = MaybeT (return Nothing)
+    x <|> y = MaybeT $ do
+        v <- runMaybeT x
+        case v of
+            Nothing -> runMaybeT y
+            Just _  -> return v
 
 instance (Monad m) => Monad (MaybeT m) where
     fail _ = MaybeT (return Nothing)
