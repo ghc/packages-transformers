@@ -61,6 +61,10 @@ import Control.Exception (IOException)
 import Control.Monad
 import Control.Monad.Fix
 
+import Data.Foldable (Foldable(foldMap))
+import Data.Monoid (mempty)
+import Data.Traversable (Traversable(traverse))
+
 -- | An exception to be thrown.
 --
 -- Minimal complete definition: 'noMsg' or 'strMsg'.
