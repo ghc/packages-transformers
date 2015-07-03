@@ -47,7 +47,7 @@ import Control.Monad.Trans.Except (ExceptT(..))
 import Data.Functor.Classes
 
 import Control.Applicative
-import Control.Monad (MonadPlus(mzero, mplus), liftM, ap)
+import Control.Monad (MonadPlus(mzero, mplus), liftM)
 import Control.Monad.Fix (MonadFix(mfix))
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
