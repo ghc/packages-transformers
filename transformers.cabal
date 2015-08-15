@@ -47,13 +47,17 @@ library
     -- NB: using impl(ghc>=7.9) instead of fragile Cabal flags
     hs-source-dirs: oldsrc
     exposed-modules: Data.Functor.Identity
-    if impl(ghc>=7.2 && <7.5)
-      -- Prior to GHC 7.5, GHC.Generics lived in ghc-prim
-      build-depends: ghc-prim
+  if !impl(ghc>=7.11)
+    -- Control.Monad.IO.Class was moved into base in GHC 7.12
+    -- see also https://ghc.haskell.org/trac/ghc/ticket/10773
+    hs-source-dirs: oldsrc
+    exposed-modules: Control.Monad.IO.Class
+  if impl(ghc>=7.2 && <7.5)
+    -- Prior to GHC 7.5, GHC.Generics lived in ghc-prim
+    build-depends: ghc-prim
   exposed-modules:
     Control.Applicative.Backwards
     Control.Applicative.Lift
-    Control.Monad.IO.Class
     Control.Monad.Signatures
     Control.Monad.Trans.Class
     Control.Monad.Trans.Cont
