@@ -66,6 +66,8 @@ import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
 import System.IO.Error
 
+#if !(MIN_VERSION_base(4,8,2))
+-- provided since GHC 7.12
 instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
     m `mplus` n = m `catchIOError` \ _ -> n
@@ -73,6 +75,7 @@ instance MonadPlus IO where
 instance Alternative IO where
     empty = mzero
     (<|>) = mplus
+#endif
 
 #if !(MIN_VERSION_base(4,4,0))
 -- exported by System.IO.Error from base-4.4
