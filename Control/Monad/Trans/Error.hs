@@ -5,6 +5,9 @@
 #if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
+#if !(MIN_VERSION_base(4,8,3))
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Trans.Error
@@ -61,9 +64,63 @@ import Control.Exception (IOException)
 import Control.Monad
 import Control.Monad.Fix
 
+#if !(MIN_VERSION_base(4,6,0))
+import Control.Monad.Instances ()  -- deprecated from base-4.6
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
+import System.IO.Error
+
+#if !(MIN_VERSION_base(4,8,3))
+-- These instances are in base-4.8.3
+
+instance MonadPlus IO where
+    mzero       = ioError (userError "mzero")
+    m `mplus` n = m `catchIOError` \ _ -> n
+
+instance Alternative IO where
+    empty = mzero
+    (<|>) = mplus
+
+# if !(MIN_VERSION_base(4,4,0))
+-- exported by System.IO.Error from base-4.4
+catchIOError :: IO a -> (IOError -> IO a) -> IO a
+catchIOError = catch
+# endif
+
+instance (Error e) => Alternative (Either e) where
+    empty        = Left noMsg
+    Left _ <|> n = n
+    m      <|> _ = m
+
+instance (Error e) => MonadPlus (Either e) where
+    mzero            = Left noMsg
+    Left _ `mplus` n = n
+    m      `mplus` _ = m
+#endif
+
+#if !(MIN_VERSION_base(4,3,0))
+-- These instances are in base-4.3
+
+instance Applicative (Either e) where
+    pure          = Right
+    Left  e <*> _ = Left e
+    Right f <*> r = fmap f r
+
+instance Monad (Either e) where
+    return        = Right
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
+
+instance MonadFix (Either e) where
+    mfix f = let
+        a = f $ case a of
+            Right r -> r
+            _       -> error "empty mfix argument"
+        in a
+
+#endif /* base to 4.2.0.x */
 
 -- | An exception to be thrown.
 --
