@@ -45,12 +45,12 @@ library
     -- Data.Functor.Identity was moved into base-4.8.0.0 (GHC 7.10)
     -- see also https://ghc.haskell.org/trac/ghc/ticket/9664
     -- NB: using impl(ghc>=7.9) instead of fragile Cabal flags
-    hs-source-dirs: oldsrc709
+    hs-source-dirs: legacy/pre709
     exposed-modules: Data.Functor.Identity
   if !impl(ghc>=7.11)
     -- Control.Monad.IO.Class was moved into base in GHC 7.12
     -- see also https://ghc.haskell.org/trac/ghc/ticket/10773
-    hs-source-dirs: oldsrc711
+    hs-source-dirs: legacy/pre711
     exposed-modules: Control.Monad.IO.Class
   if impl(ghc>=7.2 && <7.5)
     -- Prior to GHC 7.5, GHC.Generics lived in ghc-prim
