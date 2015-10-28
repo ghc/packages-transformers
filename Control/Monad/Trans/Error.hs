@@ -5,7 +5,7 @@
 #if __GLASGOW_HASKELL__ >= 710
 {-# LANGUAGE AutoDeriveTypeable #-}
 #endif
-#if !(MIN_VERSION_base(4,8,2))
+#if !(MIN_VERSION_base(4,9,0))
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 #endif
 -----------------------------------------------------------------------------
@@ -72,8 +72,8 @@ import Data.Monoid (mempty)
 import Data.Traversable (Traversable(traverse))
 import System.IO.Error
 
-#if !(MIN_VERSION_base(4,8,2))
--- These instances are in base-4.8.2
+#if !(MIN_VERSION_base(4,9,0))
+-- These instances are in base-4.9.0
 
 instance MonadPlus IO where
     mzero       = ioError (userError "mzero")

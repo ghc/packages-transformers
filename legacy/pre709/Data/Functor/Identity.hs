@@ -45,6 +45,7 @@ import Control.Monad.Fix
 import Control.Monad.Zip (MonadZip(mzipWith, munzip))
 #endif
 import Data.Foldable (Foldable(foldMap))
+import Data.Monoid (Monoid(mempty, mappend))
 import Data.Traversable (Traversable(traverse))
 #if __GLASGOW_HASKELL__ >= 612
 import Data.Data
@@ -66,6 +67,10 @@ newtype Identity a = Identity { runIdentity :: a }
              , Generic1
 #endif
              )
+
+instance (Monoid a) => Monoid (Identity a) where
+    mempty = Identity mempty
+    mappend (Identity x) (Identity y) = Identity (mappend x y)
 
 -- These instances would be equivalent to the derived instances of the
 -- newtype if the field were removed.
