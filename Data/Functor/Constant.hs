@@ -31,6 +31,9 @@ import Control.Applicative
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (Monoid(..))
 import Data.Traversable (Traversable(traverse))
+#if MIN_VERSION_base(4,8,0)
+import Data.Bifunctor (Bifunctor(..))
+#endif
 
 -- | Constant functor.
 newtype Constant a b = Constant { getConstant :: a }
@@ -86,3 +89,9 @@ instance (Monoid a) => Applicative (Constant a) where
 instance (Monoid a) => Monoid (Constant a b) where
     mempty = Constant mempty
     Constant x `mappend` Constant y = Constant (x `mappend` y)
+
+#if MIN_VERSION_base(4,8,0)
+instance Bifunctor Constant where
+    first f (Constant x) = Constant (f x)
+    second _ (Constant x) = Constant x
+#endif
