@@ -167,7 +167,9 @@ instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     m <|> n = WriterT $ runWriterT m <|> runWriterT n
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
+#if !(MIN_VERSION_base(4,8,0))
     return a = writer (a, mempty)
+#endif
     m >>= k  = WriterT $ do
         (a, w)  <- runWriterT m
         (b, w') <- runWriterT (k a)

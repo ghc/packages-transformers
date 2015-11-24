@@ -197,7 +197,9 @@ instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
     StateT m <|> StateT n = StateT $ \ s -> m s `mplus` n s
 
 instance (Monad m) => Monad (StateT s m) where
+#if !(MIN_VERSION_base(4,8,0))
     return a = StateT $ \ s -> return (a, s)
+#endif
     m >>= k  = StateT $ \ s -> do
         ~(a, s') <- runStateT m s
         runStateT (k a) s'

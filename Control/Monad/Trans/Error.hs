@@ -219,7 +219,9 @@ instance (Functor m, Monad m, Error e) => Alternative (ErrorT e m) where
     (<|>) = mplus
 
 instance (Monad m, Error e) => Monad (ErrorT e m) where
+#if !(MIN_VERSION_base(4,8,0))
     return a = ErrorT $ return (Right a)
+#endif
     m >>= k  = ErrorT $ do
         a <- runErrorT m
         case a of

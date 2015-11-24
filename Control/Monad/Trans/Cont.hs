@@ -148,7 +148,9 @@ instance Applicative (ContT r m) where
     f <*> v = ContT $ \ c -> runContT f $ \ g -> runContT v (c . g)
 
 instance Monad (ContT r m) where
+#if !(MIN_VERSION_base(4,8,0))
     return x = ContT ($ x)
+#endif
     m >>= k  = ContT $ \ c -> runContT m (\ x -> runContT (k x) c)
 
 instance MonadTrans (ContT r) where

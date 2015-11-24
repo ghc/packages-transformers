@@ -132,7 +132,9 @@ instance (Alternative m) => Alternative (ReaderT r m) where
     m <|> n = ReaderT $ \ r -> runReaderT m r <|> runReaderT n r
 
 instance (Monad m) => Monad (ReaderT r m) where
+#if !(MIN_VERSION_base(4,8,0))
     return   = lift . return
+#endif
     m >>= k  = ReaderT $ \ r -> do
         a <- runReaderT m r
         runReaderT (k a) r

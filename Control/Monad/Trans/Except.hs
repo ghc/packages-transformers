@@ -178,7 +178,9 @@ instance (Functor m, Monad m, Monoid e) => Alternative (ExceptT e m) where
             Right x -> return (Right x)
 
 instance (Monad m) => Monad (ExceptT e m) where
+#if !(MIN_VERSION_base(4,8,0))
     return a = ExceptT $ return (Right a)
+#endif
     m >>= k = ExceptT $ do
         a <- runExceptT m
         case a of

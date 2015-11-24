@@ -131,8 +131,10 @@ instance (Functor m, Monad m) => Alternative (MaybeT m) where
             Just _  -> return v
 
 instance (Monad m) => Monad (MaybeT m) where
-    fail _ = MaybeT (return Nothing)
+#if !(MIN_VERSION_base(4,8,0))
     return = lift . return
+#endif
+    fail _ = MaybeT (return Nothing)
     x >>= f = MaybeT $ do
         v <- runMaybeT x
         case v of

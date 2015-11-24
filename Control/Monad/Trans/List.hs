@@ -90,7 +90,9 @@ instance (Applicative m) => Alternative (ListT m) where
     m <|> n = ListT $ (++) <$> runListT m <*> runListT n
 
 instance (Monad m) => Monad (ListT m) where
+#if !(MIN_VERSION_base(4,8,0))
     return a = ListT $ return [a]
+#endif
     m >>= k  = ListT $ do
         a <- runListT m
         b <- mapM (runListT . k) a

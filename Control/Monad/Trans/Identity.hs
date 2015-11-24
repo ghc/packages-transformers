@@ -86,7 +86,9 @@ instance (Alternative m) => Alternative (IdentityT m) where
     (<|>) = lift2IdentityT (<|>)
 
 instance (Monad m) => Monad (IdentityT m) where
+#if !(MIN_VERSION_base(4,8,0))
     return = IdentityT . return
+#endif
     m >>= k = IdentityT $ runIdentityT . k =<< runIdentityT m
     fail msg = IdentityT $ fail msg
 

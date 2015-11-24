@@ -81,7 +81,9 @@ instance (Alternative f, Alternative g) => Alternative (Product f g) where
     Pair x1 y1 <|> Pair x2 y2 = Pair (x1 <|> x2) (y1 <|> y2)
 
 instance (Monad f, Monad g) => Monad (Product f g) where
+#if !(MIN_VERSION_base(4,8,0))
     return x = Pair (return x) (return x)
+#endif
     Pair m n >>= f = Pair (m >>= fstP . f) (n >>= sndP . f)
       where
         fstP (Pair a _) = a
