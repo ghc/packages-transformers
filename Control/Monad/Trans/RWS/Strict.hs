@@ -67,6 +67,9 @@ import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
 import Data.Monoid
 
@@ -183,6 +186,11 @@ instance (Monoid w, Monad m) => Monad (RWST r w s m) where
         (b, s'',w') <- runRWST (k a) r s'
         return (b, s'', w `mappend` w')
     fail msg = RWST $ \ _ _ -> fail msg
+
+#if MIN_VERSION_base(4,9,0)
+instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (RWST r w s m) where
+    fail msg = RWST $ \ _ _ -> Fail.fail msg
+#endif
 
 instance (Monoid w, MonadPlus m) => MonadPlus (RWST r w s m) where
     mzero = RWST $ \ _ _ -> mzero

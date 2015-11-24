@@ -48,6 +48,9 @@ import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM)
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix (MonadFix(mfix))
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
@@ -140,6 +143,11 @@ instance (Monad m) => Monad (MaybeT m) where
         case v of
             Nothing -> return Nothing
             Just y  -> runMaybeT (f y)
+
+#if MIN_VERSION_base(4,9,0)
+instance (Monad m) => Fail.MonadFail (MaybeT m) where
+    fail _ = MaybeT (return Nothing)
+#endif
 
 instance (Monad m) => MonadPlus (MaybeT m) where
     mzero = MaybeT (return Nothing)

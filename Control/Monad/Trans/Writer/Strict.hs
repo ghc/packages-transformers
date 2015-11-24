@@ -59,6 +59,9 @@ import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
 import Control.Monad.Signatures
 #if MIN_VERSION_base(4,4,0)
@@ -175,6 +178,11 @@ instance (Monoid w, Monad m) => Monad (WriterT w m) where
         (b, w') <- runWriterT (k a)
         return (b, w `mappend` w')
     fail msg = WriterT $ fail msg
+
+#if MIN_VERSION_base(4,9,0)
+instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (WriterT w m) where
+    fail msg = WriterT $ Fail.fail msg
+#endif
 
 instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
     mzero       = WriterT mzero

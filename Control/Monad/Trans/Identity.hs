@@ -39,6 +39,9 @@ import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix (MonadFix(mfix))
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
@@ -91,6 +94,11 @@ instance (Monad m) => Monad (IdentityT m) where
 #endif
     m >>= k = IdentityT $ runIdentityT . k =<< runIdentityT m
     fail msg = IdentityT $ fail msg
+
+#if MIN_VERSION_base(4,9,0)
+instance (Fail.MonadFail m) => Fail.MonadFail (IdentityT m) where
+    fail msg = IdentityT $ Fail.fail msg
+#endif
 
 instance (MonadPlus m) => MonadPlus (IdentityT m) where
     mzero = IdentityT mzero

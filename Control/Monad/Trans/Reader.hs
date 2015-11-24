@@ -53,6 +53,9 @@ import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
 #if !(MIN_VERSION_base(4,6,0))
 import Control.Monad.Instances ()  -- deprecated from base-4.6
@@ -139,6 +142,11 @@ instance (Monad m) => Monad (ReaderT r m) where
         a <- runReaderT m r
         runReaderT (k a) r
     fail msg = lift (fail msg)
+
+#if MIN_VERSION_base(4,9,0)
+instance (Fail.MonadFail m) => Fail.MonadFail (ReaderT r m) where
+    fail msg = lift (Fail.fail msg)
+#endif
 
 instance (MonadPlus m) => MonadPlus (ReaderT r m) where
     mzero       = lift mzero

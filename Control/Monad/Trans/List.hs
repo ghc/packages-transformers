@@ -36,6 +36,9 @@ import Data.Functor.Classes
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
@@ -98,6 +101,11 @@ instance (Monad m) => Monad (ListT m) where
         b <- mapM (runListT . k) a
         return (concat b)
     fail _ = ListT $ return []
+
+#if MIN_VERSION_base(4,9,0)
+instance (Monad m) => Fail.MonadFail (ListT m) where
+    fail _ = ListT $ return []
+#endif
 
 instance (Monad m) => MonadPlus (ListT m) where
     mzero       = ListT $ return []

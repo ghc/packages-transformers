@@ -62,8 +62,10 @@ import Data.Functor.Classes
 import Control.Applicative
 import Control.Exception (IOException)
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
-
 #if !(MIN_VERSION_base(4,6,0))
 import Control.Monad.Instances ()  -- deprecated from base-4.6
 #endif
@@ -228,6 +230,11 @@ instance (Monad m, Error e) => Monad (ErrorT e m) where
             Left  l -> return (Left l)
             Right r -> runErrorT (k r)
     fail msg = ErrorT $ return (Left (strMsg msg))
+
+#if MIN_VERSION_base(4,9,0)
+instance (Monad m, Error e) => Fail.MonadFail (ErrorT e m) where
+    fail msg = ErrorT $ return (Left (strMsg msg))
+#endif
 
 instance (Monad m, Error e) => MonadPlus (ErrorT e m) where
     mzero       = ErrorT $ return (Left noMsg)

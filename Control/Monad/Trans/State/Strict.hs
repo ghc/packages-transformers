@@ -77,6 +77,9 @@ import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
 
 -- ---------------------------------------------------------------------------
@@ -201,6 +204,11 @@ instance (Monad m) => Monad (StateT s m) where
         (a, s') <- runStateT m s
         runStateT (k a) s'
     fail str = StateT $ \ _ -> fail str
+
+#if MIN_VERSION_base(4,9,0)
+instance (Fail.MonadFail m) => Fail.MonadFail (StateT s m) where
+    fail str = StateT $ \ _ -> Fail.fail str
+#endif
 
 instance (MonadPlus m) => MonadPlus (StateT s m) where
     mzero       = StateT $ \ _ -> mzero

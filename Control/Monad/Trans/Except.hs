@@ -55,6 +55,9 @@ import Data.Functor.Identity
 
 import Control.Applicative
 import Control.Monad
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 import Control.Monad.Fix
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
@@ -187,6 +190,11 @@ instance (Monad m) => Monad (ExceptT e m) where
             Left e -> return (Left e)
             Right x -> runExceptT (k x)
     fail = ExceptT . fail
+
+#if MIN_VERSION_base(4,9,0)
+instance (Fail.MonadFail m) => Fail.MonadFail (ExceptT e m) where
+    fail = ExceptT . Fail.fail
+#endif
 
 instance (Monad m, Monoid e) => MonadPlus (ExceptT e m) where
     mzero = ExceptT $ return (Left mempty)
