@@ -137,12 +137,12 @@ instance (Monad m) => Monad (MaybeT m) where
 #if !(MIN_VERSION_base(4,8,0))
     return = lift . return
 #endif
-    fail _ = MaybeT (return Nothing)
     x >>= f = MaybeT $ do
         v <- runMaybeT x
         case v of
             Nothing -> return Nothing
             Just y  -> runMaybeT (f y)
+    fail _ = MaybeT (return Nothing)
 
 #if MIN_VERSION_base(4,9,0)
 instance (Monad m) => Fail.MonadFail (MaybeT m) where
