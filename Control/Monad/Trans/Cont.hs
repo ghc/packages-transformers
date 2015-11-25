@@ -53,6 +53,9 @@ import Control.Monad.Trans.Class
 import Data.Functor.Identity
 
 import Control.Applicative
+#if MIN_VERSION_base(4,9,0)
+import qualified Control.Monad.Fail as Fail
+#endif
 
 {- |
 Continuation monad.
@@ -152,6 +155,11 @@ instance Monad (ContT r m) where
     return x = ContT ($ x)
 #endif
     m >>= k  = ContT $ \ c -> runContT m (\ x -> runContT (k x) c)
+
+#if MIN_VERSION_base(4,9,0)
+instance (Fail.MonadFail m) => Fail.MonadFail (ContT r m) where
+    fail msg = ContT $ \ _ -> Fail.fail msg
+#endif
 
 instance MonadTrans (ContT r) where
     lift m = ContT (m >>=)
