@@ -1,5 +1,11 @@
 -*-change-log-*-
 
+0.5.0.0 Ross Paterson <R.Paterson@city.ac.uk> Dec 2015
+	* Control.Monad.IO.Class in base for GHC >= 8.0
+	* Added PolyKinds for GHC >= 7.4
+	* Added instances of base classes MonadZip and MonadFail
+	* Changed liftings of Prelude classes to use explicit dictionaries
+
 0.4.3.0 Ross Paterson <R.Paterson@city.ac.uk> Mar 2015
 	* Added Eq1, Ord1, Show1 and Read1 instances for Const
 
