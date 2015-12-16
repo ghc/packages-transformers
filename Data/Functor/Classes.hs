@@ -51,9 +51,12 @@ module Data.Functor.Classes (
     Show2(..), showsPrec2,
     -- * Helper functions
     -- $example
+    -- readsPrecWith',
+    readsPrecWith',
     readsData,
     readsUnaryWith,
     readsBinaryWith,
+    showsPrecWith',
     showsUnaryWith,
     showsBinaryWith,
     -- ** Obsolete helpers
@@ -68,6 +71,7 @@ module Data.Functor.Classes (
 import Control.Applicative (Const(Const))
 import Data.Functor.Identity (Identity(Identity))
 import Data.Monoid (mappend)
+import Text.Show (showListWith)
 
 -- | Lifting of the 'Eq' class to unary type constructors.
 class Eq1 f where
@@ -99,21 +103,24 @@ compare1 = compareWith compare
 
 -- | Lifting of the 'Read' class to unary type constructors.
 class Read1 f where
-    -- | Lift a 'readsPrec' function through the type constructor.
-    readsPrecWith :: (Int -> ReadS a) -> Int -> ReadS (f a)
+    -- | Lift 'readsPrec' and 'readList' functions through the type constructor.
+    readsPrecWith :: (Int -> ReadS a) -> ReadS [a] -> Int -> ReadS (f a)
 
--- | Lift the standard 'readsPrec' function through the type constructor.
+-- | Lift the standard 'readsPrec' and 'readList' functions through the
+-- type constructor.
 readsPrec1 :: (Read1 f, Read a) => Int -> ReadS (f a)
-readsPrec1 = readsPrecWith readsPrec
+readsPrec1 = readsPrecWith readsPrec readList
 
 -- | Lifting of the 'Show' class to unary type constructors.
 class Show1 f where
-    -- | Lift a 'showsPrec' function through the type constructor.
-    showsPrecWith :: (Int -> a -> ShowS) -> Int -> f a -> ShowS
+    -- | Lift 'showsPrec' and 'showList' functions through the type constructor.
+    showsPrecWith :: (Int -> a -> ShowS) -> ([a] -> ShowS) ->
+        Int -> f a -> ShowS
 
--- | Lift the standard 'showsPrec' function through the type constructor.
+-- | Lift the standard 'showsPrec' and 'showList' functions through the
+-- type constructor.
 showsPrec1 :: (Show1 f, Show a) => Int -> f a -> ShowS
-showsPrec1 = showsPrecWith showsPrec
+showsPrec1 = showsPrecWith showsPrec showList
 
 -- | Lifting of the 'Eq' class to binary type constructors.
 class Eq2 f where
@@ -179,14 +186,14 @@ instance Ord1 Maybe where
     compareWith comp (Just x) (Just y) = comp x y
 
 instance Read1 Maybe where
-    readsPrecWith rp d =
+    readsPrecWith rp _ d =
          readParen False (\ r -> [(Nothing,s) | ("Nothing",s) <- lex r])
          `mappend`
          readsData (readsUnaryWith rp "Just" Just) d
 
 instance Show1 Maybe where
-    showsPrecWith _ _ Nothing = showString "Nothing"
-    showsPrecWith sp d (Just x) = showsUnaryWith sp "Just" d x
+    showsPrecWith _ _ _ Nothing = showString "Nothing"
+    showsPrecWith sp _ d (Just x) = showsUnaryWith sp "Just" d x
 
 instance Eq1 [] where
     eqWith _ [] [] = True
@@ -201,21 +208,10 @@ instance Ord1 [] where
     compareWith comp (x:xs) (y:ys) = comp x y `mappend` compareWith comp xs ys
 
 instance Read1 [] where
-    readsPrecWith rp _ = readParen False $ \ r ->
-        [pr | ("[",s)  <- lex r, pr <- readl s]
-      where
-        readl s = [([],t) | ("]",t) <- lex s] ++
-            [(x:xs,u) | (x,t) <- rp 0 s, (xs,u) <- readl' t]
-        readl' s = [([],t) | ("]",t) <- lex s] ++
-            [(x:xs,v) | (",",t) <- lex s, (x,u) <- rp 0 t, (xs,v) <- readl' u]
-
+    readsPrecWith _ rl _ = rl
 
 instance Show1 [] where
-    showsPrecWith _ _ [] = showString "[]"
-    showsPrecWith sp _ (x:xs) = showChar '[' . sp 0 x . showl xs
-      where
-        showl []     = showChar ']'
-        showl (y:ys) = showChar ',' . sp 0 y . showl ys
+    showsPrecWith _ sl _ = sl
 
 instance Eq2 (,) where
     eqWith2 e1 e2 (x1, y1) (x2, y2) = e1 x1 x2 && e2 y1 y2
@@ -243,10 +239,10 @@ instance (Ord a) => Ord1 ((,) a) where
     compareWith = compareWith2 compare
 
 instance (Read a) => Read1 ((,) a) where
-    readsPrecWith = readsPrecWith2 readsPrec
+    readsPrecWith rp _ = readsPrecWith2 readsPrec rp
 
 instance (Show a) => Show1 ((,) a) where
-    showsPrecWith = showsPrecWith2 showsPrec
+    showsPrecWith sp _ = showsPrecWith2 showsPrec sp
 
 instance Eq2 Either where
     eqWith2 e1 _ (Left x) (Left y) = e1 x y
@@ -276,10 +272,10 @@ instance (Ord a) => Ord1 (Either a) where
     compareWith = compareWith2 compare
 
 instance (Read a) => Read1 (Either a) where
-    readsPrecWith = readsPrecWith2 readsPrec
+    readsPrecWith rp _ = readsPrecWith2 readsPrec rp
 
 instance (Show a) => Show1 (Either a) where
-    showsPrecWith = showsPrecWith2 showsPrec
+    showsPrecWith sp _ = showsPrecWith2 showsPrec sp
 
 -- Instances for other functors defined in the base package
 
@@ -290,11 +286,11 @@ instance Ord1 Identity where
     compareWith comp (Identity x) (Identity y) = comp x y
 
 instance Read1 Identity where
-    readsPrecWith rp = readsData $
+    readsPrecWith rp _ = readsData $
          readsUnaryWith rp "Identity" Identity
 
 instance Show1 Identity where
-    showsPrecWith sp d (Identity x) = showsUnaryWith sp "Identity" d x
+    showsPrecWith sp _ d (Identity x) = showsUnaryWith sp "Identity" d x
 
 instance Eq2 Const where
     eqWith2 eq _ (Const x) (Const y) = eq x y
@@ -314,11 +310,27 @@ instance (Eq a) => Eq1 (Const a) where
 instance (Ord a) => Ord1 (Const a) where
     compareWith = compareWith2 compare
 instance (Read a) => Read1 (Const a) where
-    readsPrecWith = readsPrecWith2 readsPrec
+    readsPrecWith rp _ = readsPrecWith2 readsPrec rp
 instance (Show a) => Show1 (Const a) where
-    showsPrecWith = showsPrecWith2 showsPrec
+    showsPrecWith sp _ = showsPrecWith2 showsPrec sp
 
 -- Building blocks
+
+-- | Simplified version of 'readsPrecWith' for use when the argument type
+-- is assumed not to have a special version of 'readList'.
+readsPrecWith' :: Read1 f => (Int -> ReadS (g a)) -> Int -> ReadS (f (g a))
+readsPrecWith' rp = readsPrecWith rp (readListWith (rp 0))
+
+-- | Read a list (using square brackets and commas), given a function
+-- for reading elements.
+readListWith :: ReadS a -> ReadS [a]
+readListWith rp =
+    readParen False (\r -> [pr | ("[",s) <- lex r, pr <- readl s])
+  where
+    readl s = [([],t) | ("]",t) <- lex s] ++
+        [(x:xs,u) | (x,t) <- rp s, (xs,u) <- readl' t]
+    readl' s = [([],t) | ("]",t) <- lex s] ++
+        [(x:xs,v) | (",",t) <- lex s, (x,u) <- rp t, (xs,v) <- readl' u]
 
 -- | @'readsData' p d@ is a parser for datatypes where each alternative
 -- begins with a data constructor.  It parses the constructor and
@@ -342,6 +354,11 @@ readsBinaryWith :: (Int -> ReadS a) -> (Int -> ReadS b) ->
     String -> (a -> b -> t) -> String -> ReadS t
 readsBinaryWith rp1 rp2 name cons kw s =
     [(cons x y,u) | kw == name, (x,t) <- rp1 11 s, (y,u) <- rp2 11 t]
+
+-- | Simplified version of 'showsPrecWith' for use when the argument type
+-- is assumed not to have a special version of 'showList'.
+showsPrecWith' :: Show1 f => (Int -> g a -> ShowS) -> Int -> f (g a) -> ShowS
+showsPrecWith' sp = showsPrecWith sp (showListWith (sp 0))
 
 -- | @'showsUnaryWith' sp n d x@ produces the string representation of a
 -- unary data constructor with name @n@ and argument @x@, in precedence
@@ -416,19 +433,19 @@ new algebraic types.  For example, given the definition
 a standard 'Read1' instance may be defined as
 
 > instance (Read1 f) => Read1 (T f) where
->     readsPrecWith rp = readsData $
+>     readsPrecWith rp rl = readsData $
 >         readsUnaryWith rp "Zero" Zero `mappend`
->         readsUnaryWith (readsPrecWith rp) "One" One `mappend`
->         readsBinaryWith rp (readsPrecWith rp) "Two" Two
+>         readsUnaryWith (readsPrecWith rp rl) "One" One `mappend`
+>         readsBinaryWith rp (readsPrecWith rp rl) "Two" Two
 
 and the corresponding 'Show1' instance as
 
 > instance (Show1 f) => Show1 (T f) where
->     showsPrecWith sp d (Zero x) =
+>     showsPrecWith sp _ d (Zero x) =
 >         showsUnaryWith sp "Zero" d x
->     showsPrecWith sp d (One x) =
->         showsUnaryWith (showsPrecWith sp) "One" d x
->     showsPrecWith sp d (Two x y) =
->         showsBinaryWith sp (showsPrecWith sp) "Two" d x y
+>     showsPrecWith sp sl d (One x) =
+>         showsUnaryWith (showsPrecWith sp sl) "One" d x
+>     showsPrecWith sp sl d (Two x y) =
+>         showsBinaryWith sp (showsPrecWith sp sl) "Two" d x y
 
 -}

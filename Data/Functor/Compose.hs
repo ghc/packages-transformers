@@ -48,12 +48,12 @@ instance (Ord1 f, Ord1 g) => Ord1 (Compose f g) where
         compareWith (compareWith comp) x y
 
 instance (Read1 f, Read1 g) => Read1 (Compose f g) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "Compose" Compose
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "Compose" Compose
 
 instance (Show1 f, Show1 g) => Show1 (Compose f g) where
-    showsPrecWith sp d (Compose x) =
-        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "Compose" d x
+    showsPrecWith sp sl d (Compose x) =
+        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "Compose" d x
 
 -- Instances of Prelude classes
 

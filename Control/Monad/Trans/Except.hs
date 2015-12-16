@@ -119,12 +119,12 @@ instance (Ord e, Ord1 m) => Ord1 (ExceptT e m) where
         compareWith (compareWith comp) x y
 
 instance (Read e, Read1 m) => Read1 (ExceptT e m) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ExceptT" ExceptT
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "ExceptT" ExceptT
 
 instance (Show e, Show1 m) => Show1 (ExceptT e m) where
-    showsPrecWith sp d (ExceptT m) =
-        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ExceptT" d m
+    showsPrecWith sp sl d (ExceptT m) =
+        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "ExceptT" d m
 
 instance (Eq e, Eq1 m, Eq a) => Eq (ExceptT e m a) where (==) = eq1
 instance (Ord e, Ord1 m, Ord a) => Ord (ExceptT e m a) where compare = compare1

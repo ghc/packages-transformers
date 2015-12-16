@@ -69,9 +69,9 @@ instance (Eq a) => Eq1 (Constant a) where
 instance (Ord a) => Ord1 (Constant a) where
     compareWith = compareWith2 compare
 instance (Read a) => Read1 (Constant a) where
-    readsPrecWith = readsPrecWith2 readsPrec
+    readsPrecWith rp _ = readsPrecWith2 readsPrec rp
 instance (Show a) => Show1 (Constant a) where
-    showsPrecWith = showsPrecWith2 showsPrec
+    showsPrecWith sp _ = showsPrecWith2 showsPrec sp
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x

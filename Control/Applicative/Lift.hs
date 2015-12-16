@@ -54,14 +54,14 @@ instance (Ord1 f) => Ord1 (Lift f) where
     compareWith comp (Other y1) (Other y2) = compareWith comp y1 y2
 
 instance (Read1 f) => Read1 (Lift f) where
-    readsPrecWith rp = readsData $
+    readsPrecWith rp rl = readsData $
         readsUnaryWith rp "Pure" Pure `mappend`
-        readsUnaryWith (readsPrecWith rp) "Other" Other
+        readsUnaryWith (readsPrecWith rp rl) "Other" Other
 
 instance (Show1 f) => Show1 (Lift f) where
-    showsPrecWith sp d (Pure x) = showsUnaryWith sp "Pure" d x
-    showsPrecWith sp d (Other y) =
-        showsUnaryWith (showsPrecWith sp) "Other" d y
+    showsPrecWith sp _ d (Pure x) = showsUnaryWith sp "Pure" d x
+    showsPrecWith sp sl d (Other y) =
+        showsUnaryWith (showsPrecWith sp sl) "Other" d y
 
 instance (Eq1 f, Eq a) => Eq (Lift f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (Lift f a) where compare = compare1

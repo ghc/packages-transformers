@@ -117,13 +117,13 @@ instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where
         compareWith (compareWith2 comp compare) m1 m2
 
 instance (Read w, Read1 m) => Read1 (WriterT w m) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith (readsPrecWith2 rp readsPrec))
+    readsPrecWith rp _ = readsData $
+        readsUnaryWith (readsPrecWith' (readsPrecWith2 rp readsPrec))
             "WriterT" WriterT
 
 instance (Show w, Show1 m) => Show1 (WriterT w m) where
-    showsPrecWith sp d (WriterT m) =
-        showsUnaryWith (showsPrecWith (showsPrecWith2 sp showsPrec)) "WriterT" d m
+    showsPrecWith sp _ d (WriterT m) =
+        showsUnaryWith (showsPrecWith' (showsPrecWith2 sp showsPrec)) "WriterT" d m
 
 instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where (==) = eq1
 instance (Ord w, Ord1 m, Ord a) => Ord (WriterT w m a) where compare = compare1

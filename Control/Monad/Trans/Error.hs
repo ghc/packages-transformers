@@ -172,12 +172,12 @@ instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where
     compareWith comp (ErrorT x) (ErrorT y) = compareWith (compareWith comp) x y
 
 instance (Read e, Read1 m) => Read1 (ErrorT e m) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ErrorT" ErrorT
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "ErrorT" ErrorT
 
 instance (Show e, Show1 m) => Show1 (ErrorT e m) where
-    showsPrecWith sp d (ErrorT m) =
-        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ErrorT" d m
+    showsPrecWith sp sl d (ErrorT m) =
+        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "ErrorT" d m
 
 instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where (==) = eq1
 instance (Ord e, Ord1 m, Ord a) => Ord (ErrorT e m a) where compare = compare1

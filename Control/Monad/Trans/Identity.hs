@@ -59,12 +59,12 @@ instance (Ord1 f) => Ord1 (IdentityT f) where
     compareWith comp (IdentityT x) (IdentityT y) = compareWith comp x y
 
 instance (Read1 f) => Read1 (IdentityT f) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith rp) "IdentityT" IdentityT
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith rp rl) "IdentityT" IdentityT
 
 instance (Show1 f) => Show1 (IdentityT f) where
-    showsPrecWith sp d (IdentityT m) =
-        showsUnaryWith (showsPrecWith sp) "IdentityT" d m
+    showsPrecWith sp sl d (IdentityT m) =
+        showsUnaryWith (showsPrecWith sp sl) "IdentityT" d m
 
 instance (Eq1 f, Eq a) => Eq (IdentityT f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (IdentityT f a) where compare = compare1

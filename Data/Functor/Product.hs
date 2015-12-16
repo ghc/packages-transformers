@@ -47,12 +47,12 @@ instance (Ord1 f, Ord1 g) => Ord1 (Product f g) where
         compareWith comp x1 x2 `mappend` compareWith comp y1 y2
 
 instance (Read1 f, Read1 g) => Read1 (Product f g) where
-    readsPrecWith rp = readsData $
-        readsBinaryWith (readsPrecWith rp) (readsPrecWith rp) "Pair" Pair
+    readsPrecWith rp rl = readsData $
+        readsBinaryWith (readsPrecWith rp rl) (readsPrecWith rp rl) "Pair" Pair
 
 instance (Show1 f, Show1 g) => Show1 (Product f g) where
-    showsPrecWith sp d (Pair x y) =
-        showsBinaryWith (showsPrecWith sp) (showsPrecWith sp) "Pair" d x y
+    showsPrecWith sp sl d (Pair x y) =
+        showsBinaryWith (showsPrecWith sp sl) (showsPrecWith sp sl) "Pair" d x y
 
 instance (Eq1 f, Eq1 g, Eq a) => Eq (Product f g a)
     where (==) = eq1

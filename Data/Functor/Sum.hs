@@ -47,13 +47,15 @@ instance (Ord1 f, Ord1 g) => Ord1 (Sum f g) where
     compareWith comp (InR y1) (InR y2) = compareWith comp y1 y2
 
 instance (Read1 f, Read1 g) => Read1 (Sum f g) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith rp) "InL" InL `mappend`
-        readsUnaryWith (readsPrecWith rp) "InR" InR
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith rp rl) "InL" InL `mappend`
+        readsUnaryWith (readsPrecWith rp rl) "InR" InR
 
 instance (Show1 f, Show1 g) => Show1 (Sum f g) where
-    showsPrecWith sp d (InL x) = showsUnaryWith (showsPrecWith sp) "InL" d x
-    showsPrecWith sp d (InR y) = showsUnaryWith (showsPrecWith sp) "InR" d y
+    showsPrecWith sp sl d (InL x) =
+        showsUnaryWith (showsPrecWith sp sl) "InL" d x
+    showsPrecWith sp sl d (InR y) =
+        showsUnaryWith (showsPrecWith sp sl) "InR" d y
 
 instance (Eq1 f, Eq1 g, Eq a) => Eq (Sum f g a) where
     (==) = eq1

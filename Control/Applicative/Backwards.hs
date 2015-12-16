@@ -44,12 +44,12 @@ instance (Ord1 f) => Ord1 (Backwards f) where
     compareWith comp (Backwards x) (Backwards y) = compareWith comp x y
 
 instance (Read1 f) => Read1 (Backwards f) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith rp) "Backwards" Backwards
+    readsPrecWith rp rl = readsData $
+        readsUnaryWith (readsPrecWith rp rl) "Backwards" Backwards
 
 instance (Show1 f) => Show1 (Backwards f) where
-    showsPrecWith sp d (Backwards x) =
-        showsUnaryWith (showsPrecWith sp) "Backwards" d x
+    showsPrecWith sp sl d (Backwards x) =
+        showsUnaryWith (showsPrecWith sp sl) "Backwards" d x
 
 instance (Eq1 f, Eq a) => Eq (Backwards f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (Backwards f a) where compare = compare1

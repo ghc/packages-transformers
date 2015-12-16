@@ -57,12 +57,12 @@ instance (Ord1 m) => Ord1 (ListT m) where
     compareWith comp (ListT x) (ListT y) = compareWith (compareWith comp) x y
 
 instance (Read1 m) => Read1 (ListT m) where
-    readsPrecWith rp = readsData $
-        readsUnaryWith (readsPrecWith (readsPrecWith rp)) "ListT" ListT
+    readsPrecWith _ rl = readsData $
+        readsUnaryWith (readsPrecWith' (const rl)) "ListT" ListT
 
 instance (Show1 m) => Show1 (ListT m) where
-    showsPrecWith sp d (ListT m) =
-        showsUnaryWith (showsPrecWith (showsPrecWith sp)) "ListT" d m
+    showsPrecWith _ sl d (ListT m) =
+        showsUnaryWith (showsPrecWith' (const sl)) "ListT" d m
 
 instance (Eq1 m, Eq a) => Eq (ListT m a) where (==) = eq1
 instance (Ord1 m, Ord a) => Ord (ListT m a) where compare = compare1
