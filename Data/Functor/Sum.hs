@@ -35,27 +35,27 @@ import Data.Traversable (Traversable(traverse))
 data Sum f g a = InL (f a) | InR (g a)
 
 instance (Eq1 f, Eq1 g) => Eq1 (Sum f g) where
-    eqWith eq (InL x1) (InL x2) = eqWith eq x1 x2
-    eqWith _ (InL _) (InR _) = False
-    eqWith _ (InR _) (InL _) = False
-    eqWith eq (InR y1) (InR y2) = eqWith eq y1 y2
+    liftEq eq (InL x1) (InL x2) = liftEq eq x1 x2
+    liftEq _ (InL _) (InR _) = False
+    liftEq _ (InR _) (InL _) = False
+    liftEq eq (InR y1) (InR y2) = liftEq eq y1 y2
 
 instance (Ord1 f, Ord1 g) => Ord1 (Sum f g) where
-    compareWith comp (InL x1) (InL x2) = compareWith comp x1 x2
-    compareWith _ (InL _) (InR _) = LT
-    compareWith _ (InR _) (InL _) = GT
-    compareWith comp (InR y1) (InR y2) = compareWith comp y1 y2
+    liftCompare comp (InL x1) (InL x2) = liftCompare comp x1 x2
+    liftCompare _ (InL _) (InR _) = LT
+    liftCompare _ (InR _) (InL _) = GT
+    liftCompare comp (InR y1) (InR y2) = liftCompare comp y1 y2
 
 instance (Read1 f, Read1 g) => Read1 (Sum f g) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith rp rl) "InL" InL `mappend`
-        readsUnaryWith (readsPrecWith rp rl) "InR" InR
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp rl) "InL" InL `mappend`
+        readsUnaryWith (liftReadsPrec rp rl) "InR" InR
 
 instance (Show1 f, Show1 g) => Show1 (Sum f g) where
-    showsPrecWith sp sl d (InL x) =
-        showsUnaryWith (showsPrecWith sp sl) "InL" d x
-    showsPrecWith sp sl d (InR y) =
-        showsUnaryWith (showsPrecWith sp sl) "InR" d y
+    liftShowsPrec sp sl d (InL x) =
+        showsUnaryWith (liftShowsPrec sp sl) "InL" d x
+    liftShowsPrec sp sl d (InR y) =
+        showsUnaryWith (liftShowsPrec sp sl) "InR" d y
 
 instance (Eq1 f, Eq1 g, Eq a) => Eq (Sum f g a) where
     (==) = eq1

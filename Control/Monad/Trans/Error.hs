@@ -166,18 +166,24 @@ instance ErrorList Char where
 newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
 
 instance (Eq e, Eq1 m) => Eq1 (ErrorT e m) where
-    eqWith eq (ErrorT x) (ErrorT y) = eqWith (eqWith eq) x y
+    liftEq eq (ErrorT x) (ErrorT y) = liftEq (liftEq eq) x y
 
 instance (Ord e, Ord1 m) => Ord1 (ErrorT e m) where
-    compareWith comp (ErrorT x) (ErrorT y) = compareWith (compareWith comp) x y
+    liftCompare comp (ErrorT x) (ErrorT y) = liftCompare (liftCompare comp) x y
 
 instance (Read e, Read1 m) => Read1 (ErrorT e m) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "ErrorT" ErrorT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "ErrorT" ErrorT
+      where
+        rp' = liftReadsPrec rp rl
+        rl' = liftReadList rp rl
 
 instance (Show e, Show1 m) => Show1 (ErrorT e m) where
-    showsPrecWith sp sl d (ErrorT m) =
-        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "ErrorT" d m
+    liftShowsPrec sp sl d (ErrorT m) =
+        showsUnaryWith (liftShowsPrec sp' sl') "ErrorT" d m
+      where
+        sp' = liftShowsPrec sp sl
+        sl' = liftShowList sp sl
 
 instance (Eq e, Eq1 m, Eq a) => Eq (ErrorT e m a) where (==) = eq1
 instance (Ord e, Ord1 m, Ord a) => Ord (ErrorT e m a) where compare = compare1

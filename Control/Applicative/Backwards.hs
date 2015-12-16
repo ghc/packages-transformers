@@ -38,18 +38,18 @@ import Data.Traversable
 newtype Backwards f a = Backwards { forwards :: f a }
 
 instance (Eq1 f) => Eq1 (Backwards f) where
-    eqWith eq (Backwards x) (Backwards y) = eqWith eq x y
+    liftEq eq (Backwards x) (Backwards y) = liftEq eq x y
 
 instance (Ord1 f) => Ord1 (Backwards f) where
-    compareWith comp (Backwards x) (Backwards y) = compareWith comp x y
+    liftCompare comp (Backwards x) (Backwards y) = liftCompare comp x y
 
 instance (Read1 f) => Read1 (Backwards f) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith rp rl) "Backwards" Backwards
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp rl) "Backwards" Backwards
 
 instance (Show1 f) => Show1 (Backwards f) where
-    showsPrecWith sp sl d (Backwards x) =
-        showsUnaryWith (showsPrecWith sp sl) "Backwards" d x
+    liftShowsPrec sp sl d (Backwards x) =
+        showsUnaryWith (liftShowsPrec sp sl) "Backwards" d x
 
 instance (Eq1 f, Eq a) => Eq (Backwards f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (Backwards f a) where compare = compare1

@@ -53,18 +53,18 @@ import Data.Traversable (Traversable(traverse))
 newtype IdentityT f a = IdentityT { runIdentityT :: f a }
 
 instance (Eq1 f) => Eq1 (IdentityT f) where
-    eqWith eq (IdentityT x) (IdentityT y) = eqWith eq x y
+    liftEq eq (IdentityT x) (IdentityT y) = liftEq eq x y
 
 instance (Ord1 f) => Ord1 (IdentityT f) where
-    compareWith comp (IdentityT x) (IdentityT y) = compareWith comp x y
+    liftCompare comp (IdentityT x) (IdentityT y) = liftCompare comp x y
 
 instance (Read1 f) => Read1 (IdentityT f) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith rp rl) "IdentityT" IdentityT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp rl) "IdentityT" IdentityT
 
 instance (Show1 f) => Show1 (IdentityT f) where
-    showsPrecWith sp sl d (IdentityT m) =
-        showsUnaryWith (showsPrecWith sp sl) "IdentityT" d m
+    liftShowsPrec sp sl d (IdentityT m) =
+        showsUnaryWith (liftShowsPrec sp sl) "IdentityT" d m
 
 instance (Eq1 f, Eq a) => Eq (IdentityT f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (IdentityT f a) where compare = compare1

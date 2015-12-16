@@ -110,20 +110,25 @@ mapWriter f = mapWriterT (Identity . f . runIdentity)
 newtype WriterT w m a = WriterT { runWriterT :: m (a, w) }
 
 instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where
-    eqWith eq (WriterT m1) (WriterT m2) = eqWith (eqWith2 eq (==)) m1 m2
+    liftEq eq (WriterT m1) (WriterT m2) = liftEq (liftEq2 eq (==)) m1 m2
 
 instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where
-    compareWith comp (WriterT m1) (WriterT m2) =
-        compareWith (compareWith2 comp compare) m1 m2
+    liftCompare comp (WriterT m1) (WriterT m2) =
+        liftCompare (liftCompare2 comp compare) m1 m2
 
 instance (Read w, Read1 m) => Read1 (WriterT w m) where
-    readsPrecWith rp _ = readsData $
-        readsUnaryWith (readsPrecWith' (readsPrecWith2 rp readsPrec))
-            "WriterT" WriterT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "WriterT" WriterT
+      where
+        rp' = liftReadsPrec2 rp rl readsPrec readList
+        rl' = liftReadList2 rp rl readsPrec readList
 
 instance (Show w, Show1 m) => Show1 (WriterT w m) where
-    showsPrecWith sp _ d (WriterT m) =
-        showsUnaryWith (showsPrecWith' (showsPrecWith2 sp showsPrec)) "WriterT" d m
+    liftShowsPrec sp sl d (WriterT m) =
+        showsUnaryWith (liftShowsPrec sp' sl') "WriterT" d m
+      where
+        sp' = liftShowsPrec2 sp sl showsPrec showList
+        sl' = liftShowList2 sp sl showsPrec showList
 
 instance (Eq w, Eq1 m, Eq a) => Eq (WriterT w m a) where (==) = eq1
 instance (Ord w, Ord1 m, Ord a) => Ord (WriterT w m a) where compare = compare1

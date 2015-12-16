@@ -41,19 +41,25 @@ newtype Compose f g a = Compose { getCompose :: f (g a) }
 -- Instances of lifted Prelude classes
 
 instance (Eq1 f, Eq1 g) => Eq1 (Compose f g) where
-    eqWith eq (Compose x) (Compose y) = eqWith (eqWith eq) x y
+    liftEq eq (Compose x) (Compose y) = liftEq (liftEq eq) x y
 
 instance (Ord1 f, Ord1 g) => Ord1 (Compose f g) where
-    compareWith comp (Compose x) (Compose y) =
-        compareWith (compareWith comp) x y
+    liftCompare comp (Compose x) (Compose y) =
+        liftCompare (liftCompare comp) x y
 
 instance (Read1 f, Read1 g) => Read1 (Compose f g) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "Compose" Compose
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "Compose" Compose
+      where
+        rp' = liftReadsPrec rp rl
+        rl' = liftReadList rp rl
 
 instance (Show1 f, Show1 g) => Show1 (Compose f g) where
-    showsPrecWith sp sl d (Compose x) =
-        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "Compose" d x
+    liftShowsPrec sp sl d (Compose x) =
+        showsUnaryWith (liftShowsPrec sp' sl') "Compose" d x
+      where
+        sp' = liftShowsPrec sp sl
+        sl' = liftShowList sp sl
 
 -- Instances of Prelude classes
 

@@ -40,18 +40,18 @@ import Data.Monoid
 newtype Reverse f a = Reverse { getReverse :: f a }
 
 instance (Eq1 f) => Eq1 (Reverse f) where
-    eqWith eq (Reverse x) (Reverse y) = eqWith eq x y
+    liftEq eq (Reverse x) (Reverse y) = liftEq eq x y
 
 instance (Ord1 f) => Ord1 (Reverse f) where
-    compareWith comp (Reverse x) (Reverse y) = compareWith comp x y
+    liftCompare comp (Reverse x) (Reverse y) = liftCompare comp x y
 
 instance (Read1 f) => Read1 (Reverse f) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith rp rl) "Reverse" Reverse
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp rl) "Reverse" Reverse
 
 instance (Show1 f) => Show1 (Reverse f) where
-    showsPrecWith sp sl d (Reverse x) =
-        showsUnaryWith (showsPrecWith sp sl) "Reverse" d x
+    liftShowsPrec sp sl d (Reverse x) =
+        showsUnaryWith (liftShowsPrec sp sl) "Reverse" d x
 
 instance (Eq1 f, Eq a) => Eq (Reverse f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (Reverse f a) where compare = compare1

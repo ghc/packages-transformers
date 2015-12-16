@@ -42,26 +42,26 @@ import Data.Traversable (Traversable(traverse))
 data Lift f a = Pure a | Other (f a)
 
 instance (Eq1 f) => Eq1 (Lift f) where
-    eqWith eq (Pure x1) (Pure x2) = eq x1 x2
-    eqWith _ (Pure _) (Other _) = False
-    eqWith _ (Other _) (Pure _) = False
-    eqWith eq (Other y1) (Other y2) = eqWith eq y1 y2
+    liftEq eq (Pure x1) (Pure x2) = eq x1 x2
+    liftEq _ (Pure _) (Other _) = False
+    liftEq _ (Other _) (Pure _) = False
+    liftEq eq (Other y1) (Other y2) = liftEq eq y1 y2
 
 instance (Ord1 f) => Ord1 (Lift f) where
-    compareWith comp (Pure x1) (Pure x2) = comp x1 x2
-    compareWith _ (Pure _) (Other _) = LT
-    compareWith _ (Other _) (Pure _) = GT
-    compareWith comp (Other y1) (Other y2) = compareWith comp y1 y2
+    liftCompare comp (Pure x1) (Pure x2) = comp x1 x2
+    liftCompare _ (Pure _) (Other _) = LT
+    liftCompare _ (Other _) (Pure _) = GT
+    liftCompare comp (Other y1) (Other y2) = liftCompare comp y1 y2
 
 instance (Read1 f) => Read1 (Lift f) where
-    readsPrecWith rp rl = readsData $
+    liftReadsPrec rp rl = readsData $
         readsUnaryWith rp "Pure" Pure `mappend`
-        readsUnaryWith (readsPrecWith rp rl) "Other" Other
+        readsUnaryWith (liftReadsPrec rp rl) "Other" Other
 
 instance (Show1 f) => Show1 (Lift f) where
-    showsPrecWith sp _ d (Pure x) = showsUnaryWith sp "Pure" d x
-    showsPrecWith sp sl d (Other y) =
-        showsUnaryWith (showsPrecWith sp sl) "Other" d y
+    liftShowsPrec sp _ d (Pure x) = showsUnaryWith sp "Pure" d x
+    liftShowsPrec sp sl d (Other y) =
+        showsUnaryWith (liftShowsPrec sp sl) "Other" d y
 
 instance (Eq1 f, Eq a) => Eq (Lift f a) where (==) = eq1
 instance (Ord1 f, Ord a) => Ord (Lift f a) where compare = compare1

@@ -40,19 +40,19 @@ import Data.Traversable (Traversable(traverse))
 data Product f g a = Pair (f a) (g a)
 
 instance (Eq1 f, Eq1 g) => Eq1 (Product f g) where
-    eqWith eq (Pair x1 y1) (Pair x2 y2) = eqWith eq x1 x2 && eqWith eq y1 y2
+    liftEq eq (Pair x1 y1) (Pair x2 y2) = liftEq eq x1 x2 && liftEq eq y1 y2
 
 instance (Ord1 f, Ord1 g) => Ord1 (Product f g) where
-    compareWith comp (Pair x1 y1) (Pair x2 y2) =
-        compareWith comp x1 x2 `mappend` compareWith comp y1 y2
+    liftCompare comp (Pair x1 y1) (Pair x2 y2) =
+        liftCompare comp x1 x2 `mappend` liftCompare comp y1 y2
 
 instance (Read1 f, Read1 g) => Read1 (Product f g) where
-    readsPrecWith rp rl = readsData $
-        readsBinaryWith (readsPrecWith rp rl) (readsPrecWith rp rl) "Pair" Pair
+    liftReadsPrec rp rl = readsData $
+        readsBinaryWith (liftReadsPrec rp rl) (liftReadsPrec rp rl) "Pair" Pair
 
 instance (Show1 f, Show1 g) => Show1 (Product f g) where
-    showsPrecWith sp sl d (Pair x y) =
-        showsBinaryWith (showsPrecWith sp sl) (showsPrecWith sp sl) "Pair" d x y
+    liftShowsPrec sp sl d (Pair x y) =
+        showsBinaryWith (liftShowsPrec sp sl) (liftShowsPrec sp sl) "Pair" d x y
 
 instance (Eq1 f, Eq1 g, Eq a) => Eq (Product f g a)
     where (==) = eq1

@@ -70,18 +70,24 @@ import Data.Traversable (Traversable(traverse))
 newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a) }
 
 instance (Eq1 m) => Eq1 (MaybeT m) where
-    eqWith eq (MaybeT x) (MaybeT y) = eqWith (eqWith eq) x y
+    liftEq eq (MaybeT x) (MaybeT y) = liftEq (liftEq eq) x y
 
 instance (Ord1 m) => Ord1 (MaybeT m) where
-    compareWith comp (MaybeT x) (MaybeT y) = compareWith (compareWith comp) x y
+    liftCompare comp (MaybeT x) (MaybeT y) = liftCompare (liftCompare comp) x y
 
 instance (Read1 m) => Read1 (MaybeT m) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "MaybeT" MaybeT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "MaybeT" MaybeT
+      where
+        rp' = liftReadsPrec rp rl
+        rl' = liftReadList rp rl
 
 instance (Show1 m) => Show1 (MaybeT m) where
-    showsPrecWith sp sl d (MaybeT m) =
-        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "MaybeT" d m
+    liftShowsPrec sp sl d (MaybeT m) =
+        showsUnaryWith (liftShowsPrec sp' sl') "MaybeT" d m
+      where
+        sp' = liftShowsPrec sp sl
+        sl' = liftShowList sp sl
 
 instance (Eq1 m, Eq a) => Eq (MaybeT m a) where (==) = eq1
 instance (Ord1 m, Ord a) => Ord (MaybeT m a) where compare = compare1

@@ -51,18 +51,24 @@ import Data.Traversable (Traversable(traverse))
 newtype ListT m a = ListT { runListT :: m [a] }
 
 instance (Eq1 m) => Eq1 (ListT m) where
-    eqWith eq (ListT x) (ListT y) = eqWith (eqWith eq) x y
+    liftEq eq (ListT x) (ListT y) = liftEq (liftEq eq) x y
 
 instance (Ord1 m) => Ord1 (ListT m) where
-    compareWith comp (ListT x) (ListT y) = compareWith (compareWith comp) x y
+    liftCompare comp (ListT x) (ListT y) = liftCompare (liftCompare comp) x y
 
 instance (Read1 m) => Read1 (ListT m) where
-    readsPrecWith _ rl = readsData $
-        readsUnaryWith (readsPrecWith' (const rl)) "ListT" ListT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "ListT" ListT
+      where
+        rp' = liftReadsPrec rp rl
+        rl' = liftReadList rp rl
 
 instance (Show1 m) => Show1 (ListT m) where
-    showsPrecWith _ sl d (ListT m) =
-        showsUnaryWith (showsPrecWith' (const sl)) "ListT" d m
+    liftShowsPrec sp sl d (ListT m) =
+        showsUnaryWith (liftShowsPrec sp' sl') "ListT" d m
+      where
+        sp' = liftShowsPrec sp sl
+        sl' = liftShowList sp sl
 
 instance (Eq1 m, Eq a) => Eq (ListT m a) where (==) = eq1
 instance (Ord1 m, Ord a) => Ord (ListT m a) where compare = compare1

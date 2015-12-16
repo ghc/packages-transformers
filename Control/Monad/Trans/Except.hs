@@ -112,19 +112,25 @@ withExcept = withExceptT
 newtype ExceptT e m a = ExceptT (m (Either e a))
 
 instance (Eq e, Eq1 m) => Eq1 (ExceptT e m) where
-    eqWith eq (ExceptT x) (ExceptT y) = eqWith (eqWith eq) x y
+    liftEq eq (ExceptT x) (ExceptT y) = liftEq (liftEq eq) x y
 
 instance (Ord e, Ord1 m) => Ord1 (ExceptT e m) where
-    compareWith comp (ExceptT x) (ExceptT y) =
-        compareWith (compareWith comp) x y
+    liftCompare comp (ExceptT x) (ExceptT y) =
+        liftCompare (liftCompare comp) x y
 
 instance (Read e, Read1 m) => Read1 (ExceptT e m) where
-    readsPrecWith rp rl = readsData $
-        readsUnaryWith (readsPrecWith' (readsPrecWith rp rl)) "ExceptT" ExceptT
+    liftReadsPrec rp rl = readsData $
+        readsUnaryWith (liftReadsPrec rp' rl') "ExceptT" ExceptT
+      where
+        rp' = liftReadsPrec rp rl
+        rl' = liftReadList rp rl
 
 instance (Show e, Show1 m) => Show1 (ExceptT e m) where
-    showsPrecWith sp sl d (ExceptT m) =
-        showsUnaryWith (showsPrecWith' (showsPrecWith sp sl)) "ExceptT" d m
+    liftShowsPrec sp sl d (ExceptT m) =
+        showsUnaryWith (liftShowsPrec sp' sl') "ExceptT" d m
+      where
+        sp' = liftShowsPrec sp sl
+        sl' = liftShowList sp sl
 
 instance (Eq e, Eq1 m, Eq a) => Eq (ExceptT e m a) where (==) = eq1
 instance (Ord e, Ord1 m, Ord a) => Ord (ExceptT e m a) where compare = compare1
