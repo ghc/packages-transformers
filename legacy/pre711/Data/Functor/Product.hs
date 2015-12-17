@@ -1,12 +1,21 @@
 {-# LANGUAGE CPP #-}
 #if __GLASGOW_HASKELL__ >= 702
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 704
 {-# LANGUAGE PolyKinds #-}
 #endif
-#if __GLASGOW_HASKELL__ >= 710
+#if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
 #endif
 -----------------------------------------------------------------------------
 -- |
@@ -31,13 +40,47 @@ import Control.Monad.Fix (MonadFix(..))
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Data
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Classes
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
+#if __GLASGOW_HASKELL__ >= 702
+import GHC.Generics
+#endif
 
 -- | Lifted product of functors.
 data Product f g a = Pair (f a) (g a)
+
+#if __GLASGOW_HASKELL__ >= 702
+deriving instance Generic (Product f g a)
+
+instance Generic1 (Product f g) where
+    type Rep1 (Product f g) =
+      D1 MDProduct
+        (C1 MCPair
+          (S1 NoSelector (Rec1 f) :*: S1 NoSelector (Rec1 g)))
+    from1 (Pair f g) = M1 (M1 (M1 (Rec1 f) :*: M1 (Rec1 g)))
+    to1 (M1 (M1 (M1 f :*: M1 g))) = Pair (unRec1 f) (unRec1 g)
+
+data MDProduct
+data MCPair
+
+instance Datatype MDProduct where
+    datatypeName _ = "Product"
+    moduleName   _ = "Data.Functor.Product"
+
+instance Constructor MCPair where
+    conName _ = "Pair"
+#endif
+
+#if __GLASGOW_HASKELL__ >= 708
+deriving instance Typeable Product
+deriving instance (Data (f a), Data (g a), Typeable f, Typeable g, Typeable a)
+               => Data (Product (f :: * -> *) (g :: * -> *) (a :: *))
+#endif
 
 instance (Eq1 f, Eq1 g) => Eq1 (Product f g) where
     liftEq eq (Pair x1 y1) (Pair x2 y2) = liftEq eq x1 x2 && liftEq eq y1 y2

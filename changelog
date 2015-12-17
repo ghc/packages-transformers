@@ -1,7 +1,8 @@
 -*-change-log-*-
 
 0.5.0.0 Ross Paterson <R.Paterson@city.ac.uk> Dec 2015
-	* Control.Monad.IO.Class in base for GHC >= 8.0
+	* Control.Monad.IO.Class, Data.Functor.Classes, Data.Functor.Compose,
+      Data.Functor.Product, and Data.Functor.Sum in base for GHC >= 8.0
 	* Added PolyKinds for GHC >= 7.4
 	* Added instances of base classes MonadZip and MonadFail
 	* Changed liftings of Prelude classes to use explicit dictionaries

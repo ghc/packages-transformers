@@ -48,10 +48,18 @@ library
     hs-source-dirs: legacy/pre709
     exposed-modules: Data.Functor.Identity
   if !impl(ghc>=7.11)
-    -- Control.Monad.IO.Class was moved into base-4.9.0 (GHC 7.12)
+    -- Control.Monad.IO.Class was moved into base-4.9.0.0 (GHC 8.0)
     -- see also https://ghc.haskell.org/trac/ghc/ticket/10773
     hs-source-dirs: legacy/pre711
     exposed-modules: Control.Monad.IO.Class
+    -- Much of the Data.Functor.* hierarchy was also moved into
+    -- base-4.9.0.0 (GHC 8.0) as well
+    -- see also https://ghc.haskell.org/trac/ghc/ticket/11135
+    exposed-modules:
+      Data.Functor.Classes
+      Data.Functor.Compose
+      Data.Functor.Product
+      Data.Functor.Sum
   if impl(ghc>=7.2 && <7.5)
     -- Prior to GHC 7.5, GHC.Generics lived in ghc-prim
     build-depends: ghc-prim
@@ -76,9 +84,5 @@ library
     Control.Monad.Trans.Writer
     Control.Monad.Trans.Writer.Lazy
     Control.Monad.Trans.Writer.Strict
-    Data.Functor.Classes
-    Data.Functor.Compose
     Data.Functor.Constant
-    Data.Functor.Product
     Data.Functor.Reverse
-    Data.Functor.Sum

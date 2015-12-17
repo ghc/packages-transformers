@@ -4,7 +4,7 @@
 #endif
 #if __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE Trustworthy #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}

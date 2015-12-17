@@ -1,12 +1,21 @@
 {-# LANGUAGE CPP #-}
 #if __GLASGOW_HASKELL__ >= 702
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 704
 {-# LANGUAGE PolyKinds #-}
 #endif
-#if __GLASGOW_HASKELL__ >= 710
+#if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
 #endif
 -----------------------------------------------------------------------------
 -- |
@@ -28,8 +37,14 @@ module Data.Functor.Compose (
 import Data.Functor.Classes
 
 import Control.Applicative
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Data
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Traversable (Traversable(traverse))
+#if __GLASGOW_HASKELL__ >= 702
+import GHC.Generics
+#endif
 
 infixr 9 `Compose`
 
@@ -37,6 +52,42 @@ infixr 9 `Compose`
 -- The composition of applicative functors is always applicative,
 -- but the composition of monads is not always a monad.
 newtype Compose f g a = Compose { getCompose :: f (g a) }
+
+#if __GLASGOW_HASKELL__ >= 702
+deriving instance Generic (Compose f g a)
+
+instance Functor f => Generic1 (Compose f g) where
+    type Rep1 (Compose f g) =
+      D1 MDCompose
+        (C1 MCCompose
+          (S1 MSCompose (f :.: Rec1 g)))
+    from1 (Compose x) = M1 (M1 (M1 (Comp1 (fmap Rec1 x))))
+    to1 (M1 (M1 (M1 x))) = Compose (fmap unRec1 (unComp1 x))
+
+data MDCompose
+data MCCompose
+data MSCompose
+
+instance Datatype MDCompose where
+    datatypeName _ = "Compose"
+    moduleName   _ = "Data.Functor.Compose"
+# if __GLASGOW_HASKELL__ >= 708
+    isNewtype    _ = True
+# endif
+
+instance Constructor MCCompose where
+    conName     _ = "Compose"
+    conIsRecord _ = True
+
+instance Selector MSCompose where
+    selName _ = "getCompose"
+#endif
+
+#if __GLASGOW_HASKELL__ >= 708
+deriving instance Typeable Compose
+deriving instance (Data (f (g a)), Typeable f, Typeable g, Typeable a)
+               => Data (Compose (f :: * -> *) (g :: * -> *) (a :: *))
+#endif
 
 -- Instances of lifted Prelude classes
 

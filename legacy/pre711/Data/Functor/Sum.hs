@@ -1,12 +1,21 @@
 {-# LANGUAGE CPP #-}
 #if __GLASGOW_HASKELL__ >= 702
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 704
 {-# LANGUAGE PolyKinds #-}
 #endif
-#if __GLASGOW_HASKELL__ >= 710
+#if __GLASGOW_HASKELL__ >= 708
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
 #endif
 -----------------------------------------------------------------------------
 -- |
@@ -26,13 +35,52 @@ module Data.Functor.Sum (
   ) where
 
 import Control.Applicative
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Data
+#endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Classes
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
+#if __GLASGOW_HASKELL__ >= 702
+import GHC.Generics
+#endif
 
 -- | Lifted sum of functors.
 data Sum f g a = InL (f a) | InR (g a)
+
+#if __GLASGOW_HASKELL__ >= 702
+deriving instance Generic (Sum f g a)
+
+instance Generic1 (Sum f g) where
+    type Rep1 (Sum f g) =
+      D1 MDSum (C1 MCInL (S1 NoSelector (Rec1 f))
+            :+: C1 MCInR (S1 NoSelector (Rec1 g)))
+    from1 (InL f) = M1 (L1 (M1 (M1 (Rec1 f))))
+    from1 (InR g) = M1 (R1 (M1 (M1 (Rec1 g))))
+    to1 (M1 (L1 (M1 (M1 f)))) = InL (unRec1 f)
+    to1 (M1 (R1 (M1 (M1 g)))) = InR (unRec1 g)
+
+data MDSum
+data MCInL
+data MCInR
+
+instance Datatype MDSum where
+    datatypeName _ = "Sum"
+    moduleName   _ = "Data.Functor.Sum"
+
+instance Constructor MCInL where
+    conName _ = "InL"
+
+instance Constructor MCInR where
+    conName _ = "InR"
+#endif
+
+#if __GLASGOW_HASKELL__ >= 708
+deriving instance Typeable Sum
+deriving instance (Data (f a), Data (g a), Typeable f, Typeable g, Typeable a)
+               => Data (Sum (f :: * -> *) (g :: * -> *) (a :: *))
+#endif
 
 instance (Eq1 f, Eq1 g) => Eq1 (Sum f g) where
     liftEq eq (InL x1) (InL x2) = liftEq eq x1 x2
