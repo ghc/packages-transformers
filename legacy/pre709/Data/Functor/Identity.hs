@@ -50,6 +50,8 @@ import Data.Traversable (Traversable(traverse))
 #if __GLASGOW_HASKELL__ >= 612
 import Data.Data
 #endif
+import Data.Ix (Ix(..))
+import Foreign (Storable(..), castPtr)
 #if __GLASGOW_HASKELL__ >= 702
 import GHC.Generics
 #endif
@@ -68,6 +70,27 @@ newtype Identity a = Identity { runIdentity :: a }
 #endif
              )
 
+instance (Bounded a) => Bounded (Identity a) where
+    minBound = Identity minBound
+    maxBound = Identity maxBound
+
+instance (Enum a) => Enum (Identity a) where
+    succ (Identity x)     = Identity (succ x)
+    pred (Identity x)     = Identity (pred x)
+    toEnum i              = Identity (toEnum i)
+    fromEnum (Identity x) = fromEnum x
+    enumFrom (Identity x) = map Identity (enumFrom x)
+    enumFromThen (Identity x) (Identity y) = map Identity (enumFromThen x y)
+    enumFromTo   (Identity x) (Identity y) = map Identity (enumFromTo   x y)
+    enumFromThenTo (Identity x) (Identity y) (Identity z) =
+        map Identity (enumFromThenTo x y z)
+
+instance (Ix a) => Ix (Identity a) where
+    range     (Identity x, Identity y) = map Identity (range (x, y))
+    index     (Identity x, Identity y) (Identity i) = index     (x, y) i
+    inRange   (Identity x, Identity y) (Identity e) = inRange   (x, y) e
+    rangeSize (Identity x, Identity y) = rangeSize (x, y)
+
 instance (Monoid a) => Monoid (Identity a) where
     mempty = Identity mempty
     mappend (Identity x) (Identity y) = Identity (mappend x y)
@@ -82,6 +105,16 @@ instance (Read a) => Read (Identity a) where
 instance (Show a) => Show (Identity a) where
     showsPrec d (Identity x) = showParen (d > 10) $
         showString "Identity " . showsPrec 11 x
+
+instance (Storable a) => Storable (Identity a) where
+    sizeOf    (Identity x)       = sizeOf x
+    alignment (Identity x)       = alignment x
+    peekElemOff p i              = fmap Identity (peekElemOff (castPtr p) i)
+    pokeElemOff p i (Identity x) = pokeElemOff (castPtr p) i x
+    peekByteOff p i              = fmap Identity (peekByteOff p i)
+    pokeByteOff p i (Identity x) = pokeByteOff p i x
+    peek p                       = fmap runIdentity (peek (castPtr p))
+    poke p (Identity x)          = poke (castPtr p) x
 
 -- ---------------------------------------------------------------------------
 -- Identity instances for Functor and Monad
