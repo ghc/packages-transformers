@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.5.0.2 Ross Paterson <R.Paterson@city.ac.uk> Jan 2016
+	* Backported extra instances for Identity
+
 0.5.0.1 Ross Paterson <R.Paterson@city.ac.uk> Jan 2016
 	* Tightened GHC bounds for PolyKinds and DeriveDataTypeable
 
