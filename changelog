@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.5.0.1 Ross Paterson <R.Paterson@city.ac.uk> Jan 2016
+	* Tightened GHC bounds for PolyKinds and DeriveDataTypeable
+
 0.5.0.0 Ross Paterson <R.Paterson@city.ac.uk> Dec 2015
 	* Control.Monad.IO.Class in base for GHC >= 8.0
 	* Data.Functor.{Classes,Compose,Product,Sum} in base for GHC >= 8.0
