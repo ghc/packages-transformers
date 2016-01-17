@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 612
+#if __GLASGOW_HASKELL__ >= 700
 {-# LANGUAGE DeriveDataTypeable #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 702
@@ -49,7 +49,7 @@ import Control.Monad.Zip (MonadZip(mzipWith, munzip))
 import Data.Foldable (Foldable(foldMap))
 import Data.Monoid (Monoid(mempty, mappend))
 import Data.Traversable (Traversable(traverse))
-#if __GLASGOW_HASKELL__ >= 612
+#if __GLASGOW_HASKELL__ >= 700
 import Data.Data
 #endif
 import Data.Ix (Ix(..))
@@ -61,7 +61,7 @@ import GHC.Generics
 -- | Identity functor and monad. (a non-strict monad)
 newtype Identity a = Identity { runIdentity :: a }
     deriving ( Eq, Ord
-#if __GLASGOW_HASKELL__ >= 612
+#if __GLASGOW_HASKELL__ >= 700
              , Data, Typeable
 #endif
 #if __GLASGOW_HASKELL__ >= 702
