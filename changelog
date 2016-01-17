@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.5.1.0 Ross Paterson <R.Paterson@city.ac.uk> Jan 2016
+	* Bump minor version number, required by added instances
+
 0.5.0.2 Ross Paterson <R.Paterson@city.ac.uk> Jan 2016
 	* Backported extra instances for Identity
 
