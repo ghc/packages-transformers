@@ -78,6 +78,11 @@ a monad transformation
 
 > mapStateT t :: StateT s M a -> StateT s N a
 
+For these monad transformers, 'lift' is a natural transformation in the
+category of monads, i.e. for any monad transformation @t :: M a -> N a@,
+
+* @map@/XXX/@T t . 'lift' = 'lift' . t@
+
 Each of the monad transformers introduces relevant operations.
 In a sequence of monad transformers, most of these operations.can be
 lifted through other transformers using 'lift' or the @map@/XXX/@T@
