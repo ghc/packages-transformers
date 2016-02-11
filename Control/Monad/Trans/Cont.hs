@@ -119,7 +119,12 @@ shift :: ((a -> r) -> Cont r r) -> Cont r a
 shift f = shiftT (f . (runIdentity .))
 
 -- | The continuation monad transformer.
--- Can be used to add continuation handling to other monads.
+-- Can be used to add continuation handling to any type constructor:
+-- the 'Monad' instance and most of the operations do not require @m@
+-- to be a monad.
+--
+-- 'ContT' is not a functor on the category of monads, and many operations
+-- cannot be lifted through it.
 newtype ContT r m a = ContT { runContT :: (a -> m r) -> m r }
 
 -- | The result of running a CPS computation with 'return' as the
@@ -130,7 +135,9 @@ evalContT :: (Monad m) => ContT r m r -> m r
 evalContT m = runContT m return
 
 -- | Apply a function to transform the result of a continuation-passing
--- computation.
+-- computation.  This has a more restricted type than the @map@ operations
+-- for other monad transformers, because 'ContT' does not define a functor
+-- in the category of monads.
 --
 -- * @'runContT' ('mapContT' f m) = f . 'runContT' m@
 mapContT :: (m r -> m r) -> ContT r m a -> ContT r m a
