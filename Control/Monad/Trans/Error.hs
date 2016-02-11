@@ -90,6 +90,7 @@ instance Alternative IO where
 catchIOError :: IO a -> (IOError -> IO a) -> IO a
 catchIOError = catch
 # endif
+#endif
 
 instance (Error e) => Alternative (Either e) where
     empty        = Left noMsg
@@ -100,7 +101,6 @@ instance (Error e) => MonadPlus (Either e) where
     mzero            = Left noMsg
     Left _ `mplus` n = n
     m      `mplus` _ = m
-#endif
 
 #if !(MIN_VERSION_base(4,3,0))
 -- These instances are in base-4.3
