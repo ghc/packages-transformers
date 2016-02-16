@@ -82,17 +82,20 @@ type Writer w = WriterT w Identity
 -- (The inverse of 'runWriter'.)
 writer :: (Monad m) => (a, w) -> WriterT w m a
 writer = WriterT . return
+{-# INLINE writer #-}
 
 -- | Unwrap a writer computation as a (result, output) pair.
 -- (The inverse of 'writer'.)
 runWriter :: Writer w a -> (a, w)
 runWriter = runIdentity . runWriterT
+{-# INLINE runWriter #-}
 
 -- | Extract the output from a writer computation.
 --
 -- * @'execWriter' m = 'snd' ('runWriter' m)@
 execWriter :: Writer w a -> w
 execWriter m = snd (runWriter m)
+{-# INLINE execWriter #-}
 
 -- | Map both the return value and output of a computation using
 -- the given function.
@@ -100,6 +103,7 @@ execWriter m = snd (runWriter m)
 -- * @'runWriter' ('mapWriter' f m) = f ('runWriter' m)@
 mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 mapWriter f = mapWriterT (Identity . f . runIdentity)
+{-# INLINE mapWriter #-}
 
 -- ---------------------------------------------------------------------------
 -- | A writer monad parameterized by:
@@ -114,10 +118,12 @@ newtype WriterT w m a = WriterT { runWriterT :: m (a, w) }
 
 instance (Eq w, Eq1 m) => Eq1 (WriterT w m) where
     liftEq eq (WriterT m1) (WriterT m2) = liftEq (liftEq2 eq (==)) m1 m2
+    {-# INLINE liftEq #-}
 
 instance (Ord w, Ord1 m) => Ord1 (WriterT w m) where
     liftCompare comp (WriterT m1) (WriterT m2) =
         liftCompare (liftCompare2 comp compare) m1 m2
+    {-# INLINE liftCompare #-}
 
 instance (Read w, Read1 m) => Read1 (WriterT w m) where
     liftReadsPrec rp rl = readsData $
@@ -147,6 +153,7 @@ execWriterT :: (Monad m) => WriterT w m a -> m w
 execWriterT m = do
     (_, w) <- runWriterT m
     return w
+{-# INLINE execWriterT #-}
 
 -- | Map both the return value and output of a computation using
 -- the given function.
@@ -154,65 +161,84 @@ execWriterT m = do
 -- * @'runWriterT' ('mapWriterT' f m) = f ('runWriterT' m)@
 mapWriterT :: (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
 mapWriterT f m = WriterT $ f (runWriterT m)
+{-# INLINE mapWriterT #-}
 
 instance (Functor m) => Functor (WriterT w m) where
     fmap f = mapWriterT $ fmap $ \ (a, w) -> (f a, w)
+    {-# INLINE fmap #-}
 
 instance (Foldable f) => Foldable (WriterT w f) where
     foldMap f = foldMap (f . fst) . runWriterT
+    {-# INLINE foldMap #-}
 
 instance (Traversable f) => Traversable (WriterT w f) where
     traverse f = fmap WriterT . traverse f' . runWriterT where
        f' (a, b) = fmap (\ c -> (c, b)) (f a)
+    {-# INLINE traverse #-}
 
 instance (Monoid w, Applicative m) => Applicative (WriterT w m) where
     pure a  = WriterT $ pure (a, mempty)
+    {-# INLINE pure #-}
     f <*> v = WriterT $ liftA2 k (runWriterT f) (runWriterT v)
       where k (a, w) (b, w') = (a b, w `mappend` w')
+    {-# INLINE (<*>) #-}
 
 instance (Monoid w, Alternative m) => Alternative (WriterT w m) where
     empty   = WriterT empty
+    {-# INLINE empty #-}
     m <|> n = WriterT $ runWriterT m <|> runWriterT n
+    {-# INLINE (<|>) #-}
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
 #if !(MIN_VERSION_base(4,8,0))
     return a = writer (a, mempty)
+    {-# INLINE return #-}
 #endif
     m >>= k  = WriterT $ do
         (a, w)  <- runWriterT m
         (b, w') <- runWriterT (k a)
         return (b, w `mappend` w')
+    {-# INLINE (>>=) #-}
     fail msg = WriterT $ fail msg
+    {-# INLINE fail #-}
 
 #if MIN_VERSION_base(4,9,0)
 instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (WriterT w m) where
     fail msg = WriterT $ Fail.fail msg
+    {-# INLINE fail #-}
 #endif
 
 instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
     mzero       = WriterT mzero
+    {-# INLINE mzero #-}
     m `mplus` n = WriterT $ runWriterT m `mplus` runWriterT n
+    {-# INLINE mplus #-}
 
 instance (Monoid w, MonadFix m) => MonadFix (WriterT w m) where
     mfix m = WriterT $ mfix $ \ ~(a, _) -> runWriterT (m a)
+    {-# INLINE mfix #-}
 
 instance (Monoid w) => MonadTrans (WriterT w) where
     lift m = WriterT $ do
         a <- m
         return (a, mempty)
+    {-# INLINE lift #-}
 
 instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
     liftIO = lift . liftIO
+    {-# INLINE liftIO #-}
 
 #if MIN_VERSION_base(4,4,0)
 instance (Monoid w, MonadZip m) => MonadZip (WriterT w m) where
     mzipWith f (WriterT x) (WriterT y) = WriterT $
         mzipWith (\ (a, w) (b, w') -> (f a b, w `mappend` w')) x y
+    {-# INLINE mzipWith #-}
 #endif
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monad m) => w -> WriterT w m ()
 tell w = writer ((), w)
+{-# INLINE tell #-}
 
 -- | @'listen' m@ is an action that executes the action @m@ and adds its
 -- output to the value of the computation.
@@ -222,6 +248,7 @@ listen :: (Monad m) => WriterT w m a -> WriterT w m (a, w)
 listen m = WriterT $ do
     (a, w) <- runWriterT m
     return ((a, w), w)
+{-# INLINE listen #-}
 
 -- | @'listens' f m@ is an action that executes the action @m@ and adds
 -- the result of applying @f@ to the output to the value of the computation.
@@ -233,6 +260,7 @@ listens :: (Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 listens f m = WriterT $ do
     (a, w) <- runWriterT m
     return ((a, f w), w)
+{-# INLINE listens #-}
 
 -- | @'pass' m@ is an action that executes the action @m@, which returns
 -- a value and a function, and returns the value, applying the function
@@ -243,6 +271,7 @@ pass :: (Monad m) => WriterT w m (a, w -> w) -> WriterT w m a
 pass m = WriterT $ do
     ((a, f), w) <- runWriterT m
     return (a, f w)
+{-# INLINE pass #-}
 
 -- | @'censor' f m@ is an action that executes the action @m@ and
 -- applies the function @f@ to its output, leaving the return value
@@ -255,14 +284,17 @@ censor :: (Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
 censor f m = WriterT $ do
     (a, w) <- runWriterT m
     return (a, f w)
+{-# INLINE censor #-}
 
 -- | Lift a @callCC@ operation to the new monad.
 liftCallCC :: (Monoid w) => CallCC m (a,w) (b,w) -> CallCC (WriterT w m) a b
 liftCallCC callCC f = WriterT $
     callCC $ \ c ->
     runWriterT (f (\ a -> WriterT $ c (a, mempty)))
+{-# INLINE liftCallCC #-}
 
 -- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m (a,w) -> Catch e (WriterT w m) a
 liftCatch catchE m h =
     WriterT $ runWriterT m `catchE` \ e -> runWriterT (h e)
+{-# INLINE liftCatch #-}

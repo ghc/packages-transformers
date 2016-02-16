@@ -52,9 +52,11 @@ newtype ListT m a = ListT { runListT :: m [a] }
 
 instance (Eq1 m) => Eq1 (ListT m) where
     liftEq eq (ListT x) (ListT y) = liftEq (liftEq eq) x y
+    {-# INLINE liftEq #-}
 
 instance (Ord1 m) => Ord1 (ListT m) where
     liftCompare comp (ListT x) (ListT y) = liftCompare (liftCompare comp) x y
+    {-# INLINE liftCompare #-}
 
 instance (Read1 m) => Read1 (ListT m) where
     liftReadsPrec rp rl = readsData $
@@ -80,57 +82,74 @@ instance (Show1 m, Show a) => Show (ListT m a) where showsPrec = showsPrec1
 -- * @'runListT' ('mapListT' f m) = f ('runListT' m)@
 mapListT :: (m [a] -> n [b]) -> ListT m a -> ListT n b
 mapListT f m = ListT $ f (runListT m)
+{-# INLINE mapListT #-}
 
 instance (Functor m) => Functor (ListT m) where
     fmap f = mapListT $ fmap $ map f
+    {-# INLINE fmap #-}
 
 instance (Foldable f) => Foldable (ListT f) where
     foldMap f (ListT a) = foldMap (foldMap f) a
+    {-# INLINE foldMap #-}
 
 instance (Traversable f) => Traversable (ListT f) where
     traverse f (ListT a) = ListT <$> traverse (traverse f) a
+    {-# INLINE traverse #-}
 
 instance (Applicative m) => Applicative (ListT m) where
     pure a  = ListT $ pure [a]
+    {-# INLINE pure #-}
     f <*> v = ListT $ (<*>) <$> runListT f <*> runListT v
+    {-# INLINE (<*>) #-}
 
 instance (Applicative m) => Alternative (ListT m) where
     empty   = ListT $ pure []
+    {-# INLINE empty #-}
     m <|> n = ListT $ (++) <$> runListT m <*> runListT n
+    {-# INLINE (<|>) #-}
 
 instance (Monad m) => Monad (ListT m) where
 #if !(MIN_VERSION_base(4,8,0))
     return a = ListT $ return [a]
+    {-# INLINE return #-}
 #endif
     m >>= k  = ListT $ do
         a <- runListT m
         b <- mapM (runListT . k) a
         return (concat b)
+    {-# INLINE (>>=) #-}
     fail _ = ListT $ return []
+    {-# INLINE fail #-}
 
 #if MIN_VERSION_base(4,9,0)
 instance (Monad m) => Fail.MonadFail (ListT m) where
     fail _ = ListT $ return []
+    {-# INLINE fail #-}
 #endif
 
 instance (Monad m) => MonadPlus (ListT m) where
     mzero       = ListT $ return []
+    {-# INLINE mzero #-}
     m `mplus` n = ListT $ do
         a <- runListT m
         b <- runListT n
         return (a ++ b)
+    {-# INLINE mplus #-}
 
 instance MonadTrans ListT where
     lift m = ListT $ do
         a <- m
         return [a]
+    {-# INLINE lift #-}
 
 instance (MonadIO m) => MonadIO (ListT m) where
     liftIO = lift . liftIO
+    {-# INLINE liftIO #-}
 
 #if MIN_VERSION_base(4,4,0)
 instance (MonadZip m) => MonadZip (ListT m) where
     mzipWith f (ListT a) (ListT b) = ListT $ mzipWith (zipWith f) a b
+    {-# INLINE mzipWith #-}
 #endif
 
 -- | Lift a @callCC@ operation to the new monad.
@@ -138,8 +157,10 @@ liftCallCC :: CallCC m [a] [b] -> CallCC (ListT m) a b
 liftCallCC callCC f = ListT $
     callCC $ \ c ->
     runListT (f (\ a -> ListT $ c [a]))
+{-# INLINE liftCallCC #-}
 
 -- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m [a] -> Catch e (ListT m) a
 liftCatch catchE m h = ListT $ runListT m
     `catchE` \ e -> runListT (h e)
+{-# INLINE liftCatch #-}

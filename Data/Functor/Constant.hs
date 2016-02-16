@@ -53,9 +53,11 @@ instance (Show a) => Show (Constant a b) where
 
 instance Eq2 Constant where
     liftEq2 eq _ (Constant x) (Constant y) = eq x y
+    {-# INLINE liftEq2 #-}
 
 instance Ord2 Constant where
     liftCompare2 comp _ (Constant x) (Constant y) = comp x y
+    {-# INLINE liftCompare2 #-}
 
 instance Read2 Constant where
     liftReadsPrec2 rp _ _ _ = readsData $
@@ -66,32 +68,45 @@ instance Show2 Constant where
 
 instance (Eq a) => Eq1 (Constant a) where
     liftEq = liftEq2 (==)
+    {-# INLINE liftEq #-}
 instance (Ord a) => Ord1 (Constant a) where
     liftCompare = liftCompare2 compare
+    {-# INLINE liftCompare #-}
 instance (Read a) => Read1 (Constant a) where
     liftReadsPrec = liftReadsPrec2 readsPrec readList
+    {-# INLINE liftReadsPrec #-}
 instance (Show a) => Show1 (Constant a) where
     liftShowsPrec = liftShowsPrec2 showsPrec showList
+    {-# INLINE liftShowsPrec #-}
 
 instance Functor (Constant a) where
     fmap _ (Constant x) = Constant x
+    {-# INLINE fmap #-}
 
 instance Foldable (Constant a) where
     foldMap _ (Constant _) = mempty
+    {-# INLINE foldMap #-}
 
 instance Traversable (Constant a) where
     traverse _ (Constant x) = pure (Constant x)
+    {-# INLINE traverse #-}
 
 instance (Monoid a) => Applicative (Constant a) where
     pure _ = Constant mempty
+    {-# INLINE pure #-}
     Constant x <*> Constant y = Constant (x `mappend` y)
+    {-# INLINE (<*>) #-}
 
 instance (Monoid a) => Monoid (Constant a b) where
     mempty = Constant mempty
+    {-# INLINE mempty #-}
     Constant x `mappend` Constant y = Constant (x `mappend` y)
+    {-# INLINE mappend #-}
 
 #if MIN_VERSION_base(4,8,0)
 instance Bifunctor Constant where
     first f (Constant x) = Constant (f x)
+    {-# INLINE first #-}
     second _ (Constant x) = Constant x
+    {-# INLINE second #-}
 #endif
