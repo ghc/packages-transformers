@@ -42,7 +42,14 @@ module Control.Monad.Trans.Accum (
     add,
     -- * Lifting other operations
     liftCallCC,
+    liftCallCC',
     liftCatch,
+    liftListen,
+    liftPass,
+    -- * Monad transformations
+    fromReaderT,
+    fromWriterT,
+    toStateT,
   ) where
 
 import Control.Monad.IO.Class
@@ -50,7 +57,6 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader (ReaderT(..))
 import Control.Monad.Trans.Writer (WriterT(..))
 import Control.Monad.Trans.State  (StateT(..))
-import Data.Functor.Classes
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -60,12 +66,9 @@ import qualified Control.Monad.Fail as Fail
 #endif
 import Control.Monad.Fix
 import Control.Monad.Signatures
-#if MIN_VERSION_base(4,4,0)
-import Control.Monad.Zip (MonadZip(mzipWith))
-#endif
-import Data.Foldable (Foldable(foldMap))
+#if !MIN_VERSION_base(4,8,0)
 import Data.Monoid
-import Data.Traversable (Traversable(traverse))
+#endif
 
 -- ---------------------------------------------------------------------------
 -- | An accumulation monad parameterized by the type @w@ of output to accumulate.
@@ -132,8 +135,8 @@ newtype AccumT w m a = AccumT { runAccumT :: w -> m (a, w) }
 -- * @'execAccumT' m w = 'liftM' 'snd' ('runAccumT' m w)@
 execAccumT :: (Monad m) => AccumT w m a -> w -> m w
 execAccumT m w = do
-    ~(_, w) <- runAccumT m w
-    return w
+    ~(_, w') <- runAccumT m w
+    return w'
 {-# INLINE execAccumT #-}
 
 -- | Evaluate an accumulation computation with the given initial output history
