@@ -47,9 +47,9 @@ module Control.Monad.Trans.Accum (
     liftListen,
     liftPass,
     -- * Monad transformations
-    fromReaderT,
-    fromWriterT,
-    toStateT,
+    readerToAccumT,
+    writerToAccumT,
+    accumToStateT,
   ) where
 
 import Control.Monad.IO.Class
@@ -267,16 +267,18 @@ liftPass pass m = AccumT $ \ s -> pass $ do
 {-# INLINE liftPass #-}
 
 -- | Convert a read-only computation into an accumulation computation.
-fromReaderT :: (Monad m, Monoid w) => ReaderT w m a -> AccumT w m a
-fromReaderT (ReaderT f) = AccumT $ \w -> liftM (\a -> (a, mempty)) (f w)
+readerToAccumT :: (Functor m, Monoid w) => ReaderT w m a -> AccumT w m a
+readerToAccumT (ReaderT f) = AccumT $ \ w -> fmap (\a -> (a, mempty)) (f w)
+{-# INLINE readerToAccumT #-}
 
 -- | Convert a writer computation into an accumulation computation.
-fromWriterT :: WriterT w m a -> AccumT w m a
-fromWriterT (WriterT m) = AccumT $ const $ m
+writerToAccumT :: WriterT w m a -> AccumT w m a
+writerToAccumT (WriterT m) = AccumT $ const $ m
+{-# INLINE writerToAccumT #-}
 
--- | Convert an accumulation (append-only) computation into a fully stateful computation.
-toStateT :: (Monad m, Monoid s) => AccumT s m a -> StateT s m a
-toStateT (AccumT f) = StateT $ \w -> do
-  ~(a, w') <- f w
-  return (a, w `mappend` w')
-
+-- | Convert an accumulation (append-only) computation into a fully
+-- stateful computation.
+accumToStateT :: (Functor m, Monoid s) => AccumT s m a -> StateT s m a
+accumToStateT (AccumT f) =
+    StateT $ \ w -> fmap (\ (a, w') -> (a, w `mappend` w')) (f w)
+{-# INLINE accumToStateT #-}
