@@ -80,7 +80,7 @@ type Accum w = AccumT w Identity
 -- | Construct an accumulation computation from a (result, output) pair.
 -- (The inverse of 'runAccum'.)
 accum :: (Monad m) => (w -> (a, w)) -> AccumT w m a
-accum f = AccumT $ \w -> return (f w)
+accum f = AccumT $ \ w -> return (f w)
 {-# INLINE accum #-}
 
 -- | Unwrap an accumulation computation as a (result, output) pair.
@@ -164,7 +164,7 @@ instance (Functor m) => Functor (AccumT w m) where
 instance (Monoid w, Monad m) => Applicative (AccumT w m) where
     pure a  = AccumT $ const $ pure (a, mempty)
     {-# INLINE pure #-}
-    mf <*> mv = AccumT $ \w -> do
+    mf <*> mv = AccumT $ \ w -> do
       ~(f, w')  <- runAccumT mf w
       ~(v, w'') <- runAccumT mv (w `mappend` w')
       return (f v, w' `mappend` w'')
@@ -173,15 +173,15 @@ instance (Monoid w, Monad m) => Applicative (AccumT w m) where
 instance (Monoid w, MonadPlus m) => Alternative (AccumT w m) where
     empty   = AccumT $ const mzero
     {-# INLINE empty #-}
-    m <|> n = AccumT $ \w -> runAccumT m w <|> runAccumT n w
+    m <|> n = AccumT $ \ w -> runAccumT m w <|> runAccumT n w
     {-# INLINE (<|>) #-}
 
 instance (Monoid w, Monad m) => Monad (AccumT w m) where
 #if !(MIN_VERSION_base(4,8,0))
-    return a = accum $ const (a, mempty)
+    return a = AccumT $ const $ return (a, mempty)
     {-# INLINE return #-}
 #endif
-    m >>= k  = AccumT $ \w -> do
+    m >>= k  = AccumT $ \ w -> do
         ~(a, w')  <- runAccumT m w
         ~(b, w'') <- runAccumT (k a) (w `mappend` w')
         return (b, w' `mappend` w'')
@@ -198,11 +198,11 @@ instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (AccumT w m) where
 instance (Monoid w, MonadPlus m) => MonadPlus (AccumT w m) where
     mzero       = AccumT $ const mzero
     {-# INLINE mzero #-}
-    m `mplus` n = AccumT $ \w -> runAccumT m w `mplus` runAccumT n w
+    m `mplus` n = AccumT $ \ w -> runAccumT m w `mplus` runAccumT n w
     {-# INLINE mplus #-}
 
 instance (Monoid w, MonadFix m) => MonadFix (AccumT w m) where
-    mfix m = AccumT $ \w -> mfix $ \ ~(a, _) -> runAccumT (m a) w
+    mfix m = AccumT $ \ w -> mfix $ \ ~(a, _) -> runAccumT (m a) w
     {-# INLINE mfix #-}
 
 instance (Monoid w) => MonadTrans (AccumT w) where
@@ -217,11 +217,11 @@ instance (Monoid w, MonadIO m) => MonadIO (AccumT w m) where
 
 -- | @'look'@ is an action that fetches all the previously accumulated output.
 look :: (Monoid w, Monad m) => AccumT w m w
-look = AccumT $ \w -> return (w, mempty)
+look = AccumT $ \ w -> return (w, mempty)
 
 -- | @'look'@ is an action that retrieves a function of the previously accumulated output.
 looks :: (Monoid w, Monad m) => (w -> a) -> AccumT w m a
-looks f = AccumT $ \w -> return (f w, mempty)
+looks f = AccumT $ \ w -> return (f w, mempty)
 
 -- | @'add' w@ is an action that produces the output @w@.
 add :: (Monad m) => w -> AccumT w m ()
@@ -268,7 +268,7 @@ liftPass pass m = AccumT $ \ s -> pass $ do
 
 -- | Convert a read-only computation into an accumulation computation.
 readerToAccumT :: (Functor m, Monoid w) => ReaderT w m a -> AccumT w m a
-readerToAccumT (ReaderT f) = AccumT $ \ w -> fmap (\a -> (a, mempty)) (f w)
+readerToAccumT (ReaderT f) = AccumT $ \ w -> fmap (\ a -> (a, mempty)) (f w)
 {-# INLINE readerToAccumT #-}
 
 -- | Convert a writer computation into an accumulation computation.
@@ -280,5 +280,5 @@ writerToAccumT (WriterT m) = AccumT $ const $ m
 -- stateful computation.
 accumToStateT :: (Functor m, Monoid s) => AccumT s m a -> StateT s m a
 accumToStateT (AccumT f) =
-    StateT $ \ w -> fmap (\ (a, w') -> (a, w `mappend` w')) (f w)
+    StateT $ \ w -> fmap (\ ~(a, w') -> (a, w `mappend` w')) (f w)
 {-# INLINE accumToStateT #-}
