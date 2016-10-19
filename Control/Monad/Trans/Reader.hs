@@ -63,6 +63,9 @@ import Control.Monad.Instances ()  -- deprecated from base-4.6
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
+#if MIN_VERSION_base(4,2,0)
+import Data.Functor(Functor(..))
+#endif
 
 -- | The parameterizable reader monad.
 --
@@ -132,12 +135,22 @@ withReaderT f m = ReaderT $ runReaderT m . f
 instance (Functor m) => Functor (ReaderT r m) where
     fmap f  = mapReaderT (fmap f)
     {-# INLINE fmap #-}
+#if MIN_VERSION_base(4,2,0)
+    x <$ v = mapReaderT (x <$) v
+    {-# INLINE (<$) #-}
+#endif
 
 instance (Applicative m) => Applicative (ReaderT r m) where
     pure    = liftReaderT . pure
     {-# INLINE pure #-}
     f <*> v = ReaderT $ \ r -> runReaderT f r <*> runReaderT v r
     {-# INLINE (<*>) #-}
+#if MIN_VERSION_base(4,2,0)
+    u *> v = ReaderT $ \ r -> runReaderT u r *> runReaderT v r
+    {-# INLINE (*>) #-}
+    u <* v = ReaderT $ \ r -> runReaderT u r <* runReaderT v r
+    {-# INLINE (<*) #-}
+#endif
 
 instance (Alternative m) => Alternative (ReaderT r m) where
     empty   = liftReaderT empty
@@ -154,6 +167,8 @@ instance (Monad m) => Monad (ReaderT r m) where
         a <- runReaderT m r
         runReaderT (k a) r
     {-# INLINE (>>=) #-}
+    m >> k = ReaderT $ \ r -> runReaderT m r >> runReaderT k r
+    {-# INLINE (>>) #-}
     fail msg = lift (fail msg)
     {-# INLINE fail #-}
 
