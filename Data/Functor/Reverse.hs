@@ -97,6 +97,3 @@ instance (Traversable f) => Traversable (Reverse f) where
     traverse f (Reverse t) =
         fmap Reverse . forwards $ traverse (Backwards . f) t
     {-# INLINE traverse #-}
-    sequenceA (Reverse t) =
-        fmap Reverse . forwards $ sequenceA (fmap Backwards t)
-    {-# INLINE sequenceA #-}
