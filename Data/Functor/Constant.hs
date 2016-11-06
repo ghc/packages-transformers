@@ -28,12 +28,13 @@ module Data.Functor.Constant (
 import Data.Functor.Classes
 
 import Control.Applicative
-import Data.Foldable (Foldable(foldMap))
+import Data.Foldable
 import Data.Monoid (Monoid(..))
 import Data.Traversable (Traversable(traverse))
 #if MIN_VERSION_base(4,8,0)
 import Data.Bifunctor (Bifunctor(..))
 #endif
+import Prelude hiding (null, length)
 
 -- | Constant functor.
 newtype Constant a b = Constant { getConstant :: a }
@@ -86,6 +87,10 @@ instance Functor (Constant a) where
 instance Foldable (Constant a) where
     foldMap _ (Constant _) = mempty
     {-# INLINE foldMap #-}
+#if MIN_VERSION_base(4,8,0)
+    null (Constant _) = True
+    length (Constant _) = 0
+#endif
 
 instance Traversable (Constant a) where
     traverse _ (Constant x) = pure (Constant x)

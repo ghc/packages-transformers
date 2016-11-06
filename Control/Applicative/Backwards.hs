@@ -28,7 +28,7 @@ module Control.Applicative.Backwards (
 
 import Data.Functor.Classes
 
-import Prelude hiding (foldr, foldr1, foldl, foldl1)
+import Prelude hiding (foldr, foldr1, foldl, foldl1, null, length)
 import Control.Applicative
 import Data.Foldable
 import Data.Traversable
@@ -89,6 +89,10 @@ instance (Foldable f) => Foldable (Backwards f) where
     {-# INLINE foldr1 #-}
     foldl1 f (Backwards t) = foldl1 f t
     {-# INLINE foldl1 #-}
+#if MIN_VERSION_base(4,8,0)
+    null (Backwards t) = null t
+    length (Backwards t) = length t
+#endif
 
 -- | Derived instance.
 instance (Traversable f) => Traversable (Backwards f) where

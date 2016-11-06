@@ -29,7 +29,7 @@ module Data.Functor.Reverse (
 import Control.Applicative.Backwards
 import Data.Functor.Classes
 
-import Prelude hiding (foldr, foldr1, foldl, foldl1)
+import Prelude hiding (foldr, foldr1, foldl, foldl1, null, length)
 import Control.Applicative
 import Data.Foldable
 import Data.Traversable
@@ -91,6 +91,10 @@ instance (Foldable f) => Foldable (Reverse f) where
     {-# INLINE foldr1 #-}
     foldl1 f (Reverse t) = foldr1 (flip f) t
     {-# INLINE foldl1 #-}
+#if MIN_VERSION_base(4,8,0)
+    null (Reverse t) = null t
+    length (Reverse t) = length t
+#endif
 
 -- | Traverse from right to left.
 instance (Traversable f) => Traversable (Reverse f) where

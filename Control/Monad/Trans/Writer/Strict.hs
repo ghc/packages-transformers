@@ -67,9 +67,10 @@ import Control.Monad.Signatures
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
-import Data.Foldable (Foldable(foldMap))
+import Data.Foldable
 import Data.Monoid
 import Data.Traversable (Traversable(traverse))
+import Prelude hiding (null, length)
 
 -- ---------------------------------------------------------------------------
 -- | A writer monad parameterized by the type @w@ of output to accumulate.
@@ -170,6 +171,10 @@ instance (Functor m) => Functor (WriterT w m) where
 instance (Foldable f) => Foldable (WriterT w f) where
     foldMap f = foldMap (f . fst) . runWriterT
     {-# INLINE foldMap #-}
+#if MIN_VERSION_base(4,8,0)
+    null (WriterT t) = null t
+    length (WriterT t) = length t
+#endif
 
 instance (Traversable f) => Traversable (WriterT w f) where
     traverse f = fmap WriterT . traverse f' . runWriterT where

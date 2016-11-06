@@ -46,8 +46,9 @@ import Control.Monad.Fix (MonadFix(mfix))
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
-import Data.Foldable (Foldable(foldMap))
+import Data.Foldable
 import Data.Traversable (Traversable(traverse))
+import Prelude hiding (foldr, foldr1, foldl, foldl1, null, length)
 
 -- | The trivial monad transformer, which maps a monad to an equivalent monad.
 newtype IdentityT f a = IdentityT { runIdentityT :: f a }
@@ -78,8 +79,20 @@ instance (Functor m) => Functor (IdentityT m) where
     {-# INLINE fmap #-}
 
 instance (Foldable f) => Foldable (IdentityT f) where
-    foldMap f (IdentityT a) = foldMap f a
+    foldMap f (IdentityT t) = foldMap f t
     {-# INLINE foldMap #-}
+    foldr f z (IdentityT t) = foldr f z t
+    {-# INLINE foldr #-}
+    foldl f z (IdentityT t) = foldl f z t
+    {-# INLINE foldl #-}
+    foldr1 f (IdentityT t) = foldr1 f t
+    {-# INLINE foldr1 #-}
+    foldl1 f (IdentityT t) = foldl1 f t
+    {-# INLINE foldl1 #-}
+#if MIN_VERSION_base(4,8,0)
+    null (IdentityT t) = null t
+    length (IdentityT t) = length t
+#endif
 
 instance (Traversable f) => Traversable (IdentityT f) where
     traverse f (IdentityT a) = IdentityT <$> traverse f a
