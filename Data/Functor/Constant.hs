@@ -34,6 +34,10 @@ import Data.Traversable (Traversable(traverse))
 #if MIN_VERSION_base(4,8,0)
 import Data.Bifunctor (Bifunctor(..))
 #endif
+#if MIN_VERSION_base(4,10,0)
+import Data.Bifoldable (Bifoldable(..))
+import Data.Bitraversable (Bitraversable(..))
+#endif
 import Prelude hiding (null, length)
 
 -- | Constant functor.
@@ -114,4 +118,14 @@ instance Bifunctor Constant where
     {-# INLINE first #-}
     second _ (Constant x) = Constant x
     {-# INLINE second #-}
+#endif
+
+#if MIN_VERSION_base(4,10,0)
+instance Bifoldable Constant where
+    bifoldMap f _ (Constant a) = f a
+    {-# INLINE bifoldMap #-}
+
+instance Bitraversable Constant where
+    bitraverse f _ (Constant a) = Constant <$> f a
+    {-# INLINE bitraverse #-}
 #endif
