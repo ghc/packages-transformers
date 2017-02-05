@@ -26,7 +26,8 @@ module Control.Applicative.Lift (
     -- * Collecting errors
     Errors,
     runErrors,
-    failure
+    failure,
+    eitherToErrors
   ) where
 
 import Data.Functor.Classes
@@ -146,3 +147,7 @@ runErrors (Pure x) = Right x
 failure :: e -> Errors e a
 failure e = Other (Constant e)
 {-# INLINE failure #-}
+
+-- | Convert from 'Either' to 'Errors' (inverse of 'runErrors').
+eitherToErrors :: Either e a -> Errors e a
+eitherToErrors = either failure Pure
