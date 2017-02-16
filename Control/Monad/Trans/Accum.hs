@@ -32,7 +32,8 @@ module Control.Monad.Trans.Accum (
     evalAccum,
     mapAccum,
     -- * The AccumT monad transformer
-    AccumT(..),
+    AccumT(AccumT),
+    runAccumT,
     execAccumT,
     evalAccumT,
     mapAccumT,
@@ -128,7 +129,12 @@ mapAccum f = mapAccumT (Identity . f . runIdentity)
 --  * a restricted append-only version of a state monad transformer or
 --
 --  * a writer monad transformer with the extra ability to read all previous output.
-newtype AccumT w m a = AccumT { runAccumT :: w -> m (a, w) }
+newtype AccumT w m a = AccumT (w -> m (a, w))
+
+-- | Unwrap an accumulation computation.
+runAccumT :: AccumT w m a -> w -> m (a, w)
+runAccumT (AccumT f) = f
+{-# INLINE runAccumT #-}
 
 -- | Extract the output from an accumulation computation.
 --
