@@ -127,6 +127,7 @@ mapLift f (Other e) = Other (f e)
 elimLift :: (a -> r) -> (f a -> r) -> Lift f a -> r
 elimLift f _ (Pure x) = f x
 elimLift _ g (Other e) = g e
+{-# INLINE elimLift #-}
 
 -- | An applicative functor that collects a monoid (e.g. lists) of errors.
 -- A sequence of computations fails if any of its components do, but
