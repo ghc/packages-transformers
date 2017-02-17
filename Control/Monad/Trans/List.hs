@@ -20,7 +20,8 @@
 -- which must be commutative.
 -----------------------------------------------------------------------------
 
-module Control.Monad.Trans.List (
+module Control.Monad.Trans.List
+  {-# DEPRECATED "This transformer is invalid on most monads" #-} (
     -- * The ListT monad transformer
     ListT(..),
     mapListT,
