@@ -69,12 +69,13 @@ unwrap the transformer, exposing a computation of the inner monad.
 major release they will be separate functions.)
 
 All of the monad transformers except 'Control.Monad.Trans.Cont.ContT'
-are functors on the category of monads: in addition to defining a
-mapping of monads, they also define a mapping from transformations
-between base monads to transformations between transformed monads,
-called @map@/XXX/@T@.  Thus given a monad transformation @t :: M a -> N a@,
-the combinator 'Control.Monad.Trans.State.Lazy.mapStateT' constructs
-a monad transformation
+and 'Control.Monad.Trans.Cont.SelectT' are functors on the category
+of monads: in addition to defining a mapping of monads, they
+also define a mapping from transformations between base monads to
+transformations between transformed monads, called @map@/XXX/@T@.
+Thus given a monad transformation @t :: M a -> N a@, the combinator
+'Control.Monad.Trans.State.Lazy.mapStateT' constructs a monad
+transformation
 
 > mapStateT t :: StateT s M a -> StateT s N a
 
