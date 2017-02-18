@@ -1,5 +1,14 @@
 -*-change-log-*-
 
+0.5.3.0 Ross Paterson <R.Paterson@city.ac.uk> Feb 2017
+	* Added AccumT and SelectT monad transformers
+	* Deprecated ListT
+	* Added Monad (and related) instances for Reverse
+	* Added elimLift and eitherToErrors
+	* Added specialized definitions of several methods for efficiency
+	* Removed specialized definition of sequenceA for Reverse
+	* Backported Eq1/Ord1/Read1/Show1 instances for Proxy
+
 0.5.2.0 Ross Paterson <R.Paterson@city.ac.uk> Feb 2016
 	* Re-added orphan instances for Either to deprecated module
 	* Added lots of INLINE pragmas
