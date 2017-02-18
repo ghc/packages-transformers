@@ -17,7 +17,6 @@ description:
     This package contains:
     .
     * the monad transformer class (in "Control.Monad.Trans.Class")
-      and IO monad class (in "Control.Monad.IO.Class")
     .
     * concrete functor and monad transformers, each with associated
       operations and functions to lift operations associated with other
