@@ -81,8 +81,8 @@ instance (Functor m) => Functor (SelectT r m) where
     fmap f (SelectT g) = SelectT (fmap f . g . (. f))
     {-# INLINE fmap #-}
 
-instance (Monad m) => Applicative (SelectT r m) where
-    pure = lift . pure
+instance (Functor m, Monad m) => Applicative (SelectT r m) where
+    pure = lift . return
     {-# INLINE pure #-}
     SelectT gf <*> SelectT gx = SelectT $ \ k -> do
         let h f = liftM f (gx (k . f))
@@ -90,7 +90,7 @@ instance (Monad m) => Applicative (SelectT r m) where
         h f
     {-# INLINE (<*>) #-}
 
-instance (MonadPlus m) => Alternative (SelectT r m) where
+instance (Functor m, MonadPlus m) => Alternative (SelectT r m) where
     empty = mzero
     {-# INLINE empty #-}
     (<|>) = mplus
@@ -98,7 +98,7 @@ instance (MonadPlus m) => Alternative (SelectT r m) where
 
 instance (Monad m) => Monad (SelectT r m) where
 #if !(MIN_VERSION_base(4,8,0))
-    return = pure
+    return = lift . return
     {-# INLINE return #-}
 #endif
     SelectT g >>= f = SelectT $ \ k -> do

@@ -1,5 +1,8 @@
 -*-change-log-*-
 
+0.5.3.1 Ross Paterson <R.Paterson@city.ac.uk> Feb 2017
+	* Fixed for pre-AMP environments
+
 0.5.3.0 Ross Paterson <R.Paterson@city.ac.uk> Feb 2017
 	* Added AccumT and SelectT monad transformers
 	* Deprecated ListT
