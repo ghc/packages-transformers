@@ -128,7 +128,7 @@ instance (Traversable f) => Traversable (MaybeT f) where
     {-# INLINE traverse #-}
 
 instance (Functor m, Monad m) => Applicative (MaybeT m) where
-    pure = lift . return
+    pure = MaybeT . return . Just
     {-# INLINE pure #-}
     mf <*> mx = MaybeT $ do
         mb_f <- runMaybeT mf
@@ -153,7 +153,7 @@ instance (Functor m, Monad m) => Alternative (MaybeT m) where
 
 instance (Monad m) => Monad (MaybeT m) where
 #if !(MIN_VERSION_base(4,8,0))
-    return = lift . return
+    return = MaybeT . return . Just
     {-# INLINE return #-}
 #endif
     x >>= f = MaybeT $ do
