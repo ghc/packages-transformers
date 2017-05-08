@@ -34,9 +34,11 @@ module Control.Monad.Trans.Select (
     Select,
     select,
     runSelect,
+    mapSelect,
     -- * The SelectT monad transformer
     SelectT(SelectT),
     runSelectT,
+    mapSelectT,
     -- * Monad transformation
     selectToContT,
     selectToCont,
@@ -67,6 +69,13 @@ runSelect :: Select r a -> (a -> r) -> a
 runSelect m k = runIdentity (runSelectT m (Identity . k))
 {-# INLINE runSelect #-}
 
+-- | Apply a function to transform the result of a selection computation.
+--
+-- * @'runSelect' ('mapSelect' f m) = f . 'runSelect' m@
+mapSelect :: (a -> a) -> Select r a -> Select r a
+mapSelect f = mapSelectT (Identity . f . runIdentity)
+{-# INLINE mapSelect #-}
+
 -- | Selection monad transformer.
 --
 -- 'SelectT' is not a functor on the category of monads, and many operations
@@ -78,6 +87,16 @@ newtype SelectT r m a = SelectT ((a -> m r) -> m a)
 runSelectT :: SelectT r m a -> (a -> m r) -> m a
 runSelectT (SelectT g) = g
 {-# INLINE runSelectT #-}
+
+-- | Apply a function to transform the result of a selection computation.
+-- This has a more restricted type than the @map@ operations for other
+-- monad transformers, because 'SelectT' does not define a functor in
+-- the category of monads.
+--
+-- * @'runSelectT' ('mapSelectT' f m) = f . 'runSelectT' m@
+mapSelectT :: (m a -> m a) -> SelectT r m a -> SelectT r m a
+mapSelectT f m = SelectT $ f . runSelectT m
+{-# INLINE mapSelectT #-}
 
 instance (Functor m) => Functor (SelectT r m) where
     fmap f (SelectT g) = SelectT (fmap f . g . (. f))
