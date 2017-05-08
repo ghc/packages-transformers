@@ -30,7 +30,7 @@ module Control.Monad.Trans.Maybe (
     -- * The MaybeT monad transformer
     MaybeT(..),
     mapMaybeT,
-    -- * Conversion
+    -- * Monad transformations
     maybeToExceptT,
     exceptToMaybeT,
     -- * Lifting other operations
