@@ -59,8 +59,9 @@ import qualified Control.Monad.Fail as Fail
 
 {- |
 Continuation monad.
-@Cont r a@ is a CPS computation that produces an intermediate result
-of type @a@ within a CPS computation whose final result type is @r@.
+@Cont r a@ is a CPS ("continuation-passing style") computation that produces an
+intermediate result of type @a@ within a CPS computation whose final result type
+is @r@.
 
 The @return@ function simply creates a continuation which passes the value on.
 
