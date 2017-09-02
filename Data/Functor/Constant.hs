@@ -34,6 +34,9 @@ import Data.Traversable (Traversable(traverse))
 #if MIN_VERSION_base(4,8,0)
 import Data.Bifunctor (Bifunctor(..))
 #endif
+#if MIN_VERSION_base(4,9,0)
+import Data.Semigroup (Semigroup(..))
+#endif
 #if MIN_VERSION_base(4,10,0)
 import Data.Bifoldable (Bifoldable(..))
 import Data.Bitraversable (Bitraversable(..))
@@ -100,6 +103,12 @@ instance Traversable (Constant a) where
     traverse _ (Constant x) = pure (Constant x)
     {-# INLINE traverse #-}
 
+#if MIN_VERSION_base(4,9,0)
+instance (Semigroup a) => Semigroup (Constant a b) where
+    Constant x <> Constant y = Constant (x <> y)
+    {-# INLINE (<>) #-}
+#endif
+
 instance (Monoid a) => Applicative (Constant a) where
     pure _ = Constant mempty
     {-# INLINE pure #-}
@@ -109,8 +118,11 @@ instance (Monoid a) => Applicative (Constant a) where
 instance (Monoid a) => Monoid (Constant a b) where
     mempty = Constant mempty
     {-# INLINE mempty #-}
+#if !MIN_VERSION_base(4,11,0)
+    -- From base-4.11, Monoid(mappend) defaults to Semigroup((<>))
     Constant x `mappend` Constant y = Constant (x `mappend` y)
     {-# INLINE mappend #-}
+#endif
 
 #if MIN_VERSION_base(4,8,0)
 instance Bifunctor Constant where
