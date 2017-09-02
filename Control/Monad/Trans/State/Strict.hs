@@ -203,7 +203,8 @@ instance (Functor m, Monad m) => Applicative (StateT s m) where
         (x, s'') <- mx s'
         return (f x, s'')
     {-# INLINE (<*>) #-}
-    (*>) = (>>)
+    m *> k = m >>= \_ -> k
+    {-# INLINE (*>) #-}
 
 instance (Functor m, MonadPlus m) => Alternative (StateT s m) where
     empty = StateT $ \ _ -> mzero
