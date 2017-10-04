@@ -110,6 +110,8 @@ instance (Functor m, Monad m) => Applicative (SelectT r m) where
         f <- gf ((>>= k) . h)
         h f
     {-# INLINE (<*>) #-}
+    m *> k = m >>= \_ -> k
+    {-# INLINE (*>) #-}
 
 instance (Functor m, MonadPlus m) => Alternative (SelectT r m) where
     empty = mzero

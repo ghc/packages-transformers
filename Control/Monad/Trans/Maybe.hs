@@ -140,6 +140,8 @@ instance (Functor m, Monad m) => Applicative (MaybeT m) where
                     Nothing -> return Nothing
                     Just x  -> return (Just (f x))
     {-# INLINE (<*>) #-}
+    m *> k = m >>= \_ -> k
+    {-# INLINE (*>) #-}
 
 instance (Functor m, Monad m) => Alternative (MaybeT m) where
     empty = MaybeT (return Nothing)

@@ -170,6 +170,8 @@ instance Applicative (ContT r m) where
     {-# INLINE pure #-}
     f <*> v = ContT $ \ c -> runContT f $ \ g -> runContT v (c . g)
     {-# INLINE (<*>) #-}
+    m *> k = m >>= \_ -> k
+    {-# INLINE (*>) #-}
 
 instance Monad (ContT r m) where
 #if !(MIN_VERSION_base(4,8,0))

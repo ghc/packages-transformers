@@ -103,6 +103,10 @@ instance (Applicative m) => Applicative (IdentityT m) where
     {-# INLINE pure #-}
     (<*>) = lift2IdentityT (<*>)
     {-# INLINE (<*>) #-}
+    (*>) = lift2IdentityT (*>)
+    {-# INLINE (*>) #-}
+    (<*) = lift2IdentityT (<*)
+    {-# INLINE (<*) #-}
 
 instance (Alternative m) => Alternative (IdentityT m) where
     empty = IdentityT empty
