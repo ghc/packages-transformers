@@ -1,5 +1,11 @@
 -*-change-log-*-
 
+0.5.5.0 Ross Paterson <R.Paterson@city.ac.uk> Oct 2017
+	* Added mapSelect and mapSelectT
+	* Renamed selectToCont to selectToContT for consistency
+	* Defined explicit method definitions to fix space leaks
+	* Added missing Semigroup instance to `Constant` functor
+
 0.5.4.0 Ross Paterson <R.Paterson@city.ac.uk> Feb 2017
 	* Migrate Bifoldable and Bitraversable instances for Constant
 
