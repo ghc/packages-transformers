@@ -40,6 +40,7 @@ import Control.Monad
 #if MIN_VERSION_base(4,9,0)
 import qualified Control.Monad.Fail as Fail
 #endif
+import Control.Monad.Fix
 #if MIN_VERSION_base(4,4,0)
 import Control.Monad.Zip (MonadZip(mzipWith))
 #endif
@@ -136,6 +137,12 @@ instance (Monad m) => MonadPlus (ListT m) where
         b <- runListT n
         return (a ++ b)
     {-# INLINE mplus #-}
+
+instance (MonadFix m) => MonadFix (ListT m) where
+    mfix f = ListT $ mfix (runListT . f . head) >>= \ xs -> case xs of
+        [] -> pure []
+        x:_ -> (x:) <$> (runListT . mfix) ((mapListT . fmap) tail . f)
+    {-# INLINE mfix #-}
 
 instance MonadTrans ListT where
     lift m = ListT $ do
