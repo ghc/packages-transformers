@@ -15,7 +15,7 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- This monad transformer extends a monad with the ability throw exceptions.
+-- This monad transformer extends a monad with the ability to throw exceptions.
 --
 -- A sequence of actions terminates normally, producing a value,
 -- only if none of the actions in the sequence throws an exception.
