@@ -113,7 +113,13 @@ an action that is strict in the component you want evaluated.
 
 {- $example1
 
-One might define a parsing monad by adding a state (the 'String' remaining
+The first example is a parser monad in the style of
+
+* \"Monadic parsing in Haskell\", by Graham Hutton and Erik Meijer,
+/Journal of Functional Programming/ 8(4):437-444, July 1998
+(<http://www.cs.nott.ac.uk/~pszgmh/bib.html#pearl>).
+
+We can define such a parser monad by adding a state (the 'String' remaining
 to be parsed) to the @[]@ monad, which provides non-determinism:
 
 > import Control.Monad.Trans.State
@@ -189,7 +195,8 @@ Then the parser will keep track of how many @tick@s it executes.
 {- $example3
 
 This example is a cut-down version of the one in
-\"Monad Transformers and Modular Interpreters\",
+
+* \"Monad Transformers and Modular Interpreters\",
 by Sheng Liang, Paul Hudak and Mark Jones in /POPL'95/
 (<http://web.cecs.pdx.edu/~mpj/pubs/modinterp.html>).
 

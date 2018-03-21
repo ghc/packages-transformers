@@ -9,7 +9,9 @@ category:     Control
 synopsis:     Concrete functor and monad transformers
 description:
     A portable library of functor and monad transformers, inspired by
-    the paper \"Functional Programming with Overloading and Higher-Order
+    the paper
+    .
+    * \"Functional Programming with Overloading and Higher-Order
     Polymorphism\", by Mark P Jones,
     in /Advanced School of Functional Programming/, 1995
     (<http://web.cecs.pdx.edu/~mpj/pubs/springschool.html>).
