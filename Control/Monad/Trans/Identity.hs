@@ -36,6 +36,9 @@ import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class (MonadTrans(lift))
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus))
@@ -153,6 +156,12 @@ instance (MonadZip m) => MonadZip (IdentityT m) where
 instance MonadTrans IdentityT where
     lift = IdentityT
     {-# INLINE lift #-}
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant f => Contravariant (IdentityT f) where
+    contramap f = IdentityT . contramap f . runIdentityT
+    {-# INLINE contramap #-}
+#endif
 
 -- | Lift a unary operation to the new monad.
 mapIdentityT :: (m a -> n b) -> IdentityT m a -> IdentityT n b

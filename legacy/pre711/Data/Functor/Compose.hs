@@ -35,6 +35,9 @@ module Data.Functor.Compose (
   ) where
 
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Control.Applicative
 #if __GLASGOW_HASKELL__ >= 708
@@ -144,3 +147,8 @@ instance (Applicative f, Applicative g) => Applicative (Compose f g) where
 instance (Alternative f, Applicative g) => Alternative (Compose f g) where
     empty = Compose empty
     Compose x <|> Compose y = Compose (x <|> y)
+
+#if MIN_VERSION_base(4,12,0)
+instance (Functor f, Contravariant g) => Contravariant (Compose f g) where
+    contramap f (Compose fga) = Compose (fmap (contramap f) fga)
+#endif

@@ -63,6 +63,9 @@ module Control.Monad.Trans.RWS.Lazy (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -230,6 +233,13 @@ instance (Monoid w) => MonadTrans (RWST r w s) where
 instance (Monoid w, MonadIO m) => MonadIO (RWST r w s m) where
     liftIO = lift . liftIO
     {-# INLINE liftIO #-}
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (RWST r w s m) where
+    contramap f m = RWST $ \r s ->
+      contramap (\ ~(a, s', w) -> (f a, s', w)) $ runRWST m r s
+    {-# INLINE contramap #-}
+#endif
 
 -- ---------------------------------------------------------------------------
 -- Reader operations

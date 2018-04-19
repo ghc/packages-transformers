@@ -45,6 +45,9 @@ import Data.Data
 #endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
 #if __GLASGOW_HASKELL__ >= 702
@@ -145,4 +148,9 @@ instance (MonadFix f, MonadFix g) => MonadFix (Product f g) where
 #if MIN_VERSION_base(4,4,0)
 instance (MonadZip f, MonadZip g) => MonadZip (Product f g) where
     mzipWith f (Pair x1 y1) (Pair x2 y2) = Pair (mzipWith f x1 x2) (mzipWith f y1 y2)
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance (Contravariant f, Contravariant g) => Contravariant (Product f g) where
+    contramap f (Pair a b) = Pair (contramap f a) (contramap f b)
 #endif

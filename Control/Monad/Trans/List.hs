@@ -34,6 +34,9 @@ import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Control.Applicative
 import Control.Monad
@@ -158,6 +161,12 @@ instance (MonadIO m) => MonadIO (ListT m) where
 instance (MonadZip m) => MonadZip (ListT m) where
     mzipWith f (ListT a) (ListT b) = ListT $ mzipWith (zipWith f) a b
     {-# INLINE mzipWith #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (ListT m) where
+    contramap f = ListT . contramap (fmap f) . runListT
+    {-# INLINE contramap #-}
 #endif
 
 -- | Lift a @callCC@ operation to the new monad.

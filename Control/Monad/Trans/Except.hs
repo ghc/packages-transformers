@@ -51,6 +51,9 @@ import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -253,6 +256,12 @@ instance (MonadIO m) => MonadIO (ExceptT e m) where
 instance (MonadZip m) => MonadZip (ExceptT e m) where
     mzipWith f (ExceptT a) (ExceptT b) = ExceptT $ mzipWith (liftA2 f) a b
     {-# INLINE mzipWith #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (ExceptT e m) where
+    contramap f = ExceptT . contramap (fmap f) . runExceptT
+    {-# INLINE contramap #-}
 #endif
 
 -- | Signal an exception value @e@.

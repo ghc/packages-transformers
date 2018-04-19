@@ -40,6 +40,9 @@ import Data.Data
 #endif
 import Data.Foldable (Foldable(foldMap))
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Monoid (mappend)
 import Data.Traversable (Traversable(traverse))
 #if __GLASGOW_HASKELL__ >= 702
@@ -125,3 +128,9 @@ instance (Foldable f, Foldable g) => Foldable (Sum f g) where
 instance (Traversable f, Traversable g) => Traversable (Sum f g) where
     traverse f (InL x) = InL <$> traverse f x
     traverse f (InR y) = InR <$> traverse f y
+
+#if MIN_VERSION_base(4,12,0)
+instance (Contravariant f, Contravariant g) => Contravariant (Sum f g) where
+    contramap f (InL xs) = InL (contramap f xs)
+    contramap f (InR ys) = InR (contramap f ys)
+#endif

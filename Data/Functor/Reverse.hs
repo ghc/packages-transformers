@@ -28,6 +28,9 @@ module Data.Functor.Reverse (
 
 import Control.Applicative.Backwards
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Prelude hiding (foldr, foldr1, foldl, foldl1, null, length)
 import Control.Applicative
@@ -129,3 +132,10 @@ instance (Traversable f) => Traversable (Reverse f) where
     traverse f (Reverse t) =
         fmap Reverse . forwards $ traverse (Backwards . f) t
     {-# INLINE traverse #-}
+
+#if MIN_VERSION_base(4,12,0)
+-- | Derived instance.
+instance Contravariant f => Contravariant (Reverse f) where
+    contramap f = Reverse . contramap f . getReverse
+    {-# INLINE contramap #-}
+#endif

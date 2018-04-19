@@ -52,6 +52,9 @@ module Control.Monad.Trans.Writer.Lazy (
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -235,6 +238,12 @@ instance (Monoid w, MonadZip m) => MonadZip (WriterT w m) where
     mzipWith f (WriterT x) (WriterT y) = WriterT $
         mzipWith (\ ~(a, w) ~(b, w') -> (f a b, w `mappend` w')) x y
     {-# INLINE mzipWith #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (WriterT w m) where
+    contramap f = mapWriterT $ contramap $ \ ~(a, w) -> (f a, w)
+    {-# INLINE contramap #-}
 #endif
 
 -- | @'tell' w@ is an action that produces the output @w@.

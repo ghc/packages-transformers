@@ -26,6 +26,9 @@ module Data.Functor.Constant (
   ) where
 
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Control.Applicative
 import Data.Foldable
@@ -140,4 +143,10 @@ instance Bifoldable Constant where
 instance Bitraversable Constant where
     bitraverse f _ (Constant a) = Constant <$> f a
     {-# INLINE bitraverse #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant (Constant a) where
+    contramap _ (Constant a) = Constant a
+    {-# INLINE contramap #-}
 #endif

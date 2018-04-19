@@ -49,6 +49,9 @@ module Control.Monad.Trans.Reader (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -205,6 +208,12 @@ instance (MonadZip m) => MonadZip (ReaderT r m) where
     mzipWith f (ReaderT m) (ReaderT n) = ReaderT $ \ a ->
         mzipWith f (m a) (n a)
     {-# INLINE mzipWith #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (ReaderT r m) where
+    contramap f = ReaderT . fmap (contramap f) . runReaderT
+    {-# INLINE contramap #-}
 #endif
 
 liftReaderT :: m a -> ReaderT r m a

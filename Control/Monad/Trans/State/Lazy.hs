@@ -76,6 +76,9 @@ module Control.Monad.Trans.State.Lazy (
 import Control.Monad.IO.Class
 import Control.Monad.Signatures
 import Control.Monad.Trans.Class
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 import Data.Functor.Identity
 
 import Control.Applicative
@@ -252,6 +255,13 @@ instance MonadTrans (StateT s) where
 instance (MonadIO m) => MonadIO (StateT s m) where
     liftIO = lift . liftIO
     {-# INLINE liftIO #-}
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (StateT s m) where
+    contramap f m = StateT $ \s ->
+      contramap (\ ~(a, s') -> (f a, s')) $ runStateT m s
+    {-# INLINE contramap #-}
+#endif
 
 -- | Fetch the current value of the state within the monad.
 get :: (Monad m) => StateT s m s

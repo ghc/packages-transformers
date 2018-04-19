@@ -27,6 +27,9 @@ module Control.Applicative.Backwards (
   ) where
 
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Prelude hiding (foldr, foldr1, foldl, foldl1, null, length)
 import Control.Applicative
@@ -100,3 +103,10 @@ instance (Traversable f) => Traversable (Backwards f) where
     {-# INLINE traverse #-}
     sequenceA (Backwards t) = fmap Backwards (sequenceA t)
     {-# INLINE sequenceA #-}
+
+#if MIN_VERSION_base(4,12,0)
+-- | Derived instance.
+instance Contravariant f => Contravariant (Backwards f) where
+    contramap f = Backwards . contramap f . forwards
+    {-# INLINE contramap #-}
+#endif

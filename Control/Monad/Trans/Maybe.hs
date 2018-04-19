@@ -45,6 +45,9 @@ import Control.Monad.Signatures
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except (ExceptT(..))
 import Data.Functor.Classes
+#if MIN_VERSION_base(4,12,0)
+import Data.Functor.Contravariant
+#endif
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero, mplus), liftM)
@@ -200,6 +203,12 @@ instance (MonadIO m) => MonadIO (MaybeT m) where
 instance (MonadZip m) => MonadZip (MaybeT m) where
     mzipWith f (MaybeT a) (MaybeT b) = MaybeT $ mzipWith (liftA2 f) a b
     {-# INLINE mzipWith #-}
+#endif
+
+#if MIN_VERSION_base(4,12,0)
+instance Contravariant m => Contravariant (MaybeT m) where
+    contramap f = MaybeT . contramap (fmap f) . runMaybeT
+    {-# INLINE contramap #-}
 #endif
 
 -- | Lift a @callCC@ operation to the new monad.
