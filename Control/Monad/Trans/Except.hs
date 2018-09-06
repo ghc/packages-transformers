@@ -275,9 +275,9 @@ throwE = ExceptT . return . Left
 
 -- | Handle an exception.
 --
--- * @'catchE' h ('lift' m) = 'lift' m@
+-- * @'catchE' ('lift' m) h = 'lift' m@
 --
--- * @'catchE' h ('throwE' e) = h e@
+-- * @'catchE' ('throwE' e) h = h e@
 catchE :: (Monad m) =>
     ExceptT e m a               -- ^ the inner computation
     -> (e -> ExceptT e' m a)    -- ^ a handler for exceptions in the inner
