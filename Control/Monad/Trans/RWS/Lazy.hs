@@ -17,8 +17,8 @@
 -- Portability :  portable
 --
 -- A monad transformer that combines 'ReaderT', 'WriterT' and 'StateT'.
--- This version is lazy; for a strict version with the same interface,
--- see "Control.Monad.Trans.RWS.Strict".
+-- This version is lazy; for a constant-space version with almost the
+-- same interface, see "Control.Monad.Trans.RWS.CPS".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.RWS.Lazy (

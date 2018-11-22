@@ -27,7 +27,7 @@
 -- the same interface, see "Control.Monad.Trans.Writer.Lazy".
 -- Although the output is built strictly, it is not possible to
 -- achieve constant space behaviour with this transformer: for that,
--- use "Control.Monad.Trans.State.Strict" instead.
+-- use "Control.Monad.Trans.Writer.CPS" instead.
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer.Strict (

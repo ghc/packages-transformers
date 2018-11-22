@@ -23,8 +23,8 @@
 -- during the computation.  For more general access, use
 -- "Control.Monad.Trans.State" instead.
 --
--- This version builds its output lazily; for a strict version with
--- the same interface, see "Control.Monad.Trans.Writer.Strict".
+-- This version builds its output lazily; for a constant-space version
+-- with almost the same interface, see "Control.Monad.Trans.Writer.CPS".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer.Lazy (
