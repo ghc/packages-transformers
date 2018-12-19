@@ -208,8 +208,10 @@ instance (Monoid w, Monad m) => Monad (RWST r w s m) where
         (b, s'',w') <- runRWST (k a) r s'
         return (b, s'', w `mappend` w')
     {-# INLINE (>>=) #-}
+#if !(MIN_VERSION_base(4,13,0))
     fail msg = RWST $ \ _ _ -> fail msg
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (RWST r w s m) where

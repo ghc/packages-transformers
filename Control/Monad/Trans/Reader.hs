@@ -173,8 +173,10 @@ instance (Monad m) => Monad (ReaderT r m) where
     m >> k = ReaderT $ \ r -> runReaderT m r >> runReaderT k r
 #endif
     {-# INLINE (>>) #-}
+#if !(MIN_VERSION_base(4,13,0))
     fail msg = lift (fail msg)
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Fail.MonadFail m) => Fail.MonadFail (ReaderT r m) where

@@ -220,8 +220,10 @@ instance (Monad m) => Monad (ExceptT e m) where
             Left e -> return (Left e)
             Right x -> runExceptT (k x)
     {-# INLINE (>>=) #-}
+#if !(MIN_VERSION_base(4,13,0))
     fail = ExceptT . fail
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Fail.MonadFail m) => Fail.MonadFail (ExceptT e m) where

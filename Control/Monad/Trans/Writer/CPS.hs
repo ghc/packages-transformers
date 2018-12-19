@@ -183,8 +183,10 @@ instance (Monad m) => Monad (WriterT w m) where
         unWriterT (k a) w'
     {-# INLINE (>>=) #-}
 
+#if !(MIN_VERSION_base(4,13,0))
     fail msg = WriterT $ \ _ -> fail msg
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Fail.MonadFail m) => Fail.MonadFail (WriterT w m) where

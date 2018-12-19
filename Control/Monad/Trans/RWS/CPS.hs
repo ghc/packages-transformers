@@ -233,8 +233,10 @@ instance (Monad m) => Monad (RWST r w s m) where
         unRWST (k a) r s' w'
     {-# INLINE (>>=) #-}
 
+#if !(MIN_VERSION_base(4,13,0))
     fail msg = RWST $ \ _ _ _ -> fail msg
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Fail.MonadFail m) => Fail.MonadFail (RWST r w s m) where

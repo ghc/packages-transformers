@@ -204,8 +204,10 @@ instance (Monoid w, Monad m) => Monad (WriterT w m) where
         ~(b, w') <- runWriterT (k a)
         return (b, w `mappend` w')
     {-# INLINE (>>=) #-}
+#if !(MIN_VERSION_base(4,13,0))
     fail msg = WriterT $ fail msg
     {-# INLINE fail #-}
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 instance (Monoid w, Fail.MonadFail m) => Fail.MonadFail (WriterT w m) where
